@@ -61,15 +61,18 @@ function fxwp_updates_page()
 
             if (!empty($plugins)) {
                 echo '<h3>Plugins</h3>';
-                echo '<ul>';
+                echo '<table class="wp-list-table widefat fixed striped">';
+                echo '<thead><tr><th>Plugin</th><th>Aktion</th></tr></thead>';
+                echo '<tbody>';
                 foreach ($plugins as $plugin_file => $plugin_data) {
                     $update_url = wp_nonce_url(admin_url('update.php?action=upgrade-plugin&plugin=' . urlencode($plugin_file)), 'upgrade-plugin_' . $plugin_file);
-                    echo '<li>';
-                    echo '<span>' . $plugin_data['Name'] . '</span>';
-                    echo '<a href="' . $update_url . '" class="button button-primary">Jetzt aktualisieren</a>';
-                    echo '</li>';
+                    echo '<tr>';
+                    echo '<td>' . $plugin_data['Name'] . '</td>';
+                    echo '<td><a href="' . $update_url . '" class="button button-primary">Jetzt aktualisieren</a></td>';
+                    echo '</tr>';
                 }
-                echo '</ul>';
+                echo '</tbody>';
+                echo '</table>';
             }
 
             echo '<h3>WordPress-Kernsoftware</h3>';
