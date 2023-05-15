@@ -17,6 +17,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/autoload.php';
 register_activation_hook(__FILE__, 'fxwp_activation');
 register_deactivation_hook(__FILE__, 'fxwp_deactivation');
 
+
 function fxwp_activation()
 {
     // Der API-Schlüssel könnte in den Plugin-Einstellungen gespeichert werden
