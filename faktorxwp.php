@@ -11,7 +11,6 @@
 if (!defined('ABSPATH')) exit;
 
 // Define constants
-require_once plugin_dir_path(__FILE__) . 'includes/config.php';
 require_once plugin_dir_path(__FILE__) . 'includes/autoload.php';
 
 register_activation_hook(__FILE__, 'fxwp_activation');
@@ -21,6 +20,9 @@ function fxwp_activation()
 {
     // Der API-Schlüssel könnte in den Plugin-Einstellungen gespeichert werden
     $api_key = get_option('fxwp_api_key');
+
+    // Log-Datei für die Aktivierung erstellen
+    $log = [];
 
     // Stellen Sie sicher, dass der API-Schlüssel gesetzt ist
     if ($api_key) {
@@ -43,7 +45,16 @@ function fxwp_activation()
         } else {
             // Erfolgreiche Anfrage. Fügen Sie hier Ihren Erfolgsbehandlungscode ein
         }
+
+        // log activation
+        $log[] = 'Plugin activated';
     }
+
+    $log[] = 'Automatic updates enabled';
+    fxwp_enable_automatic_updates();
+
+    // show log
+    fxwp_show_log($log);
 
 }
 

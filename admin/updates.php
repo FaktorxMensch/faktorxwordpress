@@ -43,9 +43,11 @@ function fxwp_updates_page()
         <form method="post" action="">
             <?php wp_nonce_field('fxwp_update_settings', 'fxwp_update_settings_nonce'); ?>
             <label>
-                <input type="checkbox" name="automatic_updates"
-                       value="1" <?php checked(get_option('automatic_updates', true), true); ?>>
-                Automatische Aktualisierungen aktivieren
+                <select name="automatic_updates">
+                    <option value="1" <?php selected(get_option('automatic_updates', true), true); ?>>Aktiviert</option>
+                    <option value="0" <?php selected(get_option('automatic_updates', true), false); ?>>Deaktiviert
+                    </option>
+                </select>
             </label>
             <p class="description">Wenn aktiviert, werden alle Plugins und die WordPress-Kernsoftware automatisch
                 aktualisiert.</p>

@@ -4,6 +4,10 @@
  *
  * @param string $directory Das Verzeichnis, in dem die Dateien geladen werden sollen
  */
+
+require_once plugin_dir_path(__FILE__) . 'config.php';
+require_once plugin_dir_path(__FILE__) . 'helpers.php';
+
 function fxwp_include_all_php($directory)
 {
     // should load and plan all files that start with /cron , /widgets, or /admin files and are php
