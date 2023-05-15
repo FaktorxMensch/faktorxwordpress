@@ -29,6 +29,7 @@ function fxwp_optimize_images()
         $optimized_image = array(
             'url' => $optimized_image_url,
             'id' => $image->ID,
+            'current_size' => round(filesize(str_replace(site_url('/'), ABSPATH, $optimized_image_url)) / 1024) . ' KB',
         );
         // Add the optimized image to the array
         $optimized_images[] = $optimized_image;
