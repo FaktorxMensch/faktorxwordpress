@@ -35,7 +35,7 @@ function fxwp_self_update()
             $repo_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/main.zip';
 
             // Define the directory where the plugin files are located
-            $plugin_directory = plugin_dir_path(__FILE__);
+            $plugin_directory = plugin_dir_path(__FILE__) . "../";
 
             // Define the path of the ZIP archive
             $zip_path = $plugin_directory . 'temp.zip';
