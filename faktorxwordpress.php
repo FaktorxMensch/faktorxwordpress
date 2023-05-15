@@ -151,6 +151,7 @@ function fxwp_plugin_menu()
         'fxwp_settings_page' // Function
     );
 
+
     remove_submenu_page('fxwp', 'fxwp');
 
 }

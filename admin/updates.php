@@ -6,7 +6,25 @@ function fxwp_enable_automatic_updates()
     add_filter('auto_update_core', '__return_true');
     add_filter('auto_update_plugin', '__return_true');
     add_filter('auto_update_theme', '__return_true');
+
+    // on evrey plguin, enable auto update
+    $plugins = get_plugins();
+    foreach ($plugins as $plugin) {
+        $plugin_file = $plugin['Name'];
+        add_filter("auto_update_plugin", "__return_true");
+    }
+
+    // on evrey theme, enable auto update
+    $themes = wp_get_themes();
+    foreach ($themes as $theme) {
+        $theme_file = $theme['Name'];
+        add_filter("auto_update_theme", "__return_true");
+    }
+
 }
+
+// add action after installed plugin or theme
+add_action('upgrader_process_complete', 'fxwp_enable_automatic_updates', 10, 2);
 
 function fxwp_disable_automatic_updates()
 {
@@ -44,7 +62,8 @@ function fxwp_updates_page()
             <?php wp_nonce_field('fxwp_update_settings', 'fxwp_update_settings_nonce'); ?>
             <label>
                 <select name="fxwp_automatic_updates">
-                    <option value="1" <?php selected(get_option('fxwp_automatic_updates', true), true); ?>>Aktiviert</option>
+                    <option value="1" <?php selected(get_option('fxwp_automatic_updates', true), true); ?>>Aktiviert
+                    </option>
                     <option value="0" <?php selected(get_option('fxwp_automatic_updates', true), false); ?>>Deaktiviert
                     </option>
                 </select>

@@ -43,6 +43,8 @@ function fxwp_plugin_list_installer_page()
                     echo "<p>{$plugin} installed and activated successfully.</p>";
                 } else {
                     echo "<p>Failed to activate {$plugin}.</p>";
+                    // have a meta refresh to plugins.php
+                    echo '<meta http-equiv="refresh" content="1;url=' . admin_url('plugins.php') . '">';
                 }
             } else {
                 echo "<p>Failed to install {$plugin}.</p>";
