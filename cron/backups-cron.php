@@ -153,9 +153,35 @@ function fxwp_restore_backup($backupFile)
     $zip->extractTo(ABSPATH);
     $zip->close();
 
-    // restore the database
+    // Restore the database
     $dumpFile = $backupFile . '.sql';
-    exec("mysql --user={" . DB_USER . "} --password={" . DB_PASSWORD . "} --host={" . DB_HOST . "} " . DB_NAME . " < $dumpFile");
+
+    $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+
+    if ($mysqli->connect_error) {
+        die('Connect Error (' . $mysqli->connect_errno . ') '
+            . $mysqli->connect_error);
+    }
+
+    $mysqli->query('SET FOREIGN_KEY_CHECKS=0');
+    $mysqli->query('SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO"');
+
+    // Read the SQL dump file
+    $sqlStatements = file_get_contents($dumpFile);
+
+    // Execute the SQL statements
+    if ($mysqli->multi_query($sqlStatements)) {
+        do {
+            // Fetch the result of each query
+            $mysqli->store_result();
+        } while ($mysqli->more_results() && $mysqli->next_result());
+    }
+
+    $mysqli->query('SET FOREIGN_KEY_CHECKS=1');
+    $mysqli->query('SET SQL_MODE=""');
+
+    $mysqli->close();
+
 }
 
 function fxwp_delete_backup()
