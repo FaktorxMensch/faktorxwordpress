@@ -17,9 +17,19 @@ require_once plugin_dir_path(__FILE__) . 'includes/autoload.php';
 register_activation_hook(__FILE__, 'fxwp_activation');
 register_deactivation_hook(__FILE__, 'fxwp_deactivation');
 
+// show error on every admin page
+add_action('admin_notices', 'fxwp_show_error');
+
+function fxwp_show_error()
+{
+    if (get_option('fxwp_api_key') !== '')
+        return;
+    echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Das Plugin Faktor&times;WordPress konnte nicht aktiviert werden. Bitte Plugin deaktivieren und erneut aktivieren.', 'fxwp') . '</p></div>';
+}
 
 function fxwp_activation()
 {
+
     // Der API-Schlüssel könnte in den Plugin-Einstellungen gespeichert werden
     $api_key = get_option('fxwp_api_key');
 
@@ -30,34 +40,25 @@ function fxwp_activation()
     }
 
     // Log-Datei für die Aktivierung erstellen
-    $log = [];
 
     // Stellen Sie sicher, dass der API-Schlüssel gesetzt ist
-    if ($api_key) {
-        // Bauen Sie Ihre Anfrage zusammen. Ändern Sie die URL und die Datenstruktur nach Ihren Bedürfnissen
-        $response = wp_remote_post(FXWP_API_URL . '/activate', array(
-            'body' => array(
-                'api_key' => $api_key,
-                'plugin_url' => plugin_dir_url(__FILE__), // provide plugin url to API
-            )
-        ));
+    // Bauen Sie Ihre Anfrage zusammen. Ändern Sie die URL und die Datenstruktur nach Ihren Bedürfnissen
+    $response = wp_remote_post(FXWP_API_URL . '/activate', array(
+        'body' => array(
+            'api_key' => $api_key,
+            'plugin_url' => plugin_dir_url(__FILE__), // provide plugin url to API
+        )
+    ));
 
-        // Überprüfen Sie den Status der Anfrage
-        if (is_wp_error($response)) {
-            // Fehlgeschlagene Anfrage. Fügen Sie hier Ihren Fehlerbehandlungscode ein
-        } else {
-            // Erfolgreiche Anfrage. Fügen Sie hier Ihren Erfolgsbehandlungscode ein
-        }
+    $response = json_decode($response['body'], true);
 
-        // log activation
-        $log[] = 'Plugin activated';
+    if (isset($response['success']) && $response['success'] === true) {
+        // show info
+        fxwp_enable_automatic_updates();
+    } else {
+        // show info
+        update_option('fxwp_api_key', '');
     }
-
-    $log[] = 'Automatic updates enabled';
-    fxwp_enable_automatic_updates();
-
-    // show log
-    // fxwp_show_log($log);
 
 }
 
@@ -73,6 +74,8 @@ add_action('admin_menu', 'fxwp_plugin_menu');
 
 function fxwp_plugin_menu()
 {
+    if (get_option('fxwp_api_key') === '')
+        return;
 
     add_menu_page(
         'Faktor &times; WordPress', // Page title

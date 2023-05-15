@@ -2,6 +2,10 @@
 
 function fxwp_enable_automatic_updates()
 {
+    if ( ! function_exists( 'get_plugins' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+
     update_option('fxwp_automatic_updates', true);
     add_filter('auto_update_core', '__return_true');
     add_filter('auto_update_plugin', '__return_true');
@@ -24,6 +28,10 @@ add_action('upgrader_process_complete', 'fxwp_enable_automatic_updates', 10, 2);
 
 function fxwp_disable_automatic_updates()
 {
+    if ( ! function_exists( 'get_plugins' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+
     update_option('fxwp_automatic_updates', false);
     remove_filter('auto_update_core', '__return_true');
     remove_filter('auto_update_plugin', '__return_true');
@@ -82,6 +90,10 @@ function fxwp_updates_page()
             <p>Um manuell zu aktualisieren, klicken Sie auf den "Jetzt aktualisieren" Button neben dem jeweiligen
                 Element, das Sie aktualisieren möchten.</p>
             <?php
+            if ( ! function_exists( 'get_plugins' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/plugin.php';
+            }
+
             // Holen Sie sich die Liste der installierten Plugins
             $plugins = get_plugins();
 
