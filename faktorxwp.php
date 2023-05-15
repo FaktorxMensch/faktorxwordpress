@@ -54,7 +54,7 @@ function fxwp_activation()
     fxwp_enable_automatic_updates();
 
     // show log
-    fxwp_show_log($log);
+    // fxwp_show_log($log);
 
 }
 
