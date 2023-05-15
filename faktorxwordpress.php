@@ -22,6 +22,12 @@ function fxwp_activation()
     // Der API-Schlüssel könnte in den Plugin-Einstellungen gespeichert werden
     $api_key = get_option('fxwp_api_key');
 
+    // if no api key is set, make up a random one
+    if (!$api_key) {
+        $api_key = wp_generate_password(32, false, false);
+        update_option('fxwp_api_key', $api_key);
+    }
+
     // Log-Datei für die Aktivierung erstellen
     $log = [];
 
@@ -31,12 +37,6 @@ function fxwp_activation()
         $response = wp_remote_post(FXWP_API_URL . '/activate', array(
             'body' => array(
                 'api_key' => $api_key,
-                // provide current domain to API
-                'domain' => site_url(),
-                // and main user id
-                'user' => get_current_user_id(),
-                // as well as plugin version
-                'version' => FXWP_VERSION
             )
         ));
 
