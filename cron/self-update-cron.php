@@ -48,7 +48,7 @@ function fxwp_self_update()
         $temp_directory = $plugin_directory . 'temp/';
 
         // we need automatic_updates to continue
-        if (get_option('fxwp_automatic_updates') != '1') {
+        if (!get_option('fxwp_automatic_updates')) {
             return;
         }
 
