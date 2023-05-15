@@ -4,7 +4,7 @@
 function fxwp_self_update()
 {
     // Define the URL of the remote config file
-    $config_url = 'https://raw.githubusercontent.com/ziegenhagel/fxwp/main/includes/config.php';
+    $config_url = 'https://raw.githubusercontent.com/ziegenhagel/faktorxwordpress/main/includes/config.php';
 
     // Initialize a cURL session
     $curl = curl_init();
@@ -21,18 +21,18 @@ function fxwp_self_update()
     curl_close($curl);
 
     // Extract the version information from the config file
-    $version_match = preg_match("/define\('fxwp_VERSION',\s*'(.*?)'\);/", $config_content, $matches);
+    $version_match = preg_match("/define\('FXWP_VERSION',\s*'(.*?)'\);/", $config_content, $matches);
 
     if ($version_match) {
         $remote_version = $matches[1];
-        $current_version = fxwp_VERSION;
+        $current_version = FXWP_VERSION;
 
         // Compare the version from the remote config with the current version
         if (version_compare($remote_version, $current_version, '>')) {
             // The remote version is newer, perform self-update
 
             // Define the URL of the GitHub repository's ZIP archive
-            $repo_url = 'https://github.com/ziegenhagel/faktorxwp/archive/main.zip';
+            $repo_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/main.zip';
 
             // Define the directory where the plugin files are located
             $plugin_directory = plugin_dir_path(__FILE__);

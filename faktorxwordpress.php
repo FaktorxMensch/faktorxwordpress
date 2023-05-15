@@ -28,7 +28,7 @@ function fxwp_activation()
     // Stellen Sie sicher, dass der API-Schlüssel gesetzt ist
     if ($api_key) {
         // Bauen Sie Ihre Anfrage zusammen. Ändern Sie die URL und die Datenstruktur nach Ihren Bedürfnissen
-        $response = wp_remote_post(fxwp_API_URL . '/activate', array(
+        $response = wp_remote_post(FXWP_API_URL . '/activate', array(
             'body' => array(
                 'api_key' => $api_key,
                 // provide current domain to API
@@ -36,7 +36,7 @@ function fxwp_activation()
                 // and main user id
                 'user' => get_current_user_id(),
                 // as well as plugin version
-                'version' => fxwp_VERSION
+                'version' => FXWP_VERSION
             )
         ));
 

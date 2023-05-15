@@ -131,7 +131,7 @@ function fxwp_create_backup()
     foreach ($files as $file) {
         if (is_file($file)) {
             // Delete the file if it's older than X days
-            if ($now - filemtime($file) >= 60 * 60 * 24 * fxwp_BACKUP_DAYS) { // Replace X with the number of days
+            if ($now - filemtime($file) >= 60 * 60 * 24 * FXWP_BACKUP_DAYS) { // Replace X with the number of days
                 unlink($file);
             }
         }
