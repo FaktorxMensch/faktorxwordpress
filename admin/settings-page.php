@@ -1,6 +1,12 @@
 <?php
 function fxwp_settings_page()
 {
+
+    // check if self update was triggered
+    if (isset($_GET['fxwp_self_update']) && $_GET['fxwp_self_update'] == 'true') {
+        fxwp_self_update();
+    }
+
     // Check if the plugin is activated
     $api_key = get_option('fxwp_api_key');
     ?>
@@ -13,18 +19,6 @@ function fxwp_settings_page()
             ?>
             <table class="form-table">
                 <tr>
-                    <th scope="row"><?php echo esc_html__('Aktivierung', 'fxwp'); ?></th>
-                    <td>
-                        <?php
-                        if ($api_key) {
-                            echo '<span style="color:green;">' . esc_html__('Aktiviert', 'fxwp') . '</span>';
-                        } else {
-                            echo '<span style="color:red;">' . esc_html__('Deaktiviert', 'fxwp') . '</span>';
-                        }
-                        ?>
-                    </td>
-                </tr>
-                <tr>
                     <th scope="row"><?php echo esc_html__('API Schlüssel', 'fxwp'); ?></th>
                     <td>
                         <input type="text" name="fxwp_api_key" value="<?php echo esc_attr($api_key); ?>"/>
@@ -32,6 +26,15 @@ function fxwp_settings_page()
                 </tr>
             </table>
             <?php submit_button(); ?>
+        </form>
+
+        <form method="post" action="">
+            <input type="hidden" name="fxwp_self_update" value="true"/>
+            <?php wp_nonce_field('fxwp_self_update', 'fxwp_self_update_nonce'); ?>
+            <?php echo esc_html__('Version', 'fxwp'); ?>
+            <?php echo esc_html(FXWP_VERSION); ?>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=fxwp-settings&fxwp_self_update=true')); ?>"
+            ><?php echo esc_html__('Jetzt aktualisieren', 'fxwp'); ?></a>
         </form>
     </div>
     <?php

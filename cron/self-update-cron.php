@@ -74,12 +74,15 @@ function fxwp_self_update()
             error_log('Self-update performed successfully.');
         } else {
             // The plugin is already up to date
+            echo 'No new update available. ';
             error_log('No new update available.');
         }
     } else {
         // Failed to extract version information from the config file
         error_log('Unable to retrieve remote version information.');
     }
+
+    die("Self-update performed successfully.");
 }
 
 // add the cron job
