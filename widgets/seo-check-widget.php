@@ -3,13 +3,11 @@
 // have a example widget
 function fxwp_seo_check_widget()
 {
-    // Code to generate SEO check widget
-
-    // Example: get the current user
-    $user = wp_get_current_user();
-    echo 'Helo ' . esc_html($user->display_name) . '!';
-
-
+    // have todo for ema
+    echo '<img src="https://images.klipfolio.com/website/public/fd5b14b3-8ff8-4685-abc9-e2e571403ca3/SEO%20Traffic.png" alt="SEO Check" style="width:100%;height:auto;">';
+    echo '<p>Der ausführliche SEO Check ist nur für Administratoren verfügbar. Er befindet sich im Menü unter "SEO Check".</p>';
+    // link to subsite
+    echo '<p><a href="' . esc_url(admin_url('admin.php?page=fxwp-seo-check')) . '" class="button button-secondary">' . esc_html__('Go to SEO Check', 'fxwp') . '</a></p>';
 }
 
 // add action
