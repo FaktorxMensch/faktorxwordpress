@@ -8,3 +8,6 @@ if (!defined('FXWP_VERSION')) {
 if (!defined('FXWP_BACKUP_DAYS')) {
     define('FXWP_BACKUP_DAYS', 14);
 }
+if(!defined('FXWP_STORAGE_LIMIT')) {
+    define('FXWP_STORAGE_LIMIT',  20 * 1024 * 1024 * 1024); // 20GB
+}
