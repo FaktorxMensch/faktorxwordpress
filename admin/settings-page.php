@@ -34,7 +34,7 @@ function fxwp_settings_page()
             <?php echo esc_html__('Version', 'fxwp'); ?>
             <?php echo esc_html(FXWP_VERSION); ?>
             <a href="<?php echo esc_url(admin_url('admin.php?page=fxwp-settings&fxwp_self_update=true')); ?>"
-            ><?php echo esc_html__('Jetzt aktualisieren', 'fxwp'); ?></a>
+            ><?php echo esc_html__('Prüfen auf Updates', 'fxwp'); ?></a>
         </form>
     </div>
     <?php
