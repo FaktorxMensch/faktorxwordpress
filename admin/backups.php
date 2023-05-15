@@ -5,7 +5,7 @@ function fxwp_backups_page()
     if (isset($_GET['backup_action'])) {
 
         // check nonce
-        if ( ! wp_verify_nonce($_GET['_wpnonce'], 'fxwp_critical')) {
+        if (!wp_verify_nonce($_GET['_wpnonce'], 'fxwp_critical')) {
             wp_die('Security check');
         }
 
@@ -37,6 +37,9 @@ function fxwp_backups_page()
         <p><?php _e('Create and restore backups of your WordPress site.', 'fxwp'); ?></p>
         <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=create'), 'fxwp_critical'); ?>"
            class="button button-primary"> <?php _e('Neue Sicherung erstellen', 'fxwp'); ?> </a>
+
+        <br>
+        <br>
         <?php if (!empty($backups)): ?>
             <table class="wp-list-table widefat fixed striped">
                 <?php foreach ($backups
@@ -44,10 +47,42 @@ function fxwp_backups_page()
                 as $backup): ?>
                 <tr>
                     <td>
-                        <?php echo esc_html($backup); ?>
+                        <?php
+                        $backup2 = str_replace('backup_', '', $backup);
+                        $backup2 = str_replace('.zip', '', $backup2);
+                        $parts = explode('_', $backup2);
+
+                        $date = $parts[0];
+                        $time = $parts[1];
+                        $date = str_replace('-', '.', $date);
+                        $time = str_replace('-', ':', $time);
+
+                        $ts = strtotime($date . ' ' . $time);
+                        echo "<b>";printf(esc_html__('Sicherung vom %s um %s', 'fxwp'), date_i18n(get_option('date_format'), $ts), date_i18n(get_option('time_format'), $ts));
+                        echo '</b><br>';
+
+                        // get filesize
+                        $file = WP_CONTENT_DIR . '/fxwp-backups/' . $backup;
+                        if (file_exists($file)) {
+                            $size = filesize($file);
+                            $size = size_format($size);
+                            printf('Dateigröße: %s', $size);
+                            $db_file = WP_CONTENT_DIR . '/fxwp-backups/' . $backup . '.sql';
+                            echo " | ";
+                            if (file_exists($db_file)) {
+                                $size = filesize($db_file);
+                                $size = size_format($size);
+                                printf('Datenbankgröße: %s', $size);
+                            } else {
+                                printf(' (%s)', __('Datenbank nicht gefunden', 'fxwp'));
+                            }
+                        } else {
+                            printf(' (%s)', __('Datei nicht gefunden', 'fxwp'));
+                        }
+                        ?>
                     </td>
                     <td align="right">
-                        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=restore&backup_file=' . $backup),'fxwp_critical'); ?>"
+                        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=restore&backup_file=' . $backup), 'fxwp_critical'); ?>"
                            class="button button-secondary"> <?php _e('Restore', 'fxwp'); ?> </a>
                         <!-- have download files and db backup -->
                         <a href="<?php echo esc_url(content_url('fxwp-backups/' . $backup . '.sql')); ?>"
