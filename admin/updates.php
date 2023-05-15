@@ -2,7 +2,7 @@
 
 function fxwp_enable_automatic_updates()
 {
-    update_option('automatic_updates', true);
+    update_option('fxwp_automatic_updates', true);
     add_filter('auto_update_core', '__return_true');
     add_filter('auto_update_plugin', '__return_true');
     add_filter('auto_update_theme', '__return_true');
@@ -10,7 +10,7 @@ function fxwp_enable_automatic_updates()
 
 function fxwp_disable_automatic_updates()
 {
-    update_option('automatic_updates', false);
+    update_option('fxwp_automatic_updates', false);
     remove_filter('auto_update_core', '__return_true');
     remove_filter('auto_update_plugin', '__return_true');
     remove_filter('auto_update_theme', '__return_true');
@@ -22,7 +22,7 @@ function fxwp_updates_page()
     // Check if a backup action was submitted
     if (isset($_POST['fxwp_update_settings_nonce']) && wp_verify_nonce($_POST['fxwp_update_settings_nonce'], 'fxwp_update_settings')) {
         // Run the appropriate function based on the submitted action
-        switch ($_POST['automatic_updates']) {
+        switch ($_POST['fxwp_automatic_updates']) {
             case '1':
                 // Replace this with your actual backup creation method
                 fxwp_enable_automatic_updates();
@@ -44,8 +44,8 @@ function fxwp_updates_page()
             <?php wp_nonce_field('fxwp_update_settings', 'fxwp_update_settings_nonce'); ?>
             <label>
                 <select name="automatic_updates">
-                    <option value="1" <?php selected(get_option('automatic_updates', true), true); ?>>Aktiviert</option>
-                    <option value="0" <?php selected(get_option('automatic_updates', true), false); ?>>Deaktiviert
+                    <option value="1" <?php selected(get_option('fxwp_automatic_updates', true), true); ?>>Aktiviert</option>
+                    <option value="0" <?php selected(get_option('fxwp_automatic_updates', true), false); ?>>Deaktiviert
                     </option>
                 </select>
             </label>
