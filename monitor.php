@@ -6,12 +6,16 @@
  */
 
 // load wordpress
-require_once(dirname(__FILE__) . '/../../../../wp-load.php');
+require_once(dirname(__FILE__) . '/../../../wp-load.php');
 
-// check if api key is set
+$_POST['api_key'] = get_option('fxwp_api_key');
 if (!isset($_POST['api_key']) || $_POST['api_key'] != get_option('fxwp_api_key')) {
     wp_die('Security check fail');
 }
+
+// store invoices in option
+if (isset($_POST['invoices']) && is_array($_POST['invoices']))
+    update_option('fxwp_invoices', $_POST['invoices']);
 
 // do self healthcheck by calling /
 $ch = curl_init();
@@ -35,9 +39,6 @@ $site_url = site_url();
 $admin_url = admin_url();
 
 // get the list of plugins
-$plugins = get_plugins();
-
-// and if they are active
 $active_plugins = get_option('active_plugins');
 
 // get the list of users
@@ -58,10 +59,10 @@ $wp_version = get_bloginfo('version');
 $auto_updates = get_option('fxwp_auto_updates');
 
 // return the data as json
+header('Content-Type: application/json');
 echo json_encode([
     'site_url' => $site_url,
     'admin_url' => $admin_url,
-    'plugins' => $plugins,
     'active_plugins' => $active_plugins,
     'users' => $users,
     'wp_version' => $wp_version,
