@@ -23,7 +23,7 @@ function fxwp_plugin_list_installer_page()
         echo "<ul class='plugin-list'>";
         foreach ($plugins as $plugin) {
             echo "<li>
-                <img src='https://ps.w.org/{$plugin}/assets/icon-128x128.png?rev=2818463'>
+                <img src='https://ps.w.org/{$plugin}/assets/icon-128x128.png'>
                 <div id='plugin-{$plugin}' >
                     <h3>".str_replace('-', ' ', ucfirst($plugin))."</h3>
                     <p><strong>Autor:</strong></p> <p><strong>Downloads:</strong></p> <p><strong>Bewertungen:</strong></p>
