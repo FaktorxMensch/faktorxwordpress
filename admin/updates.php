@@ -28,6 +28,17 @@ function fxwp_disable_automatic_updates()
     remove_filter('auto_update_core', '__return_true');
     remove_filter('auto_update_plugin', '__return_true');
     remove_filter('auto_update_theme', '__return_true');
+
+    // Get all plugins
+    $plugins = array_keys(get_plugins());
+    // Disable auto updates for all plugins
+    update_option('auto_update_plugins', array());
+
+    // Get all themes
+    $themes = array_keys(wp_get_themes());
+    // Disable auto updates for all themes
+    update_option('auto_update_themes', array());
+
 }
 
 function fxwp_updates_page()
