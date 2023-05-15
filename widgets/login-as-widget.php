@@ -5,16 +5,16 @@ function fxwp_login_as_widget()
         return;
     }
 
-    echo '<p>' . esc_html__('Als Benutzer:in einloggen', 'fxwp') . '</p>';
-    echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="post">';
+    echo '<p>' . esc_html__('Melde dich als anderer Benutzer an, um Fehler zu reproduzieren.', 'fxwp') . '</p>';
+    echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="post" style="display:flex;gap:4px;align-items:center;width:100%">';
     echo '<input type="hidden" name="action" value="fxwp_login_as">';
     wp_nonce_field('fxwp_login_as_action', 'fxwp_login_as_nonce');
-    echo '<select name="user_id">';
+    echo '<select name="user_id" style="flex:1">';
     foreach (get_users() as $user) {
         echo '<option value="' . esc_attr($user->ID) . '">' . esc_html($user->display_name) . '</option>';
     }
     echo '</select>';
-    echo '<input type="submit" value="' . esc_attr__('Login', 'fxwp') . '" class="button button-primary">';
+    echo '<input type="submit" value="' . esc_attr__('Jetzt anmelden', 'fxwp') . '" class="button button-secondary">';
     echo '</form>';
 }
 
@@ -23,7 +23,7 @@ function fxwp_register_login_as_widget()
 {
     wp_add_dashboard_widget(
         'fxwp_login_as_widget', // Widget slug.
-        'Als Benutzer:in einloggen', // Title.
+        'Schneller Login', // Title.
         'fxwp_login_as_widget' // Display function.
     );
 }
