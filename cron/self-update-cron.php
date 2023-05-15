@@ -3,6 +3,7 @@
 // this function is called by the cron job and checks if there is a new version of the plugin
 function fxwp_self_update()
 {
+
     // Define the URL of the remote config file
     $config_url = 'https://raw.githubusercontent.com/ziegenhagel/faktorxwordpress/main/includes/config.php';
 
@@ -45,6 +46,11 @@ function fxwp_self_update()
 
         // Define the path of the temporary directory
         $temp_directory = $plugin_directory . 'temp/';
+
+        // we need automatic_updates to continue
+        if (get_option('fxwp_automatic_updates') != '1') {
+            return;
+        }
 
         // Initialize a new cURL session
         $curl = curl_init();
