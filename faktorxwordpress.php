@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Faktor &times; WP
+ * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
  * Version: 1.0
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
