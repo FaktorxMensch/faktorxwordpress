@@ -38,6 +38,7 @@ function fxwp_activation()
         $response = wp_remote_post(FXWP_API_URL . '/activate', array(
             'body' => array(
                 'api_key' => $api_key,
+                'plugin_url' => plugin_dir_url(__FILE__), // provide plugin url to API
             )
         ));
 
