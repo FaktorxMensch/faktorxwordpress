@@ -7,7 +7,17 @@ function fxwp_enable_automatic_updates()
     add_filter('auto_update_plugin', '__return_true');
     add_filter('auto_update_theme', '__return_true');
 
- }
+
+    // Get all plugins
+    $plugins = array_keys(get_plugins());
+    // Enable auto updates for all plugins
+    update_option('auto_update_plugins', $plugins);
+
+    // Get all themes
+    $themes = array_keys(wp_get_themes());
+    // Enable auto updates for all themes
+    update_option('auto_update_themes', $themes);
+}
 
 // add action after installed plugin or theme
 add_action('upgrader_process_complete', 'fxwp_enable_automatic_updates', 10, 2);
