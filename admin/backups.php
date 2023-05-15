@@ -43,10 +43,17 @@ function fxwp_backups_page()
                             <input type="hidden" name="backup_file" value="<?php echo esc_attr($backup); ?>">
                             <input type="submit" value="<?php _e('Restore', 'fxwp'); ?>">
                         </form>
+                        <!-- have download files and db backup -->
+                        <a href="<?php echo esc_url(content_url('fxwp-backups/' . $backup . '.sql')); ?>">
+                            <button><?php _e('Download DB', 'fxwp'); ?></button>
+                        </a>
+                        <a href="<?php echo esc_url(content_url('fxwp-backups/' . $backup)); ?>">
+                            <button><?php _e('Download Files', 'fxwp'); ?></button>
+                        </a>
                         <form method="post">
                             <input type="hidden" name="backup_action" value="delete">
                             <input type="hidden" name="backup_file" value="<?php echo esc_attr($backup); ?>">
-                            <input type="submit" value="<?php _e('Delete', 'fxwp'); ?>">
+                            <input type="submit" class="button-danger" value="<?php _e('Delete', 'fxwp'); ?>">
                         </form>
                     </li>
                 <?php endforeach; ?>
@@ -63,11 +70,11 @@ function fxwp_backups_page()
 
         .fxwp-backups-list li {
             margin-bottom: 1em;
+            width: 100%;
         }
 
         .fxwp-backups-list li form {
             display: inline-block;
-            margin-left: 1em;
         }
 
         /*alternating background colors*/
@@ -83,6 +90,20 @@ function fxwp_backups_page()
         /*selected effect*/
         .fxwp-backups-list li.selected {
             background-color: #ccc;
+        }
+
+        .button-danger {
+            background-color: #dc3232;
+            color: #fff;
+            border: 1px solid #dc3232;
+            border-radius: 3px;
+        }
+
+        button, input[type="submit"] {
+            background-color: #0073aa;
+            color: #fff;
+            border: 1px solid #0073aa;
+            border-radius: 3px;
         }
     </style>
     <?php
