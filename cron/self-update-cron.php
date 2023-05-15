@@ -23,63 +23,78 @@ function fxwp_self_update()
     // Extract the version information from the config file
     $version_match = preg_match("/define\('FXWP_VERSION',\s*'(.*?)'\);/", $config_content, $matches);
 
-    if ($version_match) {
-        $remote_version = $matches[1];
-        $current_version = FXWP_VERSION;
+    if (!$version_match) {
+        // The version information could not be extracted, abort
+        return;
+    }
 
-        // Compare the version from the remote config with the current version
-        if (version_compare($remote_version, $current_version, '>')) {
-            // The remote version is newer, perform self-update
+    $remote_version = $matches[1];
+    $current_version = FXWP_VERSION;
 
-            // Define the URL of the GitHub repository's ZIP archive
-            $repo_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/main.zip';
+    if (version_compare($remote_version, $current_version, '>')) {
+        // The remote version is newer, perform self-update
 
-            // Define the directory where the plugin files are located
-            $plugin_directory = plugin_dir_path(__FILE__) . "../";
+        // Define the URL of the GitHub repository's ZIP archive
+        $repo_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/main.zip';
 
-            // Define the path of the ZIP archive
-            $zip_path = $plugin_directory . 'temp.zip';
+        // Define the directory where the plugin files are located
+        $plugin_directory = plugin_dir_path(__FILE__) . "../";
 
-            // Initialize a new cURL session
-            $curl = curl_init();
+        // Define the path of the ZIP archive
+        $zip_path = $plugin_directory . 'temp.zip';
 
-            // Set the cURL options
-            curl_setopt($curl, CURLOPT_URL, $repo_url);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_HEADER, false);
-            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
+        // Define the path of the temporary directory
+        $temp_directory = $plugin_directory . 'temp/';
 
-            // Execute the cURL request and get the ZIP archive
-            $zip_content = curl_exec($curl);
+        // Initialize a new cURL session
+        $curl = curl_init();
 
-            // Close the cURL session
-            curl_close($curl);
+        // Set the cURL options
+        curl_setopt($curl, CURLOPT_URL, $repo_url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HEADER, false);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
 
-            // Save the ZIP archive
-            file_put_contents($zip_path, $zip_content);
+        // Execute the cURL request and get the ZIP archive
+        $zip_content = curl_exec($curl);
 
-            // Open the ZIP archive
-            $zip = new ZipArchive();
-            if ($zip->open($zip_path)) {
-                // Extract the ZIP archive
-                $zip->extractTo($plugin_directory);
-                $zip->close();
+        // Close the cURL session
+        curl_close($curl);
+
+        // Save the ZIP archive
+        file_put_contents($zip_path, $zip_content);
+
+        // Open the ZIP archive
+        $zip = new ZipArchive();
+        if ($zip->open($zip_path)) {
+            // Extract the ZIP archive to the temporary directory
+            $zip->extractTo($temp_directory);
+            $zip->close();
+
+            // Initialize the WordPress filesystem object
+            global $wp_filesystem;
+            if (empty($wp_filesystem)) {
+                require_once(ABSPATH . 'wp-admin/includes/file.php');
+                WP_Filesystem();
             }
 
-            // Delete the ZIP archive
-            unlink($zip_path);
+            // Copy the files from the temporary directory to the plugin directory
+            copy_dir($temp_directory . 'faktorxwordpress-main/', $plugin_directory);
 
-            // Log the self-update
-            error_log('Self-update performed successfully.');
-        } else {
-            // The plugin is already up to date
-            echo 'No new update available. ';
-            error_log('No new update available.');
+            // Delete the temporary directory
+            rmdir($temp_directory . 'faktorxwordpress-main/');
         }
+
+        // Delete the ZIP archive
+        unlink($zip_path);
+
+        // Log the self-update
+        error_log('Self-update performed successfully.');
     } else {
-        // Failed to extract version information from the config file
-        error_log('Unable to retrieve remote version information.');
+        // The plugin is already up to date
+        echo 'No new update available. ';
+        error_log('No new update available.');
     }
 
     die("Self-update performed successfully.");
