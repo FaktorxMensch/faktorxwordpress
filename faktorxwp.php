@@ -61,8 +61,8 @@ function fxwp_plugin_menu()
 {
 
     add_menu_page(
-        'Faktor X WP', // Page title
-        'Faktor X WP', // Menu title
+        'Faktor &times; WordPress', // Page title
+        'Faktor &times; WP', // Menu title
         'manage_options', // Capability
         'faktorxwp', // Menu slug
         'fxwp_site_identifier_page', // Function

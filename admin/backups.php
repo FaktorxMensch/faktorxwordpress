@@ -27,61 +27,61 @@ function fxwp_backups_page()
     $backups = fxwp_list_backups();
     ?>
     <div class="wrap">
-        <h1><?php _e('Backup Manager', 'wpwh'); ?></h1>
+        <h1><?php _e('Backup Manager', 'fxwp'); ?></h1>
         <form method="post">
             <input type="hidden" name="backup_action" value="create">
-            <input type="submit" value="<?php _e('Create New Backup', 'wpwh'); ?>">
+            <input type="submit" value="<?php _e('Create New Backup', 'fxwp'); ?>">
         </form>
-        <h2><?php _e('Existing Backups', 'wpwh'); ?></h2>
+        <h2><?php _e('Existing Backups', 'fxwp'); ?></h2>
         <?php if (!empty($backups)): ?>
-            <ul class="wpwh-backups-list">
+            <ul class="fxwp-backups-list">
                 <?php foreach ($backups as $backup): ?>
                     <li>
                         <?php echo esc_html($backup); ?>
                         <form method="post">
                             <input type="hidden" name="backup_action" value="restore">
                             <input type="hidden" name="backup_file" value="<?php echo esc_attr($backup); ?>">
-                            <input type="submit" value="<?php _e('Restore', 'wpwh'); ?>">
+                            <input type="submit" value="<?php _e('Restore', 'fxwp'); ?>">
                         </form>
                         <form method="post">
                             <input type="hidden" name="backup_action" value="delete">
                             <input type="hidden" name="backup_file" value="<?php echo esc_attr($backup); ?>">
-                            <input type="submit" value="<?php _e('Delete', 'wpwh'); ?>">
+                            <input type="submit" value="<?php _e('Delete', 'fxwp'); ?>">
                         </form>
                     </li>
                 <?php endforeach; ?>
             </ul>
         <?php else: ?>
-            <p><?php _e('No backups found.', 'wpwh'); ?></p>
+            <p><?php _e('No backups found.', 'fxwp'); ?></p>
         <?php endif; ?>
     </div>
     <style>
-        .wpwh-backups-list {
+        .fxwp-backups-list {
             list-style: none;
             padding: 0;
         }
 
-        .wpwh-backups-list li {
+        .fxwp-backups-list li {
             margin-bottom: 1em;
         }
 
-        .wpwh-backups-list li form {
+        .fxwp-backups-list li form {
             display: inline-block;
             margin-left: 1em;
         }
 
         /*alternating background colors*/
-        .wpwh-backups-list li:nth-child(even) {
+        .fxwp-backups-list li:nth-child(even) {
             background-color: #f2f2f2;
         }
 
         /*hover effect*/
-        .wpwh-backups-list li:hover {
+        .fxwp-backups-list li:hover {
             background-color: #ddd;
         }
 
         /*selected effect*/
-        .wpwh-backups-list li.selected {
+        .fxwp-backups-list li.selected {
             background-color: #ccc;
         }
     </style>

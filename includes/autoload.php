@@ -4,7 +4,7 @@
  *
  * @param string $directory Das Verzeichnis, in dem die Dateien geladen werden sollen
  */
-function fxwpinclude_all_php($directory)
+function fxwp_include_all_php($directory)
 {
     // should load and plan all files that start with /cron , /widgets, or /admin files and are php
     $files = glob($directory . '/{admin,cron,widgets}/*.php', GLOB_BRACE);

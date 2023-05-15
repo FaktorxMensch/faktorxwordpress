@@ -15,7 +15,7 @@ function fxwp_create_backup()
     $rootDir = ABSPATH;
 
     // Define the backup directory
-    $backupDir = $rootDir . 'wp-content/wpwh-backups/';
+    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
 
     // Check if the backup directory exists, if not, create it
     if (!file_exists($backupDir)) {
@@ -29,7 +29,73 @@ function fxwp_create_backup()
     $dumpFile = $backupFile . '.sql';
 
     // take wp-configs DB credentials
-    exec("mysqldump --user={" . DB_USER . "} --password={" . DB_PASSWORD . "} --host={" . DB_HOST . "} " . DB_NAME . " > $dumpFile");
+    $output = array();
+    $returnValue = null;
+    exec("mysqldump --user={" . DB_USER . "} --password={" . DB_PASSWORD . "} --host={" . DB_HOST . "} " . DB_NAME . " > $dumpFile", $output, $returnValue);
+
+    // if mysqldump failed
+    if ($returnValue !== 0) {
+        // fall back to PHP
+        $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+
+        if ($mysqli->connect_error) {
+            die('Connect Error (' . $mysqli->connect_errno . ') '
+                . $mysqli->connect_error);
+        }
+
+        $tables = array();
+        $result = $mysqli->query('SHOW TABLES');
+        while ($row = $result->fetch_array(MYSQLI_NUM)) {
+            $tables[] = $row[0];
+        }
+
+        $sql = 'SET FOREIGN_KEY_CHECKS=0;' . "\n";
+        foreach ($tables as $table) {
+            $result = $mysqli->query('SELECT * FROM ' . $table);
+            $numFields = $result->field_count;
+            $numRows = $result->num_rows;
+            $i = 0;
+
+            $sql .= 'DROP TABLE IF EXISTS ' . $table . ';';
+            $row2 = $mysqli->query('SHOW CREATE TABLE ' . $table)->fetch_row();
+            $sql .= "\n\n" . $row2[1] . ";\n\n";
+
+            for ($j = 0; $j < $numFields; $j++) {
+                while ($row = $result->fetch_row()) {
+                    if ($i % $numRows == 0) {
+                        $sql .= 'INSERT INTO ' . $table . ' VALUES(';
+                    } else {
+                        $sql .= '(';
+                    }
+
+                    for ($k = 0; $k < $numFields; $k++) {
+                        if (isset($row[$k])) {
+                            $sql .= '"' . $mysqli->real_escape_string($row[$k]) . '"';
+                        } else {
+                            $sql .= '""';
+                        }
+                        if ($k < $numFields - 1) {
+                            $sql .= ',';
+                        }
+                    }
+
+                    if ((($i + 1) % $numRows) == 0) {
+                        $sql .= ");";
+                    } else {
+                        $sql .= "),";
+                    }
+                    $i++;
+                }
+            }
+        }
+        $sql .= "\n\n\n";
+    }
+
+    $sql .= 'SET FOREIGN_KEY_CHECKS=1;';
+
+    file_put_contents($dumpFile, $sql);
+
+    $mysqli->close();
 
     // Create a new zip archive
     $zip = new ZipArchive();
@@ -44,8 +110,8 @@ function fxwp_create_backup()
     );
 
     foreach ($files as $name => $file) {
-        // Skip directories (they would be added automatically) and skip wp-config.php and skip everythign under wp-content/wpwh-backups
-        if (!$file->isDir() && strpos($name, '/wp-content/uploads/') === false && strpos($name, '/wp-config.php') === false && strpos($name, '/wp-content/wpwh-backups/') === false) {
+        // Skip directories (they would be added automatically) and skip wp-config.php and skip everythign under wp-content/fxwp-backups
+        if (!$file->isDir() && strpos($name, '/wp-content/uploads/') === false && strpos($name, '/wp-config.php') === false && strpos($name, '/wp-content/fxwp-backups/') === false) {
             // Get real and relative path for current file
             $filePath = $file->getRealPath();
             $relativePath = substr($filePath, strlen($rootDir));
@@ -75,7 +141,7 @@ function fxwp_create_backup()
 function fxwp_restore_backup($backupFile)
 {
     // Define the backup directory
-    $backupFile = ABSPATH . 'wp-content/wpwh-backups/' . $backupFile;
+    $backupFile = ABSPATH . 'wp-content/fxwp-backups/' . $backupFile;
 
     // Create a new zip archive
     $zip = new ZipArchive();
@@ -98,7 +164,7 @@ function fxwp_delete_backup()
     $rootDir = ABSPATH;
 
     // Define the backup directory
-    $backupDir = $rootDir . 'wp-content/wpwh-backups/';
+    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
 
     // Get the latest backup file
     $files = glob($backupDir . '*.zip');
@@ -116,7 +182,7 @@ function fxwp_list_backups()
     $rootDir = ABSPATH;
 
     // Define the backup directory
-    $backupDir = $rootDir . 'wp-content/wpwh-backups/';
+    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
 
     // Get all backup files
     $files = glob($backupDir . '*.zip');
