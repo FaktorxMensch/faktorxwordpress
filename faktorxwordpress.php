@@ -141,6 +141,16 @@ function fxwp_plugin_menu()
         'fxwp_settings_page' // Function
     );
 
+    // plugin installer
+    add_submenu_page(
+        'fxwp', // Parent slug
+        'Plugin Installer', // Page title
+        'Plugin Installer', // Menu title
+        'administrator', // Capability
+        'fxwp-plugin-installer', // Menu slug
+        'fxwp_plugin_list_installer_page' // Function
+    );
+
     remove_submenu_page('fxwp', 'fxwp');
 
 }
