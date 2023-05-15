@@ -18,7 +18,7 @@ function fxwp_image_optimizer_page()
     $output = '<h2>' . esc_html__('Optimized Images', 'fxwp') . '</h2>';
 
     // have a optimze now and reset button
-    $output .= '<p><a href="' . esc_url(admin_url('admin.php?page=faktorxwp-image-optimizer&fxwp_optimize_images=1')) . '" class="button button-primary">' . esc_html__('Optimize Now', 'fxwp') . '</a> <a href="' . esc_url(admin_url('admin.php?page=faktorxwp-image-optimizer&fxwp_reset_optimized_images=1')) . '" class="button button-secondary">' . esc_html__('Reset', 'fxwp') . '</a></p>';
+    $output .= '<p><a href="' . esc_url(admin_url('admin.php?page=fxwp-image-optimizer&fxwp_optimize_images=1')) . '" class="button button-primary">' . esc_html__('Optimize Now', 'fxwp') . '</a> <a href="' . esc_url(admin_url('admin.php?page=fxwp-image-optimizer&fxwp_reset_optimized_images=1')) . '" class="button button-secondary">' . esc_html__('Reset', 'fxwp') . '</a></p>';
 
     $output .= '<ul>';
 

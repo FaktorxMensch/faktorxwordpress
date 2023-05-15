@@ -1,10 +1,11 @@
 <?php
 /**
- * Plugin Name: WPWithHeart
- * Description: A comprehensive plugin to handle site monitoring, SEO check, backups, updates, broken link checks, image optimization, storage usage, admin login, self-update, plugin installation, invoice display, and site identification.
+ * Plugin Name: Faktor &times; WP
+ * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
  * Version: 1.0
- * Author: Faktor Mensch Media
- * Text Domain: faktorxwp
+ * Author: Faktor Mensch Media UG (haftungsbeschränkt)
+ * Author URI: https://faktorxmensch.com
+ * Text Domain: fxwp
  */
 
 // Prevent direct file access
@@ -73,74 +74,74 @@ function fxwp_plugin_menu()
 
     add_menu_page(
         'Faktor &times; WordPress', // Page title
-        'Faktor &times; WP', // Menu title
+        'Faktor&hairsp;&times;WP', // Menu title
         'edit_posts', // Capability
-        'faktorxwp', // Menu slug
+        'fxwp', // Menu slug
         'fxwp_updates_page', // Function
-        'dashicons-heart', // Icon
+        'dashicons-shield', // Icon
         6 // Position
     );
 
     // upadtes
     add_submenu_page(
-        'faktorxwp', // Parent slug
+        'fxwp', // Parent slug
         'Updates', // Page title
         'Updates', // Menu title
         'administrator', // Capability
-        'faktorxwp-updates', // Menu slug
+        'fxwp-updates', // Menu slug
         'fxwp_updates_page' // Function
     );
 
     // backups
     add_submenu_page(
-        'faktorxwp', // Parent slug
+        'fxwp', // Parent slug
         'Backups', // Page title
         'Backups', // Menu title
         'administrator', // Capability
-        'faktorxwp-backups', // Menu slug
+        'fxwp-backups', // Menu slug
         'fxwp_backups_page' // Function
     );
 
     add_submenu_page(
-        'faktorxwp', // Parent slug
+        'fxwp', // Parent slug
         'SEO Check', // Page title
         'SEO Check', // Menu title
         'edit_posts', // Capability
-        'faktorxwp-seo-check', // Menu slug
+        'fxwp-seo-check', // Menu slug
         'fxwp_seo_check_page' // Function
     );
 
     // broekn link checker
     add_submenu_page(
-        'faktorxwp', // Parent slug
+        'fxwp', // Parent slug
         'Broken Link Checker', // Page title
         'Broken Link Checker', // Menu title
         'edit_posts', // Capability
-        'faktorxwp-broken-link-checker', // Menu slug
+        'fxwp-broken-link-checker', // Menu slug
         'fxwp_broken_link_checker_page' // Function
     );
 
     // image optimizer
     add_submenu_page(
-        'faktorxwp', // Parent slug
+        'fxwp', // Parent slug
         'Image Optimizer', // Page title
         'Image Optimizer', // Menu title
         'administrator', // Capability
-        'faktorxwp-image-optimizer', // Menu slug
+        'fxwp-image-optimizer', // Menu slug
         'fxwp_image_optimizer_page' // Function
     );
 
     // settings
     add_submenu_page(
-        'faktorxwp', // Parent slug
+        'fxwp', // Parent slug
         'Settings', // Page title
         'Settings', // Menu title
         'administrator', // Capability
-        'faktorxwp-settings', // Menu slug
+        'fxwp-settings', // Menu slug
         'fxwp_settings_page' // Function
     );
 
-    remove_submenu_page('faktorxwp', 'faktorxwp');
+    remove_submenu_page('fxwp', 'fxwp');
 
 }
 

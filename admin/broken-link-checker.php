@@ -18,7 +18,7 @@ function fxwp_broken_link_checker_page()
     if (empty($error_links)) {
         $output .= '<p>' . esc_html__('No broken links found.', 'fxwp') . '</p>';
         // have a check now button
-        $output .= '<p><a href="' . esc_url(admin_url('admin.php?page=faktorxwp-broken-link-checker&fxwp_check_links=1')) . '" class="button button-primary">' . esc_html__('Check Now', 'fxwp') . '</a></p>';
+        $output .= '<p><a href="' . esc_url(admin_url('admin.php?page=fxwp-broken-link-checker&fxwp_check_links=1')) . '" class="button button-primary">' . esc_html__('Check Now', 'fxwp') . '</a></p>';
         echo $output;
         return;
     } else {
