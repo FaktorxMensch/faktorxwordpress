@@ -43,7 +43,7 @@ function fxwp_updates_page()
         <form method="post" action="">
             <?php wp_nonce_field('fxwp_update_settings', 'fxwp_update_settings_nonce'); ?>
             <label>
-                <select name="automatic_updates">
+                <select name="fxwp_automatic_updates">
                     <option value="1" <?php selected(get_option('fxwp_automatic_updates', true), true); ?>>Aktiviert</option>
                     <option value="0" <?php selected(get_option('fxwp_automatic_updates', true), false); ?>>Deaktiviert
                     </option>
