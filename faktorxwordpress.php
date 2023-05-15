@@ -162,3 +162,11 @@ function fxwp_plugin_menu()
 }
 
 
+// register stylescheets
+add_action('admin_enqueue_scripts', 'fxwp_register_styles');
+
+function fxwp_register_styles()
+{
+    wp_register_style('fxwp', plugin_dir_url(__FILE__) . 'admin/css/fxwp.css', array(), '1.0.0', 'all');
+    wp_enqueue_style('fxwp');
+}

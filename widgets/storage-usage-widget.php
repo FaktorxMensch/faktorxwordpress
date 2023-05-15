@@ -9,35 +9,7 @@ function fxwp_storage_usage_widget()
     echo '<div class="fxwp-storage-usage">';
     echo '<div class="fxwp-storage-usage-bar" style="width: ' . esc_attr($percentage) . '%"></div>';
     echo '<div class="fxwp-storage-usage-text">' . esc_html($percentage) . '%</div>';
-    echo '</div>
-<style>
-.fxwp-storage-usage {
-    position: relative;
-    height: 20px;
-    background-color: #b7b7b7;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.fxwp-storage-usage-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    background-color: #007cba;
-}
-
-.fxwp-storage-usage-text {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    color: #fff;
-    text-align: center;
-    line-height: 20px;
-}
-</style>';
+    echo '</div>';
 }
 
 // Limit storage for users to 20GB
