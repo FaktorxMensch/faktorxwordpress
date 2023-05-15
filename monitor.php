@@ -1,0 +1,71 @@
+<?php
+/*
+ * this file gets called by the cron job of the agency server, which posts data about invoices  and provides an external link back to projectpilot
+ * it needs to provide the api key in order to authenticate
+ * in return it gets the wp-admin url, a list of plugins active/inactive on the site as well as usernames of all users and their roles, current wordpress version and the theme name
+ */
+
+// load wordpress
+require_once(dirname(__FILE__) . '/../../../../wp-load.php');
+
+// check if api key is set
+if (!isset($_POST['api_key']) || $_POST['api_key'] != get_option('fxwp_api_key')) {
+    wp_die('Security check fail');
+}
+
+// do self healthcheck by calling /
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, get_site_url());
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+$result = curl_exec($ch);
+curl_close($ch);
+
+// if result doesnt contain the site url, and the word style, then something is wrong
+if (strpos($result, get_site_url()) === false || strpos($result, 'style') === false) {
+    $healthcheck = false;
+} else {
+    $healthcheck = true;
+}
+
+
+// get the site url
+$site_url = site_url();
+
+// get the admin url
+$admin_url = admin_url();
+
+// get the list of plugins
+$plugins = get_plugins();
+
+// and if they are active
+$active_plugins = get_option('active_plugins');
+
+// get the list of users
+$users = get_users();
+// but remove anything but id, username and role
+$users = array_map(function ($user) {
+    return [
+        'id' => $user->ID,
+        'username' => $user->user_login,
+        'role' => $user->roles[0]
+    ];
+}, $users);
+
+// get the current wordpress version
+$wp_version = get_bloginfo('version');
+
+// check if auto updates are enabled
+$auto_updates = get_option('fxwp_auto_updates');
+
+// return the data as json
+echo json_encode([
+    'site_url' => $site_url,
+    'admin_url' => $admin_url,
+    'plugins' => $plugins,
+    'active_plugins' => $active_plugins,
+    'users' => $users,
+    'wp_version' => $wp_version,
+    'auto_updates' => $auto_updates,
+    'healthcheck' => $healthcheck
+]);
+
