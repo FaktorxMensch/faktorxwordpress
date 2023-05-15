@@ -2,9 +2,15 @@
 function fxwp_backups_page()
 {
     // Check if a backup action was submitted
-    if (isset($_POST['backup_action'])) {
+    if (isset($_GET['backup_action'])) {
+
+        // check nonce
+        if ( ! wp_verify_nonce($_GET['_wpnonce'], 'fxwp_critical')) {
+            wp_die('Security check');
+        }
+
         // Run the appropriate function based on the submitted action
-        switch ($_POST['backup_action']) {
+        switch ($_GET['backup_action']) {
             case 'create':
                 // Replace this with your actual backup creation method
                 fxwp_create_backup();
@@ -12,12 +18,12 @@ function fxwp_backups_page()
             case 'restore':
                 // Replace this with your actual backup restoration method
                 // You would also need to pass the backup file name or other identifier as a parameter
-                fxwp_restore_backup($_POST['backup_file']);
+                fxwp_restore_backup($_GET['backup_file']);
                 break;
             case 'delete':
                 // Replace this with your actual backup deletion method
                 // You would also need to pass the backup file name or other identifier as a parameter
-                fxwp_delete_backup($_POST['backup_file']);
+                fxwp_delete_backup($_GET['backup_file']);
                 break;
         }
     }
@@ -28,41 +34,58 @@ function fxwp_backups_page()
     ?>
     <div class="wrap">
         <h1><?php _e('Backup Manager', 'fxwp'); ?></h1>
-        <form method="post">
-            <input type="hidden" name="backup_action" value="create">
-            <input type="submit" value="<?php _e('Create New Backup', 'fxwp'); ?>">
-        </form>
-        <h2><?php _e('Existing Backups', 'fxwp'); ?></h2>
+        <p><?php _e('Create and restore backups of your WordPress site.', 'fxwp'); ?></p>
+        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=create'), 'fxwp_critical'); ?>"
+           class="button button-primary"> <?php _e('Neue Sicherung erstellen', 'fxwp'); ?> </a>
         <?php if (!empty($backups)): ?>
-            <ul class="fxwp-backups-list">
-                <?php foreach ($backups as $backup): ?>
-                    <li>
+            <table class="wp-list-table widefat fixed striped">
+                <?php foreach ($backups
+
+                as $backup): ?>
+                <tr>
+                    <td>
                         <?php echo esc_html($backup); ?>
-                        <form method="post">
-                            <input type="hidden" name="backup_action" value="restore">
-                            <input type="hidden" name="backup_file" value="<?php echo esc_attr($backup); ?>">
-                            <input type="submit" value="<?php _e('Restore', 'fxwp'); ?>">
-                        </form>
+                    </td>
+                    <td align="right">
+                        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=restore&backup_file=' . $backup),'fxwp_critical'); ?>"
+                           class="button button-secondary"> <?php _e('Restore', 'fxwp'); ?> </a>
                         <!-- have download files and db backup -->
-                        <a href="<?php echo esc_url(content_url('fxwp-backups/' . $backup . '.sql')); ?>">
-                            <button><?php _e('Download DB', 'fxwp'); ?></button>
+                        <a href="<?php echo esc_url(content_url('fxwp-backups/' . $backup . '.sql')); ?>"
+                           class="button button-secondary">
+                            <?php _e('Datenbank herunterladen', 'fxwp'); ?>
                         </a>
-                        <a href="<?php echo esc_url(content_url('fxwp-backups/' . $backup)); ?>">
-                            <button><?php _e('Download Files', 'fxwp'); ?></button>
+                        <a href="<?php echo esc_url(content_url('fxwp-backups/' . $backup)); ?>"
+                           class="button button-secondary">
+                            <?php _e('Dateien herunterladen', 'fxwp'); ?>
                         </a>
-                        <form method="post">
-                            <input type="hidden" name="backup_action" value="delete">
-                            <input type="hidden" name="backup_file" value="<?php echo esc_attr($backup); ?>">
-                            <input type="submit" class="button-danger" value="<?php _e('Delete', 'fxwp'); ?>">
-                        </form>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
+                        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=delete&backup_file=' . $backup), 'fxwp_critical'); ?>"
+                           class="button button-delete"> <?php _e('Delete', 'fxwp'); ?> </a>
+                    </td>
+                    <?php endforeach; ?>
+                </tr>
+            </table>
         <?php else: ?>
             <p><?php _e('No backups found.', 'fxwp'); ?></p>
         <?php endif; ?>
     </div>
     <style>
+        .button.button-delete {
+            border-color: #dc3232;
+            color: #dc3232;
+        }
+
+        .button.button-delete:hover {
+            background-color: #dc3232;
+            border-color: #be2424;
+            color: #fff;
+        }
+
+        .button.button-delete:active {
+            background-color: #be2424;
+            border-color: #be2424;
+            color: #fff;
+        }
+
         .fxwp-backups-list {
             list-style: none;
             padding: 0;
