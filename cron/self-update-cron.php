@@ -83,7 +83,8 @@ function fxwp_self_update()
             copy_dir($temp_directory . 'faktorxwordpress-main/', $plugin_directory);
 
             // Delete the temporary directory
-            rmdir($temp_directory . 'faktorxwordpress-main/');
+            $wp_filesystem->delete($temp_directory, true);
+
         }
 
         // Delete the ZIP archive
@@ -93,11 +94,9 @@ function fxwp_self_update()
         error_log('Self-update performed successfully.');
     } else {
         // The plugin is already up to date
-        echo 'No new update available. ';
         error_log('No new update available.');
     }
 
-    die("Self-update performed successfully.");
 }
 
 // add the cron job
