@@ -4,12 +4,32 @@ function fxwp_plugin_list_installer_page()
     // Definieren Sie Ihre Plugin-Sammlungen
     $plugin_collections = array(
         'Arbeiten mit Beiträgen' => array(
-            'pods',
-            'post-types-order'
+            array(
+                'name' => 'pods',
+                'options' => array(
+                    'option1' => 'value1',
+                    'option2' => 'value2',
+                    // weitere Optionen hier
+                ),
+            ),
+            array(
+                'name' => 'post-types-order',
+                'options' => array(),
+            ),
         ),
         'Website-Verbesserung' => array(
-            'broken-link-checker',
-            'wp-super-cache'
+            array(
+                'name' => 'broken-link-checker',
+                'options' => array(
+                    'option1' => 'value1',
+                    'option2' => 'value2',
+                    // weitere Optionen hier
+                ),
+            ),
+            array(
+                'name' => 'wp-super-cache',
+                'options' => array(),
+            ),
         )
         // Fügen Sie nach Bedarf weitere Sammlungen hinzu
     );
@@ -22,33 +42,49 @@ function fxwp_plugin_list_installer_page()
         echo "<h2>{$collection_name}</h2>";
         echo "<ul class='plugin-list'>";
         foreach ($plugins as $plugin) {
+            $plugin = $plugin['name'];
             echo "<li>
                 <img src='https://ps.w.org/{$plugin}/assets/icon-128x128.png'>
                 <div id='plugin-{$plugin}' >
-                    <h3>".str_replace('-', ' ', ucfirst($plugin))."</h3>
+                    <h3>" . str_replace('-', ' ', ucfirst($plugin)) . "</h3>
                     <p><strong>Autor:</strong></p> <p><strong>Downloads:</strong></p> <p><strong>Bewertungen:</strong></p>
                 </div>
             </li>";
         }
         echo "</ul>";
-        echo '<form method="post" action="">';
+        echo '<div style="display:flex;gap:8px;><form method="post" action="">';
         echo "<input type='hidden' name='plugin_collection' value='{$collection_name}'/>";
         echo '<input type="submit" value="Sammlung installieren" class="button button-primary button-large"/>';
         echo '</form>';
-
+        echo '<form method="post">';
+        echo "<input type='hidden' name='plugin_collection' value='{$collection_name}'/>";
+        echo '<input type="submit" name="configure_plugins" value="Plugins konfigurieren" class="button button-secondary button-large"/>
+        </form>
+        </div>';
         echo "</div>";
     }
 
     echo '</div>';
 
-    // Überprüfen, ob eine Sammlung ausgewählt wurde
-    if (isset($_POST['plugin_collection'])) {
+    // Überprüfen, ob die Plugins konfiguriert werden sollen
+    if (isset($_POST['configure_plugins'])) {
+        $selected_collection = $_POST['plugin_collection'];
+
+        foreach ($plugin_collections[$selected_collection] as $plugin_data) {
+            $plugin = $plugin_data['name'];
+            // Aktualisieren der Plugin-Optionen
+            foreach ($plugin_data['options'] as $option => $value) {
+                update_option($option, $value);
+            }
+            echo "<p>{$plugin} erfolgreich konfiguriert.</p>";
+        }
+    } else if (isset($_POST['plugin_collection'])) {
         $selected_collection = $_POST['plugin_collection'];
 
         // Installieren und aktivieren Sie die Plugins in der ausgewählten Sammlung
-        foreach ($plugin_collections[$selected_collection] as $plugin) {
-            // Geben Sie die Quelle des Plugins an
-            $plugin_source = "https://downloads.wordpress.org/plugin/{$plugin}.zip";  // Aktualisieren Sie diese URL
+        foreach ($plugin_collections[$selected_collection] as $plugin_data) {
+            $plugin = $plugin_data['name'];
+            $plugin_source = "https://downloads.wordpress.org/plugin/{$plugin}.zip";
 
             // Notwendige WordPress-Dateien einbeziehen
             require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
@@ -56,27 +92,28 @@ function fxwp_plugin_list_installer_page()
             require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-            // Verwenden Sie die Plugin_Upgrader-Klasse von WordPress, um das Plugin zu installieren
             $upgrader = new Plugin_Upgrader();
             $installed = $upgrader->install($plugin_source);
 
-            // Überprüfen Sie, ob die Installation erfolgreich war
             if (!is_wp_error($installed) && $installed) {
-                // Aktivieren Sie das Plugin
                 $result = activate_plugin($plugin);
 
-                // Überprüfen Sie, ob die Aktivierung erfolgreich war
                 if (is_null($result)) {
                     echo "<p>{$plugin} erfolgreich installiert und aktiviert.</p>";
+
+                    // Aktualisieren der Plugin-Optionen
+                    foreach ($plugin_data['options'] as $option => $value) {
+                        update_option($option, $value);
+                    }
                 } else {
                     echo "<p>Aktivierung von {$plugin} fehlgeschlagen.</p>";
-                    // Führen Sie eine Meta-Aktualisierung zu plugins.php durch
                     echo '<meta http-equiv="refresh" content="1;url=' . admin_url('plugins.php') . '">';
                 }
             } else {
                 echo "<p>Installation von {$plugin} fehlgeschlagen.</p>";
             }
         }
+
     }
     // Include JavaScript to fetch plugin details after page load
     echo "<script>
@@ -84,6 +121,7 @@ function fxwp_plugin_list_installer_page()
     var pluginDetails = {};
 
     function fetchPluginDetails(plugin) {
+        plugin = plugin.name;
         var apiURL = 'https://api.wordpress.org/plugins/info/1.0/' + plugin + '.json';
 
         fetch(apiURL)
