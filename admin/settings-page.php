@@ -26,7 +26,7 @@ function fxwp_settings_page()
                     $favicon_id = get_option('fxwp_favicon');
                     if ($favicon_id) {
                         $favicon_url = wp_get_attachment_url($favicon_id);
-                        echo '<img src="' . esc_url($favicon_url) . '" alt="Favicon" width="16" height="16" />';
+                        echo '<img src="' . esc_url($favicon_url) . '" alt="Favicon" width="22" height="22">';
                     }
                     ?>
                 </td>
@@ -42,11 +42,14 @@ function fxwp_settings_page()
                                 'post_mime_type' => 'image',
                                 'post_status' => 'inherit',
                                 'posts_per_page' => -1,
-                                // post title or filename lowercase should contain 'favicon' or 'ico' or 'logo'
-                                's' => 'favicon,ico,logo',
                             );
                             $attachments = get_posts($args);
                             foreach ($attachments as $attachment) {
+                                // post title or filename lowercase should contain 'favicon' or 'ico' or 'logo'
+                                if (strpos(strtolower($attachment->post_title), 'ico') === false && strpos(strtolower($attachment->post_title), 'logo') === false) {
+                                    continue;
+                                }
+
                                 $selected = '';
                                 if ($favicon_id && $attachment->ID === intval($favicon_id)) {
                                     $selected = 'selected';
