@@ -17,7 +17,7 @@ function fxwp_display_settings_page()
                 <th scope="col">Shortcode-Tag</th>
                 <th scope="col">Attribute</th>
                 <th scope="col">Beschreibung</th>
-                <!--                <th scope="col">Aktionen</th>-->
+                <th scope="col">Aktionen</th>
             </tr>
             </thead>
             <tbody>
@@ -33,7 +33,7 @@ function fxwp_display_settings_page()
                             return $attribute['name'] . '=' . $attribute['default'];
                         }, $shortcode_data['attributes']))) . '</td>';
                     echo '<td>' . ($shortcode_data['description']) . '</td>';
-//                    echo '<td>'; echo '<a href="' . admin_url('admin.php?page=fxwp-shortcode-edit&tag=' . urlencode($shortcode_tag)) . '">Bearbeiten</a>'; echo '</td>';
+                    echo '<td><a href="' . admin_url('admin.php?page=my-custom-shortcodes-add-new&tag=' . urlencode($shortcode_tag)) . '">Bearbeiten</a></td>';
                     echo '</tr>';
                 }
             } else {
@@ -50,35 +50,58 @@ function fxwp_display_settings_page()
 // Den Inhalt der Seite "Neu hinzufügen" anzeigen:
 function fxwp_display_add_new_page()
 {
-    // Lade vorhandene Shortcodes
+    // Check if it's an edit or add request
+    $is_edit = isset($_GET['tag']);
+
+    if ($is_edit) {
+        // Edit existing shortcode
+        $shortcode_tag = $_GET['tag'];
+        fxwp_display_shortcode_form($shortcode_tag);
+    } else {
+        // Add new shortcode
+        fxwp_display_shortcode_form();
+    }
+}
+
+
+// Display the shortcode form for add/edit
+function fxwp_display_shortcode_form($shortcode_tag = null)
+{
+    $is_edit = $shortcode_tag !== null;
+
+    // Get the existing shortcode data from the options
     $fxwp_shortcodes = get_option('fxwp_shortcodes', array());
 
-    // Anlegen eines neuen Shortcodes
+    // Find the shortcode with the matching tag if in edit mode
+    if ($is_edit) {
+        // find shortcut_data
+        $shortcode_data = null;
+        foreach ($fxwp_shortcodes as $shortcode) {
+            if ($shortcode['tag'] === $shortcode_tag) {
+                $shortcode_data = $shortcode;
+                break;
+            }
+        }
+
+        // If the shortcode data is not found, display an error message
+        if (!$shortcode_data) {
+            echo '<div class="error"><p>Der angegebene Shortcode wurde nicht gefunden.</p></div>';
+            return;
+        }
+    }
+
     if (isset($_POST['fxwp_shortcode_tag'])) {
-
-        // show notice
-        add_action('admin_notices', function () {
-            ?>
-            <div class="notice notice-success is-dismissible">
-                <p>Shortcode wurde erfolgreich hinzugefügt.</p>
-            </div>
-            <?php
-        });
-
-        echo '<p>Shortcode wurde erfolgreich hinzugefügt.</p>';
-
-        $new_shortcode = array(
+        $updated_shortcode = array(
             'tag' => sanitize_text_field($_POST['fxwp_shortcode_tag']),
             'attributes' => array(),
             'description' => sanitize_textarea_field($_POST['fxwp_shortcode_description']),
-            // allow php code
             'code' => ($_POST['fxwp_shortcode_code']),
         );
 
         // Attribute hinzufügen
         if (isset($_POST['fxwp_shortcode_attributes'])) {
             foreach ($_POST['fxwp_shortcode_attributes'] as $attribute) {
-                $new_shortcode['attributes'][] = array(
+                $updated_shortcode['attributes'][] = array(
                     'name' => sanitize_text_field($attribute['name']),
                     'description' => sanitize_textarea_field($attribute['description']),
                     'default' => sanitize_text_field($attribute['default']),
@@ -86,20 +109,32 @@ function fxwp_display_add_new_page()
             }
         }
 
-        // Den neuen Shortcode zum Array hinzufügen
-        $fxwp_shortcodes[] = $new_shortcode;
+        // Update the existing shortcode in the options
+        $was_updated = false;
+        foreach ($fxwp_shortcodes as &$shortcode) {
+            if ($shortcode['tag'] === $shortcode_tag) {
+                $shortcode = $updated_shortcode;
+                $was_updated = true;
+                $shortcode_data = $updated_shortcode;
+                break;
+            }
+        }
+        if(!$was_updated) {
+            $fxwp_shortcodes[] = $updated_shortcode;
+        }
 
         // Update the option
         update_option('fxwp_shortcodes', $fxwp_shortcodes);
     }
 
+
     // Das Formular anzeigen
     ?>
     <div class="wrap">
-        <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+        <h1><?php echo esc_html($is_edit ? 'Shortcode bearbeiten' : 'Neuen Shortcode hinzufügen'); ?></h1>
         <form method="post">
             <?php
-            wp_nonce_field('fxwp_shortcode_nonce', 'fxwp_add_shortcode_nonce');
+            wp_nonce_field('fxwp_shortcode_nonce', $is_edit ? 'fxwp_edit_shortcode_nonce' : 'fxwp_add_shortcode_nonce');
             ?>
             <table class="form-table">
                 <tbody>
@@ -109,7 +144,8 @@ function fxwp_display_add_new_page()
                     </th>
                     <td>
                         <input required name="fxwp_shortcode_tag" id="fxwp_shortcode_tag" type="text"
-                               class="regular-text">
+                               class="regular-text" value="<?php echo esc_attr($shortcode_tag); ?>"
+                            <?php echo $is_edit ? 'readonly' : ''; ?>>
                     </td>
                 </tr>
                 <tr>
@@ -118,7 +154,19 @@ function fxwp_display_add_new_page()
                     </th>
                     <td>
                         <div id="fxwp_shortcode_attributes">
-                            <!-- Hier werden die dynamischen Felder eingefügt -->
+
+                            <?php
+                            // Display the existing attributes for editing
+                            if (isset($shortcode_data) && isset($shortcode_data['attributes'])) {
+                                foreach ($shortcode_data['attributes'] as $index => $attribute) {
+                                    echo '<div class="fxwp_attribute">';
+                                    echo '<input type="text" name="fxwp_shortcode_attributes[' . esc_attr($index) . '][name]" value="' . esc_attr($attribute['name']) . '" placeholder="Attributname">';
+                                    echo '<input type="text" name="fxwp_shortcode_attributes[' . esc_attr($index) . '][description]" value="' . esc_attr($attribute['description']) . '" placeholder="Beschreibung">';
+                                    echo '<input type="text" name="fxwp_shortcode_attributes[' . esc_attr($index) . '][default]" value="' . esc_attr($attribute['default']) . '" placeholder="Standardwert">';
+                                    echo '</div>';
+                                }
+                            }
+                            ?>
                         </div>
                         <button type="button" id="fxwp_add_attribute">Attribut hinzufügen</button>
                     </td>
@@ -129,7 +177,8 @@ function fxwp_display_add_new_page()
                     </th>
                     <td>
                         <textarea name="fxwp_shortcode_description" id="fxwp_shortcode_description"
-                                  class="large-text code" rows="10"></textarea>
+                                  class="large-text code"
+                                  rows="10"><?php echo esc_textarea($shortcode_data['description'] ?? ''); ?></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -137,15 +186,17 @@ function fxwp_display_add_new_page()
                         <label for="fxwp_shortcode_code">PHP Code</label>
                     </th>
                     <td>
-                        <textarea name="fxwp_shortcode_code" id="fxwp_shortcode_code" class="large-text code"
-                                  rows="10"></textarea>
+                       <textarea name="fxwp_shortcode_code" id="fxwp_shortcode_code" class="large-text code"
+                                 rows="10"><?php echo str_replace('<', '&lt;', str_replace('\\"', '"', $shortcode_data['code'] ?? '&lt;?php /* echo $atts["cols"]; */ ?>
+<!-- some html -->')); ?></textarea>
                     </td>
                 </tr>
                 </tbody>
             </table>
             <?php
             // Submit-Button ausgeben
-            submit_button('Neuer Shortcode');
+            submit_button($is_edit ? 'Shortcode aktualisieren' : 'Neuen Shortcode hinzufügen');
+
             ?>
         </form>
         <script>document.getElementById('fxwp_add_attribute').addEventListener('click', function () {
