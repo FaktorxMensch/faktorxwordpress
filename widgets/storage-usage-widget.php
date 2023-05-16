@@ -15,6 +15,7 @@ function fxwp_storage_usage_widget()
 // Limit storage for users to 20GB
 function fxwp_check_storage_limit($file)
 {
+    // TODO: fix this, it is broken
     // Check if the file is being uploaded
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$file])) {
 
@@ -59,7 +60,7 @@ function fxwp_get_directory_size($dir)
     return $size;
 }
 
-add_filter('wp_handle_upload_prefilter', 'fxwp_check_storage_limit');
+//add_filter('wp_handle_upload_prefilter', 'fxwp_check_storage_limit');
 
 function fxwp_display_storage_limit_notice()
 {

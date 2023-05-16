@@ -19,6 +19,45 @@ function fxwp_settings_page()
             do_settings_sections('fxwp_settings_group');
             ?>
             <table class="form-table">
+
+                <th scope="row"><?php echo esc_html__('Aktuelles Favicon', 'fxwp'); ?></th>
+                <td>
+                    <?php
+                    $favicon_id = get_option('fxwp_favicon');
+                    if ($favicon_id) {
+                        $favicon_url = wp_get_attachment_url($favicon_id);
+                        echo '<img src="' . esc_url($favicon_url) . '" alt="Favicon" width="16" height="16" />';
+                    }
+                    ?>
+                </td>
+                <tr>
+                    <th scope="row"><?php echo esc_html__('Favicon auswählen', 'fxwp'); ?></th>
+                    <td>
+                        <p><?php echo esc_html__('Wählen Sie Ihr Favicon aus der Medienbibliothek.', 'fxwp'); ?></p>
+                        <select name="fxwp_favicon">
+                            <option value=""><?php echo esc_html__('Kein Favicon ausgewählt', 'fxwp'); ?></option>
+                            <?php
+                            $args = array(
+                                'post_type' => 'attachment',
+                                'post_mime_type' => 'image',
+                                'post_status' => 'inherit',
+                                'posts_per_page' => -1,
+                                // post title or filename lowercase should contain 'favicon' or 'ico' or 'logo'
+                                's' => 'favicon,ico,logo',
+                            );
+                            $attachments = get_posts($args);
+                            foreach ($attachments as $attachment) {
+                                $selected = '';
+                                if ($favicon_id && $attachment->ID === intval($favicon_id)) {
+                                    $selected = 'selected';
+                                }
+                                echo '<option value="' . esc_attr($attachment->ID) . '" ' . $selected . '>' . esc_html($attachment->post_title) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </td>
+                </tr>
+
                 <tr>
                     <th scope="row"><?php echo esc_html__('API Schlüssel', 'fxwp'); ?></th>
                     <td>
@@ -54,6 +93,7 @@ function fxwp_settings_page()
             <a href="<?php echo esc_url(admin_url('admin.php?page=fxwp-settings&fxwp_self_update=true')); ?>"
             ><?php echo esc_html__('Prüfen auf Updates', 'fxwp'); ?></a>
         </form>
+
     </div>
     <?php
 }
@@ -61,6 +101,7 @@ function fxwp_settings_page()
 function fxwp_register_settings()
 {
     register_setting('fxwp_settings_group', 'fxwp_api_key');
+    register_setting('fxwp_settings_group', 'fxwp_favicon');
     register_setting('fxwp_settings_group', 'fxwp_google_fonts_remove');
 }
 
