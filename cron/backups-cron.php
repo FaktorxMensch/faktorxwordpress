@@ -7,7 +7,11 @@ if (!wp_next_scheduled('fxwp_backup_task')) {
     wp_schedule_event(time(), 'daily', 'fxwp_backup_task');
 }
 
-add_action('fxwp_backup_task', 'fxwp_create_backup');
+add_action('fxwp_backup_task', function () {
+    fxwp_create_backup();
+    fxwp_delete_expired_backups();
+});
+
 
 function fxwp_create_backup()
 {
@@ -123,20 +127,54 @@ function fxwp_create_backup()
 
     // Zip archive will be created only after closing object
     $zip->close();
+}
 
-    // Delete old backups
-    $files = glob($backupDir . '*.zip'); // Get all zip files
+function fxwp_delete_expired_backups()
+{
+    $rootDir = ABSPATH;
+    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
+    $files = glob($backupDir . 'backup_*.zip');
+
+    // Sort the array so the oldest files are first
+    array_multisort(
+        array_map('filemtime', $files), SORT_NUMERIC, SORT_ASC,
+        $files
+    );
+
     $now = time();
+    $sons = $fathers = $grandfathers = array();
 
     foreach ($files as $file) {
-        if (is_file($file)) {
-            // Delete the file if it's older than X days
-            if ($now - filemtime($file) >= 60 * 60 * 24 * FXWP_BACKUP_DAYS) { // Replace X with the number of days
-                unlink($file);
-            }
+        $fileTime = filemtime($file);
+        $daysOld = round(($now - $fileTime) / (60 * 60 * 24));
+
+        if ($daysOld <= FXWP_BACKUP_DAYS_SON) {
+            $sons[] = $file;
+        } elseif ($daysOld <= FXWP_BACKUP_DAYS_FATHER) {
+            $fathers[] = $file;
+        } elseif ($daysOld <= FXWP_BACKUP_DAYS_GRANDFATHER) {
+            $grandfathers[] = $file;
+        } else {
+            unlink($file); // Delete files older than "Grandfather" backups
         }
     }
+
+    // Delete the oldest Son backups, leaving 6
+    while (count($sons) > FXWP_BACKUP_DAYS_FATHER) {
+        unlink(array_shift($sons));
+    }
+
+    // Delete the oldest Father backups, leaving 3
+    while (count($fathers) > FXWP_BACKUP_DAYS_GRANDFATHER) {
+        unlink(array_shift($fathers));
+    }
+
+    // Delete the oldest Grandfather backups, leaving 1
+    while (count($grandfathers) > FXWP_BACKUP_GRANDFATHERS) {
+        unlink(array_shift($grandfathers));
+    }
 }
+
 
 function fxwp_restore_backup($backupFile)
 {
