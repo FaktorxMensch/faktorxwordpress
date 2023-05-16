@@ -116,16 +116,6 @@ function fxwp_plugin_menu()
         'fxwp_seo_check_page' // Function
     );
 
-    // broekn link checker
-    add_submenu_page(
-        'fxwp', // Parent slug
-        'Broken Link Checker', // Page title
-        'Broken Link Checker', // Menu title
-        'edit_posts', // Capability
-        'fxwp-broken-link-checker', // Menu slug
-        'fxwp_broken_link_checker_page' // Function
-    );
-
     // image optimizer
     add_submenu_page(
         'fxwp', // Parent slug
