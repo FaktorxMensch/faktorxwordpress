@@ -17,7 +17,7 @@ function fxwp_display_settings_page()
                 <th scope="col">Shortcode-Tag</th>
                 <th scope="col">Attribute</th>
                 <th scope="col">Beschreibung</th>
-<!--                <th scope="col">Aktionen</th>-->
+                <!--                <th scope="col">Aktionen</th>-->
             </tr>
             </thead>
             <tbody>
@@ -32,7 +32,7 @@ function fxwp_display_settings_page()
                     echo '<td>' . esc_html(implode(', ', array_map(function ($attribute) {
                             return $attribute['name'] . '=' . $attribute['default'];
                         }, $shortcode_data['attributes']))) . '</td>';
-                    echo '<td>' . esc_html($shortcode_data['description']) . '</td>';
+                    echo '<td>' . ($shortcode_data['description']) . '</td>';
 //                    echo '<td>'; echo '<a href="' . admin_url('admin.php?page=fxwp-shortcode-edit&tag=' . urlencode($shortcode_tag)) . '">Bearbeiten</a>'; echo '</td>';
                     echo '</tr>';
                 }
@@ -71,7 +71,8 @@ function fxwp_display_add_new_page()
             'tag' => sanitize_text_field($_POST['fxwp_shortcode_tag']),
             'attributes' => array(),
             'description' => sanitize_textarea_field($_POST['fxwp_shortcode_description']),
-            'code' => sanitize_textarea_field($_POST['fxwp_shortcode_code']),
+            // allow php code
+            'code' => ($_POST['fxwp_shortcode_code']),
         );
 
         // Attribute hinzufügen
@@ -208,7 +209,10 @@ function fxwp_display_doc_page()
             echo '<td>[' . esc_html($shortcode['tag']) . ' ' . esc_html($attribute['name']) . '="' . esc_html($attribute['default']) . '"]</td>';
             echo '</tr>';
         }
+
         echo '</table>';
+        echo '<h3>PHP Code:</h3>';
+        echo '<pre><code>' . str_replace('<', '&lt;', str_replace('>', '&gt;', ($shortcode['code']))) . '</code></pre>';
         echo '</div>';
     }
 }
