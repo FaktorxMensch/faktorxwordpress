@@ -143,3 +143,14 @@ p.error-message {
     text-align: center;
     line-height: 20px;
 }
+
+.card.fxwp_shortcode {
+    max-width: 98%;
+}
+
+.fxwp_attribute {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}

@@ -149,6 +149,38 @@ function fxwp_plugin_menu()
 
     remove_submenu_page('fxwp', 'fxwp');
 
+
+
+    add_menu_page(
+        'Meine Benutzerdefinierten Shortcodes',
+        'Shortcodes',
+        'manage_options',
+        'my-custom-shortcodes',
+        'fxwp_display_settings_page',
+        'dashicons-admin-generic',
+        null
+    );
+
+    // Eine Unterseite unter unserem Top-Level-Menü hinzufügen:
+    add_submenu_page(
+        'my-custom-shortcodes',
+        'Neuen Shortcode hinzufügen',
+        'Neu hinzufügen',
+        'manage_options',
+        'my-custom-shortcodes-add-new',
+        'fxwp_display_add_new_page'
+    );
+
+    // Eine weitere Unterseite für die Dokumentation hinzufügen:
+    add_submenu_page(
+        'my-custom-shortcodes',
+        'Shortcode Dokumentation',
+        'Dokumentation',
+        'manage_options',
+        'my-custom-shortcodes-doc',
+        'fxwp_display_doc_page'
+    );
+
 }
 
 
