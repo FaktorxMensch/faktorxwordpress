@@ -9,6 +9,7 @@ function fxwp_settings_page()
 
     // Check if the plugin is activated
     $api_key = get_option('fxwp_api_key');
+    $google_fonts_remove = get_option('fxwp_google_fonts_remove');
     ?>
     <div class="wrap">
         <h1><?php echo esc_html__('Faktor &times; WordPress Einstellungen', 'fxwp'); ?></h1>
@@ -21,7 +22,24 @@ function fxwp_settings_page()
                 <tr>
                     <th scope="row"><?php echo esc_html__('API Schlüssel', 'fxwp'); ?></th>
                     <td>
+                        <p><?php echo esc_html__('Bitte geben Sie Ihren API Schlüssel ein.', 'fxwp'); ?></p>
                         <input type="text" name="fxwp_api_key" value="<?php echo esc_attr($api_key); ?>"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        <?php echo esc_html__('Google Fonts entfernen', 'fxwp'); ?>
+                    </th>
+                    <td>
+                        <p><?php echo esc_html__('Sollen die Google Fonts entfernt werden?', 'fxwp'); ?></p>
+                        <select name="fxwp_google_fonts_remove">
+                            <option value="nein" <?php selected($google_fonts_remove, 'nein'); ?>>Nein</option>
+                            <option value="einfach" <?php selected($google_fonts_remove, 'einfach'); ?>>Ja, einfach
+                            </option>
+                            <option value="aggresiv" <?php selected($google_fonts_remove, 'aggresiv'); ?>>Ja, aggresiv
+                            </option>
+                        </select>
+
                     </td>
                 </tr>
             </table>
@@ -43,6 +61,7 @@ function fxwp_settings_page()
 function fxwp_register_settings()
 {
     register_setting('fxwp_settings_group', 'fxwp_api_key');
+    register_setting('fxwp_settings_group', 'fxwp_google_fonts_remove');
 }
 
 add_action('admin_init', 'fxwp_register_settings');
