@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!wp_next_scheduled('fxwp_backup_task')) {
-    wp_schedule_event(time(), 'daily', 'fxwp_backup_task');
+    wp_schedule_event(time(), 'hourly', 'fxwp_backup_task');
 }
 
 add_action('fxwp_backup_task', function () {
@@ -129,52 +129,89 @@ function fxwp_create_backup()
     $zip->close();
 }
 
+function fxwp_get_backup_timestamp($filename)
+{
+    // get the filename without the path
+    $filename = basename($filename);
+    $backup2 = str_replace('backup_', '', $filename);
+    $backup2 = str_replace('.zip', '', $backup2);
+    $parts = explode('_', $backup2);
+
+    $date = $parts[0];
+    $time = $parts[1];
+    //                        $date = str_replace('-', '.', $date);
+    $time = str_replace('-', ':', $time);
+
+    $date = $date . ' ' . $time;
+    $ts = strtotime($date);
+    return $ts;
+}
+
 function fxwp_delete_expired_backups()
 {
     $rootDir = ABSPATH;
     $backupDir = $rootDir . 'wp-content/fxwp-backups/';
     $files = glob($backupDir . 'backup_*.zip');
 
-    // Sort the array so the oldest files are first
+    // Sort the array so the oldest files are first but take its filename
     array_multisort(
-        array_map('filemtime', $files), SORT_NUMERIC, SORT_ASC,
+        array_map('fxwp_get_backup_timestamp', $files), SORT_NUMERIC, SORT_ASC,
         $files
     );
 
     $now = time();
-    $sons = $fathers = $grandfathers = array();
+    $hourly = $daily = $monthly = $older = array();
 
     foreach ($files as $file) {
-        $fileTime = filemtime($file);
-        $daysOld = round(($now - $fileTime) / (60 * 60 * 24));
+        $fileTime = fxwp_get_backup_timestamp($file);
+        $hoursOld = floor(($now - $fileTime) / (60 * 60));
+        $daysOld = floor(($now - $fileTime) / (60 * 60 * 24));
 
-        if ($daysOld <= FXWP_BACKUP_DAYS_SON) {
-            $sons[] = $file;
-        } elseif ($daysOld <= FXWP_BACKUP_DAYS_FATHER) {
-            $fathers[] = $file;
-        } elseif ($daysOld <= FXWP_BACKUP_DAYS_GRANDFATHER) {
-            $grandfathers[] = $file;
+        if ($hoursOld < FXWP_BACKUP_DAYS_SON) {
+            $hourly[] = $file;
+        } elseif ($daysOld < FXWP_BACKUP_DAYS_FATHER) {
+            $daily[] = $file;
+        } elseif ($daysOld < FXWP_BACKUP_DAYS_GRANDFATHER) {
+            $monthly[] = $file;
         } else {
-            unlink($file); // Delete files older than "Grandfather" backups
+            $older[] = $file;
         }
     }
 
-    // Delete the oldest Son backups, leaving 6
-    while (count($sons) > FXWP_BACKUP_DAYS_FATHER) {
-        unlink(array_shift($sons));
+    // Keep only the last hourly backup per hour
+    $keptHourly = array();
+    foreach ($hourly as $file) {
+        $timestamp = fxwp_get_backup_timestamp($file);
+        $hourKey = date('Y-m-d-H', $timestamp);
+        $keptHourly[$hourKey] = $file;
     }
 
-    // Delete the oldest Father backups, leaving 3
-    while (count($fathers) > FXWP_BACKUP_DAYS_GRANDFATHER) {
-        unlink(array_shift($fathers));
+    // Keep only one daily backup per day for the last 7 days
+    $keptDaily = array();
+    foreach ($daily as $file) {
+        $timestamp = fxwp_get_backup_timestamp($file);
+        $dayKey = date('Y-m-d', $timestamp);
+        $keptDaily[$dayKey] = $file;
     }
 
-    // Delete the oldest Grandfather backups, leaving 1
-    while (count($grandfathers) > FXWP_BACKUP_GRANDFATHERS) {
-        unlink(array_shift($grandfathers));
+    // Keep only one monthly backup per month for the last 3 months
+    $keptMonthly = array();
+    foreach ($monthly as $file) {
+        $timestamp = fxwp_get_backup_timestamp($file);
+        $monthKey = date('Y-m', $timestamp);
+        $keptMonthly[$monthKey] = $file;
+    }
+
+    // Merge all the backups we want to keep
+    $keptBackups = array_merge($keptHourly, $keptDaily, $keptMonthly);
+
+    // Delete the backups not in the keptBackups array
+    foreach ($files as $file) {
+        if (!in_array($file, $keptBackups)) {
+            unlink($file);
+        }
     }
 }
-
 
 function fxwp_restore_backup($backupFile)
 {

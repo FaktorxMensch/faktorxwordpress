@@ -9,7 +9,10 @@ define('FXWP_API_URL', 'https://p2.faktorxmensch.com/api/fxwp');
 define('FXWP_STORAGE_LIMIT', 20 * 1024 * 1024 * 1024); // 20GB
 
 // GVS Intervalle
-define('FXWP_BACKUP_DAYS_SON', 1); // Backup jeden Tag
-define('FXWP_BACKUP_DAYS_FATHER', 7); // Backup jede Woche
-define('FXWP_BACKUP_DAYS_GRANDFATHER', 30); // Backup jeden Monat
-define('FXWP_BACKUP_GRANDFATHERS', 2); // how many grandfathers to keep
+// wir wollen die letzten 24 stunden, dann von jedem tag der letzten woche, dann von jedem monat der letzten 2 monate
+define('FXWP_BACKUP_INTERVAL', 'hourly'); // vs daily
+
+define('FXWP_BACKUP_DAYS_SON', 24); // keep hourly backups for the last X hours
+define('FXWP_BACKUP_DAYS_FATHER', 7); // keep daily backups for the last X days
+define('FXWP_BACKUP_DAYS_GRANDFATHER', 3 * 30); // keep monthly backups for the last X days
+

@@ -1,4 +1,34 @@
 <?php
+//
+//function fxwp_mock_backups()
+//{
+//    // delete all backups
+//    $rootDir = ABSPATH;
+//    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
+//    $files = glob($backupDir . '*.zip*');
+//    foreach ($files as $file) {
+//        unlink($file);
+//    }
+//
+//    $hours = 90 * 24;
+//    // create empty files for testing
+//    for ($i = 0; $i < $hours; $i+=4) {
+//        $date = date('Y-m-d_H-i-s', strtotime("-$i hours"));
+//        $file = "backup_$date.zip";
+//        $path = WP_CONTENT_DIR . "/fxwp-backups/$file";
+//        if (!file_exists($path)) {
+//            file_put_contents($path, '');
+//            file_put_contents($path . ".sql", '');
+//        }
+//    }
+//
+//}
+//
+//// testing
+//
+//add_action('init', 'fxwp_mock_backups');
+//add_action('init', 'fxwp_delete_expired_backups');
+
 function fxwp_backups_page()
 {
     // Check if a backup action was submitted
@@ -42,23 +72,19 @@ function fxwp_backups_page()
         <br>
         <?php if (!empty($backups)): ?>
             <table class="wp-list-table widefat fixed striped">
-                <?php foreach ($backups
+                <?php
+                // reverse backups
+                $backups = array_reverse($backups);
+                foreach ($backups
 
-                as $backup): ?>
+                as $backup):
+                ?>
                 <tr>
                     <td>
                         <?php
-                        $backup2 = str_replace('backup_', '', $backup);
-                        $backup2 = str_replace('.zip', '', $backup2);
-                        $parts = explode('_', $backup2);
-
-                        $date = $parts[0];
-                        $time = $parts[1];
-                        $date = str_replace('-', '.', $date);
-                        $time = str_replace('-', ':', $time);
-
-                        $ts = strtotime($date . ' ' . $time);
-                        echo "<b>";printf(esc_html__('Sicherung vom %s um %s', 'fxwp'), date_i18n(get_option('date_format'), $ts), date_i18n(get_option('time_format'), $ts));
+                        $ts = fxwp_get_backup_timestamp($backup);
+                        echo "<b>";
+                        printf(esc_html__('Sicherung vom %s um %s', 'fxwp'), date_i18n(get_option('date_format'), $ts), date_i18n(get_option('time_format'), $ts));
                         echo '</b><br>';
 
                         // get filesize
