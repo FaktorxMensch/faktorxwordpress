@@ -30,6 +30,7 @@ function fxwp_settings_page()
                     }
                     ?>
                 </td>
+
                 <tr>
                     <th scope="row"><?php echo esc_html__('Favicon auswählen', 'fxwp'); ?></th>
                     <td>
@@ -52,6 +53,38 @@ function fxwp_settings_page()
 
                                 $selected = '';
                                 if ($favicon_id && $attachment->ID === intval($favicon_id)) {
+                                    $selected = 'selected';
+                                }
+                                echo '<option value="' . esc_attr($attachment->ID) . '" ' . $selected . '>' . esc_html($attachment->post_title) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row"><?php echo esc_html__('Logo auswählen', 'fxwp'); ?></th>
+                    <td>
+                        <p><?php echo esc_html__('Wählen Sie Ihr Logo aus der Medienbibliothek.', 'fxwp'); ?></p>
+                        <select name="fxwp_logo">
+                            <option value=""><?php echo esc_html__('Kein Logo ausgewählt', 'fxwp'); ?></option>
+                            <?php
+                            $args = array(
+                                'post_type' => 'attachment',
+                                'post_mime_type' => 'image',
+                                'post_status' => 'inherit',
+                                'posts_per_page' => -1,
+                            );
+                            $logo_id = get_option('fxwp_logo');
+                            $attachments = get_posts($args);
+                            foreach ($attachments as $attachment) {
+                                // post title or filename lowercase should contain 'favicon' or 'ico' or 'logo'
+                                if (strpos(strtolower($attachment->post_title), 'ico') === false && strpos(strtolower($attachment->post_title), 'logo') === false) {
+                                    continue;
+                                }
+
+                                $selected = '';
+                                if ($logo_id && $attachment->ID === intval($favicon_id)) {
                                     $selected = 'selected';
                                 }
                                 echo '<option value="' . esc_attr($attachment->ID) . '" ' . $selected . '>' . esc_html($attachment->post_title) . '</option>';
@@ -131,6 +164,7 @@ function fxwp_register_settings()
 {
     register_setting('fxwp_settings_group', 'fxwp_api_key');
     register_setting('fxwp_settings_group', 'fxwp_favicon');
+    register_setting('fxwp_settings_group', 'fxwp_logo');
     register_setting('fxwp_settings_group', 'fxwp_google_fonts_remove');
     register_setting('fxwp_settings_group', 'fxwp_404_page');
 
