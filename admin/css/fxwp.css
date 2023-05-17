@@ -16,6 +16,12 @@
     color: #fff;
 }
 
+.button.button-warning {
+    border-color: #e89900;
+    color: #e89900;
+    pointer-events: none;
+}
+
 .fxwp-backups-list {
     list-style: none;
     padding: 0;
@@ -99,7 +105,8 @@ p.error-message {
     margin-bottom: 20px;
     border-bottom: 1px solid #ddd;
 }
-.plugin-list  > li {
+
+.plugin-list > li {
     list-style: none;
     margin-left: 0;
     margin-bottom: 20px;
@@ -108,13 +115,15 @@ p.error-message {
     align-items: center;
     gap: 20px;
 }
-.plugin-list  > li img {
+
+.plugin-list > li img {
     width: 80px;
     height: 80px;
     border-radius: 11px;
 }
-.plugin-list  > li p  {
-    margin:0;
+
+.plugin-list > li p {
+    margin: 0;
 }
 
 .fxwp-storage-usage {

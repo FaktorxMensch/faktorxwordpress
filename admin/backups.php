@@ -12,7 +12,7 @@ function fxwp_mock_backups()
 
     $hours = 90 * 24;
     // create empty files for testing
-    for ($i = 0; $i < $hours; $i+=1) {
+    for ($i = 0; $i < $hours; $i += 1) {
         $date = date('Y-m-d_H-i-s', strtotime("-$i hours"));
         $file = "backup_$date.zip";
         $path = WP_CONTENT_DIR . "/fxwp-backups/$file";
@@ -107,8 +107,12 @@ function fxwp_backups_page()
                         ?>
                     </td>
                     <td align="right">
-                        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=restore&backup_file=' . $backup), 'fxwp_critical'); ?>"
-                           class="button button-secondary"> <?php _e('Restore', 'fxwp'); ?> </a>
+                        <?php if ($size > 1000) { ?>
+                            <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=restore&backup_file=' . $backup), 'fxwp_critical'); ?>"
+                               class="button button-secondary"> <?php _e('Restore', 'fxwp'); ?> </a>
+                        <?php } else {
+                            echo "<a class='button button-warning'>Backup fehlerhaft!</a>";
+                        } ?>
                         <!-- have download files and db backup -->
                         <a href="<?php echo esc_url(content_url('fxwp-backups/' . $backup . '.sql')); ?>"
                            class="button button-secondary">
