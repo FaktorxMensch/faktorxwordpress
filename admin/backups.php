@@ -1,33 +1,32 @@
 <?php
-//
-//function fxwp_mock_backups()
-//{
-//    // delete all backups
-//    $rootDir = ABSPATH;
-//    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
-//    $files = glob($backupDir . '*.zip*');
-//    foreach ($files as $file) {
-//        unlink($file);
-//    }
-//
-//    $hours = 90 * 24;
-//    // create empty files for testing
-//    for ($i = 0; $i < $hours; $i+=4) {
-//        $date = date('Y-m-d_H-i-s', strtotime("-$i hours"));
-//        $file = "backup_$date.zip";
-//        $path = WP_CONTENT_DIR . "/fxwp-backups/$file";
-//        if (!file_exists($path)) {
-//            file_put_contents($path, '');
-//            file_put_contents($path . ".sql", '');
-//        }
-//    }
-//
-//}
-//
-//// testing
-//
-//add_action('init', 'fxwp_mock_backups');
-//add_action('init', 'fxwp_delete_expired_backups');
+
+function fxwp_mock_backups()
+{
+    // delete all backups
+    $rootDir = ABSPATH;
+    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
+    $files = glob($backupDir . '*.zip*');
+    foreach ($files as $file) {
+        unlink($file);
+    }
+
+    $hours = 90 * 24;
+    // create empty files for testing
+    for ($i = 0; $i < $hours; $i+=1) {
+        $date = date('Y-m-d_H-i-s', strtotime("-$i hours"));
+        $file = "backup_$date.zip";
+        $path = WP_CONTENT_DIR . "/fxwp-backups/$file";
+        if (!file_exists($path)) {
+            file_put_contents($path, '');
+            file_put_contents($path . ".sql", '');
+        }
+    }
+
+}
+
+// testing
+add_action('init', 'fxwp_mock_backups');
+add_action('init', 'fxwp_delete_expired_backups');
 
 function fxwp_backups_page()
 {
