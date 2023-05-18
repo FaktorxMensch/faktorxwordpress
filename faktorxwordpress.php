@@ -129,8 +129,8 @@ function fxwp_plugin_menu()
     // plugin installer
     add_submenu_page(
         'fxwp', // Parent slug
-        'Plugin Installer', // Page title
-        'Plugin Installer', // Menu title
+        'Install Helper', // Page title
+        'Install Helper', // Menu title
         'administrator', // Capability
         'fxwp-plugin-installer', // Menu slug
         'fxwp_plugin_list_installer_page' // Function

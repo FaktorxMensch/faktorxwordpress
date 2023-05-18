@@ -35,6 +35,17 @@ function fxwp_plugin_list_installer_page()
     );
 
     echo '<div class="wrap">';
+    ?>
+    <label class="switch fixed-upper-right">
+        <input type="checkbox" id="togBtn">
+        <div class="slider round">
+            <span class="on">Erweitert</span>
+            <span class="off">Einfach</span>
+        </div>
+    </label>
+    <?php
+
+    echo '<div style="display:none" class="advanced-options">';
     echo '<h1>Plugin-Listen-Installer</h1>';
 
     foreach ($plugin_collections as $collection_name => $plugins) {
@@ -65,6 +76,7 @@ function fxwp_plugin_list_installer_page()
         echo "</div>";
     }
 
+    // THEMES
     echo '<h1 style="margin-top:25px">Theme-Installer</h1>';
     echo '<div class="collection-box">';
     echo '<h2>Benutzerdefinierte Themes</h2>';
@@ -81,9 +93,60 @@ function fxwp_plugin_list_installer_page()
     echo '<input type="submit" value="Theme installieren" class="button button-primary button-large"/>';
     echo '</form>';
     echo '</div>';
+    echo '</div>';
+
+    // EINRICHTUNG
+    echo '<h1 style="margin-top:25px">Seiten Einrichtung</h1>';
+    echo '<div class="collection-box">';
+    echo '<h2>Einrichtung</h2>';
+    echo '<form method="post">';
+    echo '<ul class="checkbox-list">';
+    $options = array(
+
+        // Plugin Paket Standard installieren
+        'fxwp_install_plugin_package' => 'Plugin Paket Standard installieren',
+        // Faktor&times;WordPress Theme installieren
+        'fxwp_install_theme' => 'Faktor&times;WordPress Theme installieren',
+
+        // Startseite erstellen
+        'fxwp_create_homepage' => 'Startseite erstellen',
+        // Top und Footer Menüs erstellen
+        'fxwp_create_menus' => 'Top und Footer Menüs erstellen',
+        // Datenschutzerklärung erstellen
+        'fxwp_create_privacy_policy' => 'Datenschutzerklärung erstellen',
+        // Impressum erstellen
+        'fxwp_create_imprint' => 'Impressum erstellen',
+        // Cookie Hinweis einrichten
+        'fxwp_create_cookie_notice' => 'Cookie Hinweis erstellen',
+        // Kontaktseite mit Formular erstellen
+        'fxwp_create_contact_page' => 'Kontaktseite mit Formular erstellen (Contact Form 7)',
+        // AGB und Shop-Seite erstellen
+        'fxwp_create_shop_pages' => 'AGB und Shop-Seite erstellen',
+    );
+    foreach ($options as $option => $label) {
+        echo "<li><input checked value='true' type='checkbox' name='{$option}' id='{$option}'/><label for='{$option}'>{$label}</label></li>";
+    }
+    echo '</ul>';
+    // have a form with post that sets POST fxwp_install_theme to true
+    echo '<input type="hidden" name="fxwp_site_setup" value="true"/>';
+    echo '<input type="submit" value="Seite einrichten" class="button button-primary button-large"/>';
+    echo '</form>';
+    echo '</div>';
 
     echo '</div>';
 
+    ?>
+    <script>
+        var checkbox = document.getElementById('togBtn');
+        var advancedOptions = document.querySelectorAll('.advanced-options');
+
+        checkbox.addEventListener('change', function () {
+            for (var i = 0; i < advancedOptions.length; i++) {
+                advancedOptions[i].style.display = this.checked ? "block" : "none";
+            }
+        });
+    </script>
+    <?php
     // Überprüfen, ob die Plugins konfiguriert werden sollen
     if (isset($_POST['configure_plugins'])) {
         $selected_collection = $_POST['plugin_collection'];
