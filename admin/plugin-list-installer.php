@@ -65,6 +65,7 @@ function fxwp_plugin_list_installer_page()
         echo "</div>";
     }
 
+    echo '<h1 style="margin-top:25px">Theme-Installer</h1>';
     echo '<div class="collection-box">';
     echo '<h2>Benutzerdefinierte Themes</h2>';
     echo '<ul class="plugin-list"><li>

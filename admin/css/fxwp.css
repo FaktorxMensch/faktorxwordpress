@@ -119,7 +119,8 @@ p.error-message {
 .plugin-list > li img {
     width: 80px;
     height: 80px;
-    border-radius: 11px;
+    border-radius: 9px;
+    background: #DEE2E6;
 }
 
 .plugin-list > li p {

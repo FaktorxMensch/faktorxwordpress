@@ -7,6 +7,13 @@
 function fxwp_install_theme()
 {
 
+    // initialize WP_Filesystem
+    if (!function_exists('WP_Filesystem')) {
+        require_once ABSPATH . '/wp-admin/includes/file.php';
+    }
+
+    WP_Filesystem();
+
     $url = FXWP_THEME_REPO_URI;
 
     // Define the path where the theme will be unpacked.
@@ -27,6 +34,7 @@ function fxwp_install_theme()
 
     // Unpack the downloaded package file.
     $result = unzip_file($temp_file, $theme_dir);
+
     // Return success.
     if (is_wp_error($result)) {
         // Handle any errors.
@@ -38,7 +46,7 @@ function fxwp_install_theme()
         // Delete the temporary file.
         @unlink($temp_file);
 
-        $theme_dir_name = 'faktorxwordpress-theme';
+        $theme_dir_name = 'faktorxwordpress-theme-main';
 
         // activate the theme
         switch_theme($theme_dir_name);
