@@ -19,18 +19,6 @@ function fxwp_settings_page()
             do_settings_sections('fxwp_settings_group');
             ?>
             <table class="form-table">
-
-                <th scope="row"><?php echo esc_html__('Aktuelles Favicon', 'fxwp'); ?></th>
-                <td>
-                    <?php
-                    $favicon_id = get_option('fxwp_favicon');
-                    if ($favicon_id) {
-                        $favicon_url = wp_get_attachment_url($favicon_id);
-                        echo '<img src="' . esc_url($favicon_url) . '" alt="Favicon" width="22" height="22">';
-                    }
-                    ?>
-                </td>
-
                 <tr>
                     <th scope="row"><?php echo esc_html__('Favicon auswählen', 'fxwp'); ?></th>
                     <td>
@@ -44,6 +32,7 @@ function fxwp_settings_page()
                                 'post_status' => 'inherit',
                                 'posts_per_page' => -1,
                             );
+                            $favicon_id = get_option('fxwp_favicon');
                             $attachments = get_posts($args);
                             foreach ($attachments as $attachment) {
                                 // post title or filename lowercase should contain 'favicon' or 'ico' or 'logo'
@@ -60,6 +49,17 @@ function fxwp_settings_page()
                             ?>
                         </select>
                     </td>
+                    <td>
+                        <?php
+                        $favicon_id = get_option('fxwp_favicon');
+                        if ($favicon_id) {
+                            $favicon_url = wp_get_attachment_url($favicon_id);
+                            echo '<img src="' . esc_url($favicon_url) . '" alt="Favicon" width="22" height="22">';
+                        }
+                        ?>
+                    </td>
+
+
                 </tr>
 
                 <tr>
@@ -92,6 +92,16 @@ function fxwp_settings_page()
                             ?>
                         </select>
                     </td>
+                    <td>
+                        <?php
+                        if ($logo_id) {
+                            $logo_url = wp_get_attachment_url($logo_id);
+                            echo '<img src="' . esc_url($logo_url) . '" alt="Favicon" width="22" height="22">';
+                        }
+                        ?>
+                    </td>
+
+
                 </tr>
                 <tr>
                     <th scope="row"><?php echo esc_html__('404 Seite auswählen', 'fxwp'); ?></th>
