@@ -70,6 +70,29 @@ function fxwp_install_collection($collection)
 
 function fxwp_plugin_list_installer_page()
 {
+    $site_setup_options = array(
+
+        // Faktor&times;WordPress Theme installieren
+        'fxwp_install_theme' => 'Faktor&times;WordPress Theme installieren',
+        // Plugin Paket Standard installieren
+        'fxwp_install_first_collection' => 'Plugin Paket Standard installieren',
+
+        // Startseite erstellen
+        'fxwp_create_homepage' => 'Startseite erstellen',
+        // Datenschutzerklärung erstellen
+        'fxwp_create_privacy_policy' => 'Datenschutzerklärung erstellen',
+        // Impressum erstellen
+        'fxwp_create_imprint' => 'Impressum erstellen',
+        // Cookie Hinweis einrichten
+        'fxwp_create_cookie_notice' => 'Cookie Hinweis erstellen',
+        // Kontaktseite mit Formular erstellen
+        'fxwp_create_contact_page' => 'Kontaktseite mit Formular erstellen (Contact Form 7)',
+        // AGB und Shop-Seite erstellen
+        'fxwp_create_shop_pages' => 'AGB und Shop-Seite erstellen',
+        // Top und Footer Menüs erstellen
+        'fxwp_create_menus' => 'Top und Footer Menüs erstellen',
+    );
+
     // Definieren Sie Ihre Plugin-Sammlungen
     $plugin_collections = array(
         'Arbeiten mit Beiträgen' => array(
@@ -170,29 +193,7 @@ function fxwp_plugin_list_installer_page()
     echo '<h2>Einrichtung</h2>';
     echo '<form method="post">';
     echo '<ul class="checkbox-list">';
-    $options = array(
-
-        // Plugin Paket Standard installieren
-        'fxwp_install_plugin_package' => 'Plugin Paket Standard installieren',
-        // Faktor&times;WordPress Theme installieren
-        'fxwp_install_theme' => 'Faktor&times;WordPress Theme installieren',
-
-        // Startseite erstellen
-        'fxwp_create_homepage' => 'Startseite erstellen',
-        // Top und Footer Menüs erstellen
-        'fxwp_create_menus' => 'Top und Footer Menüs erstellen',
-        // Datenschutzerklärung erstellen
-        'fxwp_create_privacy_policy' => 'Datenschutzerklärung erstellen',
-        // Impressum erstellen
-        'fxwp_create_imprint' => 'Impressum erstellen',
-        // Cookie Hinweis einrichten
-        'fxwp_create_cookie_notice' => 'Cookie Hinweis erstellen',
-        // Kontaktseite mit Formular erstellen
-        'fxwp_create_contact_page' => 'Kontaktseite mit Formular erstellen (Contact Form 7)',
-        // AGB und Shop-Seite erstellen
-        'fxwp_create_shop_pages' => 'AGB und Shop-Seite erstellen',
-    );
-    foreach ($options as $option => $label) {
+    foreach ($site_setup_options as $option => $label) {
         echo "<li><input checked value='true' type='checkbox' name='{$option}' id='{$option}'/><label for='{$option}'>{$label}</label></li>";
     }
     echo '</ul>';
@@ -217,8 +218,179 @@ function fxwp_plugin_list_installer_page()
     <?php
 
     if (isset($_POST['fxwp_site_setup'])) {
+        // go through all options and set them
+        foreach ($site_setup_options as $option => $label) {
+            if (isset($_POST[$option])) {
 
-        // TODO
+                switch ($option) {
+                    case 'fxwp_install_first_collection':
+                        fxwp_install_collection($plugin_collections[0]);
+                        break;
+                    case 'fxwp_install_theme':
+                        fxwp_install_theme();
+                        break;
+                    case 'fxwp_create_homepage':
+                        // have wordpress create a page with the title "Home" and the slug "home"
+                        $page = get_page_by_title('Home');
+                        if (!$page) {
+                            $page = wp_insert_post(
+                                array(
+                                    'post_title' => 'Home',
+                                    'post_type' => 'page',
+                                    'post_status' => 'publish',
+                                    'post_author' => 1,
+                                    'post_slug' => 'home',
+                                    'post_content' => 'Dies ist die Homepage',
+                                )
+                            );
+                        }
+
+                        // set it as the homepage
+                        update_option('show_on_front', 'page');
+                        update_option('page_on_front', $page->ID);
+
+                        break;
+
+                    case 'fxwp_create_menus':
+                        // create a menu with the name "Hauptmenü" in location  in locaiton header-menu
+                        $menu_name = 'Hauptmenü';
+                        $menu_exists = wp_get_nav_menu_object($menu_name);
+                        $theme_location = 'header-menu';
+                        if (!$menu_exists) {
+                            $menu_id = wp_create_nav_menu($menu_name);
+                            $locations = get_theme_mod('nav_menu_locations');
+                            $locations[$theme_location] = $menu_id;
+                            set_theme_mod('nav_menu_locations', $locations);
+                        }
+                        // add the home page to the menu
+                        $page = get_page_by_title('Home');
+                        wp_update_nav_menu_item($menu_id, 0, array(
+                            'menu-item-title' => __('Home'),
+                            'menu-item-classes' => 'home',
+                            'menu-item-url' => home_url('/'),
+                            'menu-item-status' => 'publish'));
+                        // add the kontakt page to the menu
+                        $page = get_page_by_title('Kontakt');
+                        wp_update_nav_menu_item($menu_id, 0, array(
+                            'menu-item-title' => __('Kontakt'),
+                            'menu-item-classes' => 'kontakt',
+                            'menu-item-url' => home_url('/kontakt'),
+                            'menu-item-status' => 'publish'));
+                        // create a menu with the name "Footer" in location  in locaiton footer-menu
+                        $menu_name = 'Footer';
+                        $menu_exists = wp_get_nav_menu_object($menu_name);
+                        $theme_location = 'footer-menu';
+                        if (!$menu_exists) {
+                            $menu_id = wp_create_nav_menu($menu_name);
+                            $locations = get_theme_mod('nav_menu_locations');
+                            $locations[$theme_location] = $menu_id;
+                            set_theme_mod('nav_menu_locations', $locations);
+                        }
+                        // add the pages agb, impressum, datenschutz / datenschutzerklärung to the menu
+                        foreach (array('AGB', 'Impressum', 'Datenschutz', 'Datenschutzerklärung') as $page_title) {
+                            $page = get_page_by_title($page_title);
+                            if ($page)
+                                wp_update_nav_menu_item($menu_id, 0, array(
+                                    'menu-item-title' => __($page_title),
+                                    'menu-item-classes' => strtolower($page_title),
+                                    'menu-item-url' => home_url('/' . strtolower($page_title)),
+                                    'menu-item-status' => 'publish'));
+                        }
+
+                        break;
+                    case 'fxwp_create_privacy_policy':
+                        // create a page with the title "Datenschutzerklärung" and the slug "datenschutzerklaerung"
+                        $page = get_page_by_title('Datenschutzerklärung');
+                        if (!$page) {
+                            $page = wp_insert_post(
+                                array(
+                                    'post_title' => 'Datenschutzerklärung',
+                                    'post_type' => 'page',
+                                    'post_status' => 'publish',
+                                    'post_author' => 1,
+                                    'post_content' => 'Bitte ersetzen Sie diesen Text mit Ihrer Datenschutzerklärung',
+                                    'post_slug' => 'datenschutzerklaerung'
+                                )
+                            );
+                            // set a please change me text as content
+                        }
+                        // set it as the privacy policy page
+                        update_option('wp_page_for_privacy_policy', $page->ID);
+                        break;
+                    case 'fxwp_create_imprint':
+                        // create a page with the title "Impressum" and the slug "impressum"
+                        $page = get_page_by_title('Impressum');
+                        if (!$page) {
+                            $page = wp_insert_post(
+                                array(
+                                    'post_title' => 'Impressum',
+                                    'post_type' => 'page',
+                                    'post_status' => 'publish',
+                                    'post_author' => 1,
+                                    'post_content' => 'Bitte ersetzen Sie diesen Text mit Ihrem Impressum',
+                                    'post_slug' => 'impressum'
+                                )
+                            );
+                            // set a please change me text as content
+                        }
+                        break;
+                    case 'fxwp_create_cookie_notice':
+                        // install the cookie notice plugin
+                        fxwp_install_plugin('cookie-notice');
+                        // activate the cookie notice plugin
+                        activate_plugin('cookie-notice/cookie-notice.php');
+                        // set the cookie notice settings
+                        // TODO set the cookie notice settings
+                        break;
+                    case 'fxwp_create_contact_page':
+
+                        // install the contact form 7 plugin
+                        fxwp_install_plugin('contact-form-7');
+                        // activate the contact form 7 plugin
+                        activate_plugin('contact-form-7/wp-contact-form-7.php');
+                        // create a contact form with the title "Kontaktformular"
+                        $contact_form = get_page_by_title('Kontaktformular');
+                        if (!$contact_form) {
+                            $contact_form = wp_insert_post(
+                                array(
+                                    'post_title' => 'Kontaktformular',
+                                    'post_type' => 'wpcf7_contact_form',
+                                    'post_status' => 'publish',
+                                    'post_author' => 1,
+                                    'post_content' => '[text* name placeholder "Name*"]
+                                        [text* email placeholder "E-Mail*"]
+                                        [text* subject placeholder "Betreff*"]
+                                        [textarea* message placeholder "Nachricht*"]
+                                        [submit "Senden"]'
+                                )
+                            );
+                        }
+                        // create a page with the title "Kontakt" and the slug "kontakt"
+                        $page = get_page_by_title('Kontakt');
+                        if (!$page) {
+                            $page = wp_insert_post(
+                                array(
+                                    'post_title' => 'Kontakt',
+                                    'post_type' => 'page',
+                                    'post_status' => 'publish',
+                                    'post_author' => 1,
+                                    'post_content' => '<h1>Kontakt</h1>[contact-form-7 id="' . $contact_form . '" title="Kontaktformular"]', 'post_slug' => 'kontakt'
+                                )
+                            );
+                        }
+                        break;
+                    case 'fxwp_create_shop_pages':
+                        // install woo commerce
+                        fxwp_install_plugin('woocommerce');
+                        // activate woo commerce
+                        activate_plugin('woocommerce/woocommerce.php');
+                        break;
+                    default:
+                        echo "Option {$option} not implemented yet";
+                        break;
+                }
+            }
+        }
     }
 
     // Überprüfen, ob die Plugins konfiguriert werden sollen
