@@ -1,4 +1,73 @@
 <?php
+function fxwp_configure_collection($collection)
+{
+    foreach ($collection as $plugin_data) {
+        $plugin = $plugin_data['name'];
+        // Aktualisieren der Plugin-Optionen
+        foreach ($plugin_data['options'] as $option => $value) {
+            update_option($option, $value);
+        }
+        echo "<p>{$plugin} erfolgreich konfiguriert.</p>";
+    }
+}
+
+
+function fxwp_install_collection($collection)
+{
+
+    // Installieren und aktivieren Sie die Plugins in der ausgewählten Sammlung
+    foreach ($collection as $plugin_data) {
+        $plugin = $plugin_data['name'];
+        $plugin_source = "https://downloads.wordpress.org/plugin/{$plugin}.zip";
+
+        // Notwendige WordPress-Dateien einbeziehen
+        require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+        $upgrader = new Plugin_Upgrader();
+        $installed = $upgrader->install($plugin_source);
+
+        if (!is_wp_error($installed) && $installed) {
+
+            $result = null;
+            $plugin_files = glob('/path/to/your/plugins/*.php');
+            foreach ($plugin_files as $plugin_file) {
+                $plugin_data = get_plugin_data($plugin_file);
+
+                if (!empty($plugin_data['Name'])) {
+                    // Use any unique part of the plugin path.
+                    // 'plugin-name/plugin-name.php' for example.
+                    $plugin_slug = plugin_basename($plugin_file);
+                    $result = activate_plugin($plugin_slug);
+                }
+            }
+
+            if (is_null($result)) {
+
+                $update_options_count = 0;
+                // Aktualisieren der Plugin-Optionen
+                foreach ($plugin_data['options'] as $option => $value) {
+                    update_option($option, $value);
+                    $update_options_count++;
+                }
+
+                echo "<p>" . esc_html($plugin_data['Name']) . " erfolgreich installiert und aktiviert. Es wurden {$update_options_count} Optionen aktualisiert.</p>";
+
+
+            } else {
+                echo "<p>Aktivierung von {$plugin} fehlgeschlagen.</p>";
+                echo '<meta http-equiv="refresh" content="1;url=' . admin_url('plugins.php') . '">';
+            }
+        } else {
+            echo "<p>Installation von {$plugin} fehlgeschlagen.</p>";
+        }
+    }
+
+
+}
+
 function fxwp_plugin_list_installer_page()
 {
     // Definieren Sie Ihre Plugin-Sammlungen
@@ -139,7 +208,6 @@ function fxwp_plugin_list_installer_page()
     <script>
         var checkbox = document.getElementById('togBtn');
         var advancedOptions = document.querySelectorAll('.advanced-options');
-
         checkbox.addEventListener('change', function () {
             for (var i = 0; i < advancedOptions.length; i++) {
                 advancedOptions[i].style.display = this.checked ? "block" : "none";
@@ -147,76 +215,21 @@ function fxwp_plugin_list_installer_page()
         });
     </script>
     <?php
+
+    if (isset($_POST['fxwp_site_setup'])) {
+
+        // TODO
+    }
+
     // Überprüfen, ob die Plugins konfiguriert werden sollen
     if (isset($_POST['configure_plugins'])) {
-        $selected_collection = $_POST['plugin_collection'];
-
-        foreach ($plugin_collections[$selected_collection] as $plugin_data) {
-            $plugin = $plugin_data['name'];
-            // Aktualisieren der Plugin-Optionen
-            foreach ($plugin_data['options'] as $option => $value) {
-                update_option($option, $value);
-            }
-            echo "<p>{$plugin} erfolgreich konfiguriert.</p>";
-        }
+        fxwp_configure_collection($plugin_collections[$_POST['plugin_collection']]);
     } else if (isset($_POST['plugin_collection'])) {
-        $selected_collection = $_POST['plugin_collection'];
-
-        // Installieren und aktivieren Sie die Plugins in der ausgewählten Sammlung
-        foreach ($plugin_collections[$selected_collection] as $plugin_data) {
-            $plugin = $plugin_data['name'];
-            $plugin_source = "https://downloads.wordpress.org/plugin/{$plugin}.zip";
-
-            // Notwendige WordPress-Dateien einbeziehen
-            require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-            require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-            $upgrader = new Plugin_Upgrader();
-            $installed = $upgrader->install($plugin_source);
-
-            if (!is_wp_error($installed) && $installed) {
-
-                $result = null;
-                $plugin_files = glob('/path/to/your/plugins/*.php');
-                foreach ($plugin_files as $plugin_file) {
-                    $plugin_data = get_plugin_data($plugin_file);
-
-                    if (!empty($plugin_data['Name'])) {
-                        // Use any unique part of the plugin path.
-                        // 'plugin-name/plugin-name.php' for example.
-                        $plugin_slug = plugin_basename($plugin_file);
-                        $result = activate_plugin($plugin_slug);
-                    }
-                }
-
-                if (is_null($result)) {
-
-                    $update_options_count = 0;
-                    // Aktualisieren der Plugin-Optionen
-                    foreach ($plugin_data['options'] as $option => $value) {
-                        update_option($option, $value);
-                        $update_options_count++;
-                    }
-
-                    echo "<p>" . esc_html($plugin_data['Name']) . " erfolgreich installiert und aktiviert. Es wurden {$update_options_count} Optionen aktualisiert.</p>";
-
-
-                } else {
-                    echo "<p>Aktivierung von {$plugin} fehlgeschlagen.</p>";
-                    echo '<meta http-equiv="refresh" content="1;url=' . admin_url('plugins.php') . '">';
-                }
-            } else {
-                echo "<p>Installation von {$plugin} fehlgeschlagen.</p>";
-            }
-        }
-
+        fxwp_install_collection($plugin_collections[$_POST['plugin_collection']]);
     }
 
     // sometimes we wnat to install the fxwp theme
     if (isset($_POST['fxwp_install_theme'])) {
-        // check the nonce
         fxwp_install_theme();
     }
 
