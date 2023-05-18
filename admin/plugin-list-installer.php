@@ -384,6 +384,25 @@ function fxwp_plugin_list_installer_page()
                         fxwp_install_plugin('woocommerce');
                         // activate woo commerce
                         activate_plugin('woocommerce/woocommerce.php');
+                        // agb page
+                        $page = get_page_by_title('AGB');
+                        if (!$page) {
+                            $page = wp_insert_post(
+                                array(
+                                    'post_title' => 'AGB',
+                                    'post_type' => 'page',
+                                    'post_status' => 'publish',
+                                    'post_author' => 1,
+                                    'post_content' => 'Bitte ersetzen Sie diesen Text mit Ihren AGB',
+                                    'post_slug' => 'agb'
+                                )
+                            );
+                        }
+                        // set it as the terms and conditions page
+                        update_option('woocommerce_terms_page_id', $page->ID);
+                        // datenschutz page
+                        $page = get_page_by_title('Datenschutzerklärung');
+                        update_option('woocommerce_privacy_policy_page_id', $page->ID);
                         break;
                     default:
                         echo "Option {$option} not implemented yet";
