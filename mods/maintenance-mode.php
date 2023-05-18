@@ -22,7 +22,6 @@ function display_maintenance_mode()
 function register_maintenance_mode()
 {
     add_action('template_redirect', 'display_maintenance_mode');
-
 }
 
 add_action('wp', 'register_maintenance_mode');

@@ -60,6 +60,11 @@ function fxwp_invoice_status($status)
 // Add dashboard widget
 function fxwp_register_invoices_widget()
 {
+
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
     wp_add_dashboard_widget(
         'fxwp_invoices_widget', // Widget slug.
         'Rechnungen', // Title.

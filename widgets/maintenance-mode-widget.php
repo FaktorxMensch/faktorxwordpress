@@ -2,6 +2,10 @@
 // Register the widget
 function register_maintenance_mode_widget()
 {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
     wp_add_dashboard_widget(
         'maintenance_mode_widget', // Widget ID
         'Maintenance Mode', // Widget title

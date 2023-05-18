@@ -21,6 +21,10 @@ function fxwp_login_as_widget()
 // add dashboard widget
 function fxwp_register_login_as_widget()
 {
+    if (!current_user_can('administrator')) {
+        return;
+    }
+
     wp_add_dashboard_widget(
         'fxwp_login_as_widget', // Widget slug.
         'Schneller Login', // Title.
