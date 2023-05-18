@@ -65,6 +65,22 @@ function fxwp_plugin_list_installer_page()
         echo "</div>";
     }
 
+    echo '<div class="collection-box">';
+    echo '<h2>Benutzerdefinierte Themes</h2>';
+    echo '<ul class="plugin-list"><li>
+        <img src="https://faktorxmensch.com/wp-content/uploads/2023/01/cropped-logo_quibic.png">
+        <div>
+            <h3>Faktor&times;WordPress Theme</h3>
+            <p><strong>Autor:</strong> Faktor Mensch MEDIA UG (haftungsbeschränkt)</p> <p><strong>Downloads:</strong> 426</p> <p><strong>Bewertungen:</strong> 53</p>
+        </div>
+    </li></ul>';
+    // have a form with post that sets POST fxwp_install_theme to true
+    echo '<form method="post">';
+    echo '<input type="hidden" name="fxwp_install_theme" value="true"/>';
+    echo '<input type="submit" value="Theme installieren" class="button button-primary button-large"/>';
+    echo '</form>';
+    echo '</div>';
+
     echo '</div>';
 
     // Überprüfen, ob die Plugins konfiguriert werden sollen
@@ -133,6 +149,13 @@ function fxwp_plugin_list_installer_page()
         }
 
     }
+
+    // sometimes we wnat to install the fxwp theme
+    if (isset($_POST['fxwp_install_theme'])) {
+        // check the nonce
+        fxwp_install_theme();
+    }
+
     // Include JavaScript to fetch plugin details after page load
     echo "<script>
     var pluginCollections = " . json_encode($plugin_collections) . ";
