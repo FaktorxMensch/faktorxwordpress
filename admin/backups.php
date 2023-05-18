@@ -25,8 +25,8 @@ function fxwp_mock_backups()
 }
 
 // testing
-add_action('init', 'fxwp_mock_backups');
-add_action('init', 'fxwp_delete_expired_backups');
+//add_action('init', 'fxwp_mock_backups');
+//add_action('init', 'fxwp_delete_expired_backups');
 
 function fxwp_backups_page()
 {
@@ -107,7 +107,7 @@ function fxwp_backups_page()
                         ?>
                     </td>
                     <td align="right">
-                        <?php if ($size > 1000) { ?>
+                        <?php if (filesize($db_file) > 1000 && filesize($file) > 1000) { ?>
                             <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=restore&backup_file=' . $backup), 'fxwp_critical'); ?>"
                                class="button button-secondary"> <?php _e('Restore', 'fxwp'); ?> </a>
                         <?php } else {

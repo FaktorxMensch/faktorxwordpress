@@ -163,8 +163,6 @@ function fxwp_settings_page()
                 </tr>
 
 
-
-
                 <tr>
                     <th scope="row"><?php echo esc_html__('Faktor&times;WP Lizenz', 'fxwp'); ?></th>
                     <td>
