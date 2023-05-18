@@ -129,14 +129,6 @@ function fxwp_settings_page()
                     </td>
                 </tr>
 
-
-                <tr>
-                    <th scope="row"><?php echo esc_html__('API Schlüssel', 'fxwp'); ?></th>
-                    <td>
-                        <p><?php echo esc_html__('Bitte geben Sie Ihren API Schlüssel ein.', 'fxwp'); ?></p>
-                        <input type="text" name="fxwp_api_key" value="<?php echo esc_attr($api_key); ?>"/>
-                    </td>
-                </tr>
                 <tr>
                     <th scope="row">
                         <?php echo esc_html__('Google Fonts entfernen', 'fxwp'); ?>
@@ -171,6 +163,15 @@ function fxwp_settings_page()
                 </tr>
 
 
+
+
+                <tr>
+                    <th scope="row"><?php echo esc_html__('Faktor&times;WP Lizenz', 'fxwp'); ?></th>
+                    <td>
+                        <p><?php echo esc_html__('Bitte geben Sie Ihren Lizenz Schlüssel ein.', 'fxwp'); ?></p>
+                        <input type="text" name="fxwp_api_key" value="<?php echo esc_attr($api_key); ?>"/>
+                    </td>
+                </tr>
             </table>
             <?php submit_button(); ?>
         </form>
