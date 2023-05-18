@@ -11,11 +11,12 @@ function fxwp_render_view_option()
         }
         </style>';
     // ...
-    if (!get_option('fxwp_view_option', 'einfach') === 'erweitert' || current_user_can('erweiterte_ansicht')) {
+    if (get_option('fxwp_view_option', 'einfach') !== 'erweitert' && !current_user_can('erweiterte_ansicht')) {
         // Code to display in Einfache Ansicht
         // Customers
         echo '<style>
         .hide_simple, .hide_advanced, #menu-plugins, #menu-users, .plugin-title .row-actions.visible, a[href$="plugin-install.php"], 
+        #menu-users,
         #menu-appearance a[href="themes.php"].wp-first-item, a[href$="theme-install.php"], #menu-tools
         {
             display:none !important;
