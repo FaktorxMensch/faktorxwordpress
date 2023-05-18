@@ -143,6 +143,24 @@ function fxwp_settings_page()
 
                     </td>
                 </tr>
+
+                <tr>
+                    <th scope="row"><?php echo esc_html__('Ansichtsoptionen', 'fxwp'); ?></th>
+                    <td>
+                        <p><?php echo esc_html__('Wählen Sie die gewünschte Ansichtsoption aus:', 'fxwp'); ?></p>
+                        <label>
+                            <input type="radio" name="fxwp_view_option" value="einfach" <?php checked(get_option('fxwp_view_option', 'einfach'), 'einfach'); ?>>
+                            <?php echo esc_html__('Einfache Ansicht', 'fxwp'); ?>
+                        </label>
+                        <br>
+                        <label>
+                            <input type="radio" name="fxwp_view_option" value="erweitert" <?php checked(get_option('fxwp_view_option'), 'erweitert'); ?>>
+                            <?php echo esc_html__('Erweiterte Ansicht', 'fxwp'); ?>
+                        </label>
+                    </td>
+                </tr>
+
+
             </table>
             <?php submit_button(); ?>
         </form>
@@ -167,6 +185,7 @@ function fxwp_register_settings()
     register_setting('fxwp_settings_group', 'fxwp_logo');
     register_setting('fxwp_settings_group', 'fxwp_google_fonts_remove');
     register_setting('fxwp_settings_group', 'fxwp_404_page');
+    register_setting('fxwp_settings_group', 'fxwp_view_option');
 
 }
 
