@@ -353,8 +353,15 @@ function fxwp_plugin_list_installer_page()
                         fxwp_install_plugin('cookie-notice');
                         // activate the cookie notice plugin
                         activate_plugin('cookie-notice/cookie-notice.php');
-                        // set the cookie notice settings
-                        // TODO set the cookie notice settings
+
+                        // Set the cookie notice settings
+                        update_option('cookie_notice_position', 'bottom');
+                        update_option('cookie_notice_accept_text', 'Akzeptieren');
+                        update_option('cookie_notice_learnmore_text', 'Mehr erfahren');
+                        // Update other options as needed
+
+                        echo "<p>Cookie notice successfully installed and configured.</p>";
+
                         break;
                     case 'fxwp_create_contact_page':
 
