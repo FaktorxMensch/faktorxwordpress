@@ -70,7 +70,7 @@ function fxwp_delete_old_email_logs()
 //    return $schedules;
 //}
 
-function fxwp_schedule_cron()
+function fxwp_schedule_email_cron()
 {
     if (!wp_next_scheduled('fxwp_delete_old_email_logs')) {
         wp_schedule_event(time(), 'daily', 'fxwp_delete_old_email_logs');
@@ -78,4 +78,4 @@ function fxwp_schedule_cron()
 }
 
 //  schedule cron
-add_filter('cron_schedules', 'fxwp_add_cron_interval');
+add_filter('cron_schedules', 'fxwp_schedule_email_cron');
