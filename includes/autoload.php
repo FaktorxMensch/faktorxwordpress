@@ -11,7 +11,7 @@ require_once plugin_dir_path(__FILE__) . 'helpers.php';
 function fxwp_include_all_php($directory)
 {
     // should load and plan all files that start with /cron , /widgets, or /admin files and are php
-    $files = glob($directory . '/{admin,cron,widgets,mods}/*.php', GLOB_BRACE);
+    $files = glob($directory . '/{admin/sites,cron,widgets,mods}/*.php', GLOB_BRACE);
     foreach ($files as $file) {
         require_once $file;
     }
