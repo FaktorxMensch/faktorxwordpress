@@ -16,9 +16,12 @@ function fxwp_display_email_logs()
         $message = 'Dies ist eine Test E-Mail von ' . get_bloginfo('name') . '.';
         $headers = array('Content-Type: text/html; charset=UTF-8');
 
-        wp_mail($to, $subject, $message, $headers);
+        $mail = wp_mail($to, $subject, $message, $headers);
 
-        echo '<div class="notice notice-success"><p>' . esc_html('Die Test E-Mail wurde erfolgreich gesendet.') . '</p></div>';
+        if (!$mail) {
+            echo '<div class="notice notice-error"><p>' . esc_html('Die Test E-Mail konnte nicht gesendet werden.') . '</p></div>';
+        } else
+            echo '<div class="notice notice-success"><p>' . esc_html('Die Test E-Mail wurde erfolgreich gesendet.') . '</p></div>';
     }
 
     $email_logs = $wpdb->get_results("SELECT * FROM $table_name ORDER BY timestamp DESC LIMIT 50");
