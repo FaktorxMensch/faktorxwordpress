@@ -95,6 +95,12 @@ function fxwp_plugin_list_installer_page()
 
     // Definieren Sie Ihre Plugin-Sammlungen
     $plugin_collections = array(
+        'Standard' => array(
+            array(
+                'name' => 'post-types-order',
+                'options' => array(),
+            ),
+        ),
         'Arbeiten mit Beiträgen' => array(
             array(
                 'name' => 'pods',

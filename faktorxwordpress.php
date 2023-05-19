@@ -60,6 +60,7 @@ function fxwp_activation()
         update_option('fxwp_api_key', '');
     }
 
+    fxwp_create_email_log_table();
 }
 
 
@@ -114,6 +115,16 @@ function fxwp_plugin_menu()
         'edit_posts', // Capability
         'fxwp-seo-check', // Menu slug
         'fxwp_seo_check_page' // Function
+    );
+
+    // email log
+    add_submenu_page(
+        'fxwp', // Parent slug
+        'Email Log', // Page title
+        'Email Log', // Menu title
+        'administrator', // Capability
+        'fxwp-email-log', // Menu slug
+        'fxwp_display_email_logs' // Function
     );
 
     // image optimizer
@@ -192,3 +203,5 @@ function fxwp_register_styles()
     wp_register_style('fxwp', plugin_dir_url(__FILE__) . 'admin/css/fxwp.css', array(), '1.0.0', 'all');
     wp_enqueue_style('fxwp');
 }
+
+
