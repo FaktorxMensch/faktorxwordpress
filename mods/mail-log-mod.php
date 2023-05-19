@@ -77,5 +77,5 @@ function fxwp_schedule_cron()
     }
 }
 
+//  schedule cron
 add_filter('cron_schedules', 'fxwp_add_cron_interval');
-
