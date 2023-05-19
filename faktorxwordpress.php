@@ -89,15 +89,15 @@ function fxwp_plugin_menu()
     );
 
 
-    // Custom Fields
-    add_submenu_page(
-        'fxwp', // Parent slug
-        'Custom Fields', // Page title
-        'Custom Fields', // Menu title
-        'manage_options', // Capability
-        'fxwp-custom-fields', // Menu slug
-        'fxwp_custom_fields_page' // Function
-    );
+//    // Custom Fields
+//    add_submenu_page(
+//        'fxwp', // Parent slug
+//        'Custom Fields', // Page title
+//        'Custom Fields', // Menu title
+//        'manage_options', // Capability
+//        'fxwp-custom-fields', // Menu slug
+//        'fxwp_custom_fields_page' // Function
+//    );
 
     // upadtes
     add_submenu_page(
