@@ -12,57 +12,65 @@ function fxwp_configure_collection($collection)
 }
 
 
+function fxwp_install_plugin($plugin)
+{
+
+    $plugin_source = "https://downloads.wordpress.org/plugin/{$plugin}.zip";
+
+    // Notwendige WordPress-Dateien einbeziehen
+    require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+    require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+    require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+    $upgrader = new Plugin_Upgrader();
+    $installed = $upgrader->install($plugin_source);
+
+    if (!is_wp_error($installed) && $installed) {
+
+        $result = null;
+        $plugin_files = glob(WP_PLUGIN_DIR . '/' . $plugin . '/*.php');
+        foreach ($plugin_files as $plugin_file) {
+            $plugin_data = get_plugin_data($plugin_file);
+
+            if (!empty($plugin_data['Name'])) {
+                // Use any unique part of the plugin path.
+                // 'plugin-name/plugin-name.php' for example.
+                $plugin_slug = plugin_basename($plugin_file);
+                $result = activate_plugin($plugin_slug);
+            }
+        }
+
+        if (is_null($result)) {
+
+            $update_options_count = 0;
+            // Aktualisieren der Plugin-Optionen
+            foreach ($plugin_data['options'] as $option => $value) {
+                update_option($option, $value);
+                $update_options_count++;
+            }
+
+            echo "<p>" . esc_html($plugin_data['Name']) . " erfolgreich installiert und aktiviert. Es wurden {$update_options_count} Optionen aktualisiert.</p>";
+
+
+        } else {
+            echo "<p>Aktivierung von {$plugin} fehlgeschlagen.</p>";
+            echo '<meta http-equiv="refresh" content="1;url=' . admin_url('plugins.php') . '">';
+        }
+    } else {
+        echo "<p>Installation von {$plugin} fehlgeschlagen.</p>";
+    }
+}
+
+
 function fxwp_install_collection($collection)
 {
 
     // Installieren und aktivieren Sie die Plugins in der ausgewählten Sammlung
     foreach ($collection as $plugin_data) {
         $plugin = $plugin_data['name'];
-        $plugin_source = "https://downloads.wordpress.org/plugin/{$plugin}.zip";
 
-        // Notwendige WordPress-Dateien einbeziehen
-        require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-        require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-        require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-        $upgrader = new Plugin_Upgrader();
-        $installed = $upgrader->install($plugin_source);
-
-        if (!is_wp_error($installed) && $installed) {
-
-            $result = null;
-            $plugin_files = glob('/path/to/your/plugins/*.php');
-            foreach ($plugin_files as $plugin_file) {
-                $plugin_data = get_plugin_data($plugin_file);
-
-                if (!empty($plugin_data['Name'])) {
-                    // Use any unique part of the plugin path.
-                    // 'plugin-name/plugin-name.php' for example.
-                    $plugin_slug = plugin_basename($plugin_file);
-                    $result = activate_plugin($plugin_slug);
-                }
-            }
-
-            if (is_null($result)) {
-
-                $update_options_count = 0;
-                // Aktualisieren der Plugin-Optionen
-                foreach ($plugin_data['options'] as $option => $value) {
-                    update_option($option, $value);
-                    $update_options_count++;
-                }
-
-                echo "<p>" . esc_html($plugin_data['Name']) . " erfolgreich installiert und aktiviert. Es wurden {$update_options_count} Optionen aktualisiert.</p>";
-
-
-            } else {
-                echo "<p>Aktivierung von {$plugin} fehlgeschlagen.</p>";
-                echo '<meta http-equiv="refresh" content="1;url=' . admin_url('plugins.php') . '">';
-            }
-        } else {
-            echo "<p>Installation von {$plugin} fehlgeschlagen.</p>";
-        }
+        fxwp_install_plugin($plugin);
     }
 
 
