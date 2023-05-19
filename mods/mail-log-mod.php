@@ -51,31 +51,3 @@ function fxwp_create_email_log_table()
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 }
-
-// have a corn that deletes email logs older than 30 days
-function fxwp_delete_old_email_logs()
-{
-    global $wpdb;
-    $table_name = $wpdb->prefix . "email_logs";
-    $wpdb->query("DELETE FROM $table_name WHERE timestamp < DATE_SUB(NOW(), INTERVAL 30 DAY)");
-}
-
-// add cron
-//function fxwp_add_cron_interval($schedules)
-//{
-//    $schedules['fxwp_30_days'] = array(
-//        'interval' => 30 * 24 * 60 * 60,
-//        'display' => esc_html__('Once every 30 days'),
-//    );
-//    return $schedules;
-//}
-
-function fxwp_schedule_email_cron()
-{
-    if (!wp_next_scheduled('fxwp_delete_old_email_logs')) {
-        wp_schedule_event(time(), 'daily', 'fxwp_delete_old_email_logs');
-    }
-}
-
-//  schedule cron
-add_filter('cron_schedules', 'fxwp_schedule_email_cron');
