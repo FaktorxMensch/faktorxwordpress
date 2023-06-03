@@ -7,6 +7,13 @@ function fxwp_settings_page()
         fxwp_self_update();
     }
 
+    // check if we want fxwp_api_key_renew
+    if (isset($_GET['fxwp_api_key_renew']) && $_GET['fxwp_api_key_renew'] == 'true') {
+        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Ihr API-Schlüssel wurde erfolgreich erneuert.', 'fxwp') . '</p></div>';
+        fxwp_deactivation();
+        fxwp_activation();
+    }
+
     // Check if the plugin is activated
     $api_key = get_option('fxwp_api_key');
     $google_fonts_remove = get_option('fxwp_google_fonts_remove');
@@ -167,7 +174,15 @@ function fxwp_settings_page()
                     <th scope="row"><?php echo esc_html__('Faktor&times;WP Lizenz', 'fxwp'); ?></th>
                     <td>
                         <p><?php echo esc_html__('Bitte geben Sie Ihren Lizenz Schlüssel ein.', 'fxwp'); ?></p>
+                        <div class="flex">
                         <input type="text" name="fxwp_api_key" value="<?php echo esc_attr($api_key); ?>"/>
+                            <!-- have a new activation button -->
+                            <?php if ($api_key) { ?>
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=fxwp-settings&fxwp_api_key_renew=true')); ?>"
+                                   onclick="alert('<?php echo esc_js(__('Bitte jetzt Verknüfungsmodus in P2 aktivieren und dann weiter!', 'fxwp')); ?>'); return false;"
+                                   class="button button-secondary"><?php echo esc_html__('Lizenz erneuern', 'fxwp'); ?></a>
+                            <?php } ?>
+                        </div>
                     </td>
                 </tr>
             </table>
