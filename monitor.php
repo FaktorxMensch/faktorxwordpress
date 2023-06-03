@@ -8,9 +8,15 @@
 // load wordpress
 require_once(dirname(__FILE__) . '/../../../wp-load.php');
 
-$_POST['api_key'] = get_option('fxwp_api_key');
+//$_POST['api_key'] = get_option('fxwp_api_key');
+if (!isset($_POST['api_key'])) {
+    $postdata = file_get_contents("php://input");
+    $request = json_decode($postdata);
+    $_POST['api_key'] = $request->api_key;
+    $_POST['invoices'] = $request->invoices;
+}
 if (!isset($_POST['api_key']) || $_POST['api_key'] != get_option('fxwp_api_key')) {
-    wp_die('Security check fail');
+    wp_die('Security check failed');
 }
 
 // store invoices in option
@@ -67,6 +73,7 @@ echo json_encode([
     'users' => $users,
     'wp_version' => $wp_version,
     'auto_updates' => $auto_updates,
-    'healthcheck' => $healthcheck
+    'healthcheck' => $healthcheck,
+    'invoices_count' => count($_POST['invoices']),
 ]);
 

@@ -2,21 +2,7 @@
 
 function fxwp_invoices_widget()
 {
-    $invoices = get_option('fxwp_invoices', array());
-//    $invoices = [
-//        0 => [
-//            'number' => '123',
-//            'url' => 'https://p2.faktorxmensch.com/api/fxwp/invoices/123',
-//            'created_at' => '2020-01-01',
-//            'status' => 'paid',
-//        ],
-//        1 => [
-//            'number' => '456',
-//            'url' => 'https://p2.faktorxmensch.com/api/fxwp/invoices/456',
-//            'created_at' => '2020-01-02',
-//            'status' => 'paid',
-//        ],
-//    ];
+    $invoices = get_option('fxwp_invoices', []);
 
     if (empty($invoices)) {
         echo '<p>' . esc_html__('Keine Rechnungen gefunden.', 'fxwp') . '</p>';
@@ -33,13 +19,12 @@ function fxwp_invoices_widget()
     echo '<tbody>';
     foreach ($invoices as $invoice) {
         echo '<tr>';
-        echo '<td><a href="' . esc_url($invoice['url']) . '" target="_blank">' . esc_html($invoice['number']) . '</a></td>';
-        echo '<td>' . date('d.m.Y', strtotime($invoice['created_at'])) . '</td>';
-        echo '<td>' . fxwp_invoice_status($invoice['status']) . '</td>';
+        echo '<td><a href="' . esc_url($invoice->url) . '" target="_blank">' . esc_html($invoice->number) . '</a></td>';
+        echo '<td>' . date('d.m.Y', strtotime($invoice->created_at)) . '</td>';
+        echo '<td>' . fxwp_invoice_status($invoice->status) . '</td>';
         echo '</tr>';
     }
     echo '</tbody>';
-
     echo '</table>';
 }
 
