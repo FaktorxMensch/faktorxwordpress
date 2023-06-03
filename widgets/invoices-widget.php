@@ -27,7 +27,6 @@ function fxwp_invoices_widget()
 
     echo '<tbody>';
     foreach ($invoices_to_display as $invoice) {
-
         echo '<tr>';
         echo '<td><a href="' . esc_url($invoice->url) . '" target="_blank">' . esc_html($invoice->number) . '</a></td>';
         echo '<td>' . date('d.m.Y', strtotime($invoice->created_at)) . '</td>';
@@ -79,21 +78,21 @@ function fxwp_invoices_widget()
                 var paginationHTML = "";
 
                 if (currentPage > 1) {
-                    paginationHTML += "<a href=\'?invoice_page=" + (currentPage - 1) + "\'>&laquo; Previous</a><div>";
+                    paginationHTML += "<a href=\'?invoice_page=" + (currentPage - 1) + "\'>&laquo; Zurück</a><div>";
                 } else {
                     paginationHTML += "<div></div><div>";
                 }
 
-                for (var i = 1; i <= totalPages; i++) {
-                    if (i === currentPage) {
-                        paginationHTML += "<a class=\'current\'>" + i + "</a>";
-                    } else {
-                        paginationHTML += "<a href=\'?invoice_page=" + i + "\'>" + i + "</a>";
-                    }
-                }
-
+//                for (var i = 1; i <= totalPages; i++) {
+//                    if (i === currentPage) {
+//                        paginationHTML += "<a class=\'current\'>" + i + "</a>";
+//                    } else {
+//                        paginationHTML += "<a href=\'?invoice_page=" + i + "\'>" + i + "</a>";
+//                    }
+//                }
+//
                 if (currentPage < totalPages) {
-                    paginationHTML += "</div><a href=\'?invoice_page=" + (currentPage + 1) + "\'>Next &raquo;</a>";
+                    paginationHTML += "</div><a href=\'?invoice_page=" + (currentPage + 1) + "\'>Weiter &raquo;</a>";
                 } else {
                     paginationHTML += "</div><div></div>";
                 }
