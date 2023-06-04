@@ -68,7 +68,13 @@ function fxwp_activation()
 
 function fxwp_deactivation()
 {
+    $api_key = get_option('fxwp_api_key');
     // code to execute on plugin deactivation
+    $response = wp_remote_post(FXWP_API_URL . '/activate', array(
+        'body' => array(
+            'deactivate_api_key' => $api_key,
+        )
+    ));
     delete_option('fxwp_api_key');
 }
 
