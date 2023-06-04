@@ -158,12 +158,14 @@ function fxwp_settings_page()
                     <td>
                         <p><?php echo esc_html__('Wählen Sie die gewünschte Ansichtsoption aus:', 'fxwp'); ?></p>
                         <label>
-                            <input type="radio" name="fxwp_view_option" value="einfach" <?php checked(get_option('fxwp_view_option', 'einfach'), 'einfach'); ?>>
+                            <input type="radio" name="fxwp_view_option"
+                                   value="einfach" <?php checked(get_option('fxwp_view_option', 'einfach'), 'einfach'); ?>>
                             <?php echo esc_html__('Einfache Ansicht', 'fxwp'); ?>
                         </label>
                         <br>
                         <label>
-                            <input type="radio" name="fxwp_view_option" value="erweitert" <?php checked(get_option('fxwp_view_option'), 'erweitert'); ?>>
+                            <input type="radio" name="fxwp_view_option"
+                                   value="erweitert" <?php checked(get_option('fxwp_view_option'), 'erweitert'); ?>>
                             <?php echo esc_html__('Erweiterte Ansicht', 'fxwp'); ?>
                         </label>
                     </td>
@@ -175,7 +177,7 @@ function fxwp_settings_page()
                     <td>
                         <p><?php echo esc_html__('Bitte geben Sie Ihren Lizenz Schlüssel ein.', 'fxwp'); ?></p>
                         <div class="flex">
-                        <input type="text" name="fxwp_api_key" value="<?php echo esc_attr($api_key); ?>"/>
+                            <input type="text" name="fxwp_api_key" value="<?php echo esc_attr($api_key); ?>"/>
                             <!-- have a new activation button -->
                             <?php if ($api_key) { ?>
                                 <a href="<?php echo esc_url(admin_url('admin.php?page=fxwp-settings&fxwp_api_key_renew=true')); ?>"
@@ -183,6 +185,22 @@ function fxwp_settings_page()
                                    class="button button-secondary"><?php echo esc_html__('Lizenz erneuern', 'fxwp'); ?></a>
                             <?php } ?>
                         </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <!-- local env? -->
+                    <th scope="row"><?php echo esc_html__('Lokale Umgebung', 'fxwp'); ?></th>
+                    <td>
+                        <!-- use FXWP_LOCAL_ENV constant -->
+                        <p><?php
+                            if(defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV) {
+                                echo esc_html__('Sie befinden sich in einer lokalen Umgebung.', 'fxwp');
+                            } else {
+                                echo esc_html__('Sie befinden sich nicht in einer lokalen Umgebung.', 'fxwp');
+                            }
+                            ?>
+                        </p>
                     </td>
                 </tr>
             </table>

@@ -3,7 +3,21 @@ if (defined('FXWP_VERSION'))
     return;
 // Plugin functionality
 define('FXWP_VERSION', '0.2');
-define('FXWP_API_URL', 'https://p2.faktorxmensch.com/api/fxwp');
+
+// check if we are in a local environment
+if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '.local') !== false) {
+    define('FXWP_LOCAL_ENV', true);
+} else {
+    define('FXWP_LOCAL_ENV', false);
+}
+
+//
+if(FXWP_LOCAL_ENV) {
+    define('FXWP_API_URL', 'http://localhost:3000/api/fxwp');
+} else {
+    define('FXWP_API_URL', 'https://p2.faktorxmensch.com/api/fxwp');
+}
+//define('FXWP_API_URL', 'https://p2.faktorxmensch.com/api/fxwp');
 //define('FXWP_API_URL', 'http://localhost:3000/api/fxwp');
 
 // Server Settings
