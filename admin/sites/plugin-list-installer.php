@@ -368,7 +368,7 @@ function fxwp_plugin_list_installer_page()
                         break;
                     case 'fxwp_create_cookie_notice':
                         // install the cookie notice plugin
-                        fxwp_install_plugin('complianz-gdpr/complianz-gpdr.php');
+                        fxwp_install_plugin('complianz-gdpr'); //https://downloads.wordpress.org/plugin/complianz-gdpr.6.4.6.zip
                         // activate the cookie notice plugin
                         activate_plugin('complianz-gdpr/complianz-gpdr.php');
 
