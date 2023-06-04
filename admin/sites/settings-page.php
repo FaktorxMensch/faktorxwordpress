@@ -193,7 +193,7 @@ function fxwp_settings_page()
                     <td>
                         <!-- use FXWP_LOCAL_ENV constant -->
                         <p><?php
-                            if(defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV) {
+                            if (defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV) {
                                 echo esc_html__('Sie befinden sich in einer lokalen Umgebung.', 'fxwp');
                             } else {
                                 echo esc_html__('Sie befinden sich nicht in einer lokalen Umgebung.', 'fxwp');
@@ -202,6 +202,18 @@ function fxwp_settings_page()
                         </p>
                     </td>
                 </tr>
+
+                <!-- print get_option for fxwp_customer and fxwp_project -->
+                <tr>
+                    <th scope="row"><?php echo esc_html__('Kunde', 'fxwp'); ?></th>
+                    <td><p><?php print_r(get_option('fxwp_customer')); ?></p></td>
+                </tr>
+
+                <tr>
+                    <th scope="row"><?php echo esc_html__('Projekt', 'fxwp'); ?></th>
+                    <td><p><?php print_r(get_option('fxwp_project')); ?></p></td>
+                </tr>
+
             </table>
             <?php submit_button(); ?>
         </form>
