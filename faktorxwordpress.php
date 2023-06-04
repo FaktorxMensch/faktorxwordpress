@@ -55,6 +55,7 @@ function fxwp_activation()
     if (isset($response['success']) && $response['success'] === true) {
         // show info
         fxwp_enable_automatic_updates();
+        update_option('fxwp_customer', $response['customer']);
     } else {
         // show info
         update_option('fxwp_api_key', '');
