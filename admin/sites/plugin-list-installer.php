@@ -155,7 +155,12 @@ function fxwp_plugin_list_installer_page()
                 'options' => array(),
             )
         ),
-        // Fügen Sie nach Bedarf weitere Sammlungen hinzu
+        'Block site builder' => array(
+            array(
+                'name' => 'elementor',
+                'options' => array(),
+            )
+        )
     );
 
     echo '<div class="wrap">';
