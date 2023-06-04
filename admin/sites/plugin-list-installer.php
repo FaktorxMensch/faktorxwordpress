@@ -95,8 +95,10 @@ function fxwp_plugin_list_installer_page()
         'fxwp_create_cookie_notice' => 'Cookie Hinweis erstellen',
         // Kontaktseite mit Formular erstellen
         'fxwp_create_contact_page' => 'Kontaktseite mit Formular erstellen (Contact Form 7)',
-        // AGB und Shop-Seite erstellen
-        'fxwp_create_shop_pages' => 'AGB und Shop-Seite erstellen',
+        // Shop und AGB-Seite dazu erstellen
+        'fxwp_create_shop_pages' => 'Shop und AGB-Seite dazu erstellen',
+        // SEO Plugin installieren
+        'fxwp_install_seo_plugin' => 'SEO Plugin installieren',
         // Top und Footer Menüs erstellen
         'fxwp_create_menus' => 'Top und Footer Menüs erstellen',
     );
@@ -424,6 +426,12 @@ function fxwp_plugin_list_installer_page()
                         // datenschutz page
                         $page = get_page_by_title('Datenschutzerklärung');
                         update_option('woocommerce_privacy_policy_page_id', $page->ID);
+                        break;
+                    case 'fxwp_install_seo_plugin':
+                        // install the seo plugin
+                        fxwp_install_plugin('seo-by-rank-math');
+                        // activate the seo plugin
+                        activate_plugin('seo-by-rank-math/rank-math.php');
                         break;
                     default:
                         echo "Option {$option} not implemented yet";
