@@ -181,7 +181,6 @@ function fxwp_settings_page()
                             <!-- have a new activation button -->
                             <?php if ($api_key) { ?>
                                 <a href="<?php echo esc_url(admin_url('admin.php?page=fxwp-settings&fxwp_api_key_renew=true')); ?>"
-                                   onclick="alert('<?php echo esc_js(__('Bitte jetzt Verknüfungsmodus in P2 aktivieren und dann weiter!', 'fxwp')); ?>');"
                                    class="button button-secondary"><?php echo esc_html__('Lizenz erneuern', 'fxwp'); ?></a>
                             <?php } ?>
                         </div>
