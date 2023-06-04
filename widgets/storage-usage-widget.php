@@ -5,7 +5,7 @@ function fxwp_storage_usage_widget()
     $used_space = FXWP_STORAGE_LIMIT - $available_space;
     $percentage = round($used_space / $available_space * 100);
 
-    echo '<p>' . printf(esc_html__('Ihr verfügbarer Speicherplatz beträgt %1$s GB. Sie haben %2$s GB belegt, davon sind %3$s GB für E-Mails reserviert.', 'fxwp'), fxwp_format_file_size($available_space), fxwp_format_file_size($used_space), fxwp_format_file_size(4 * 1024 * 1024 * 1024)) . '</p>';
+    echo '<p>' . sprintf(esc_html__('Ihr verfügbarer Speicherplatz beträgt %1$s GB. Sie haben %2$s GB belegt, davon sind %3$s GB für E-Mails reserviert.', 'fxwp'), fxwp_format_file_size($available_space), fxwp_format_file_size($used_space), fxwp_format_file_size(4 * 1024 * 1024 * 1024)) . '</p>';
     echo '<div class="fxwp-storage-usage">';
     echo '<div class="fxwp-storage-usage-bar" style="width: ' . esc_attr($percentage) . '%"></div>';
     echo '<div class="fxwp-storage-usage-text">' . esc_html($percentage) . '%</div>';

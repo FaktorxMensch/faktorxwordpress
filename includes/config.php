@@ -4,6 +4,7 @@ if (defined('FXWP_VERSION'))
 // Plugin functionality
 define('FXWP_VERSION', '0.2');
 define('FXWP_API_URL', 'https://p2.faktorxmensch.com/api/fxwp');
+//define('FXWP_API_URL', 'http://localhost:3000/api/fxwp');
 
 // Server Settings
 define('FXWP_STORAGE_LIMIT', 20 * 1024 * 1024 * 1024); // 20GB
