@@ -368,15 +368,14 @@ function fxwp_plugin_list_installer_page()
                         break;
                     case 'fxwp_create_cookie_notice':
                         // install the cookie notice plugin
-                        fxwp_install_plugin('complianz-gdpr'); //https://downloads.wordpress.org/plugin/complianz-gdpr.6.4.6.zip
+                        fxwp_install_plugin('complianz-gdpr');
                         // activate the cookie notice plugin
                         activate_plugin('complianz-gdpr/complianz-gpdr.php');
 
                         // Set the cookie notice settings
-                        /*update_option('cookie_notice_position', 'bottom');
-                        update_option('cookie_notice_accept_text', 'Akzeptieren');
-                        update_option('cookie_notice_learnmore_text', 'Mehr erfahren');*/
-                        update_option('complianz_options_wizard', 'a:17:{s:15:"country_company";s:2:"DE";s:7:"regions";s:2:"eu";s:18:"eu_consent_regions";s:3:"yes";s:18:"uk_consent_regions";s:2:"no";s:9:"us_states";a:6:{s:3:"cal";s:1:"0";s:3:"col";s:1:"0";s:3:"con";s:1:"0";s:3:"nev";s:1:"0";s:3:"uta";s:1:"0";s:3:"vir";s:1:"0";}s:21:"wp_admin_access_users";s:2:"no";s:16:"cookie-statement";s:9:"generated";s:17:"privacy-statement";s:6:"custom";s:9:"impressum";s:6:"custom";s:10:"disclaimer";s:4:"none";s:17:"organisation_name";s:23:"[NAME DER KUNDIS]";s:15:"address_company";s:39:"[ADRESSE NAME]\n[KUNDIS ADRESSE 1]\n[KUNDIS ADRESSE 2]";s:13:"email_company";s:20:"[KUNDIS EMAIL]";s:17:"telephone_company";s:22:"[KUNDIS PHONE NUMBER]";s:18:"records_of_consent";s:2:"no";s:11:"datarequest";s:2:"no";s:11:"respect_dnt";s:3:"yes";}');
+                        $customer = get_option('fxwp_customer');
+                        $customer_address = $customer['default_address']['name'].PHP_EOL.$customer['default_address']['address1'].PHP_EOL.$customer['default_address']['address2'];
+                        update_option('complianz_options_wizard', unserialize('a:17:{s:15:"country_company";s:2:"DE";s:7:"regions";s:2:"eu";s:18:"eu_consent_regions";s:3:"yes";s:18:"uk_consent_regions";s:2:"no";s:9:"us_states";a:6:{s:3:"cal";s:1:"0";s:3:"col";s:1:"0";s:3:"con";s:1:"0";s:3:"nev";s:1:"0";s:3:"uta";s:1:"0";s:3:"vir";s:1:"0";}s:21:"wp_admin_access_users";s:2:"no";s:16:"cookie-statement";s:9:"generated";s:17:"privacy-statement";s:6:"custom";s:9:"impressum";s:6:"custom";s:10:"disclaimer";s:4:"none";s:17:"organisation_name";s:'.strlen($customer['name']).':"'.$customer['name'].'";s:15:"address_company";s:'.strlen($customer_address).':"'.$customer_address.'";s:13:"email_company";s:'.strlen($customer['email']).':"'.$customer['email'].'";s:17:"telephone_company";s:'.strlen($customer['phone']).':"'.$customer['phone'].'";s:18:"records_of_consent";s:2:"no";s:11:"datarequest";s:2:"no";s:11:"respect_dnt";s:3:"yes";}'));
                         // Update other options as needed
 
                         echo "<p>Cookie notice successfully installed and configured.</p>";
