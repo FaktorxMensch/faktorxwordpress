@@ -127,15 +127,6 @@ function fxwp_plugin_menu()
         'fxwp_backups_page' // Function
     );
 
-    add_submenu_page(
-        'fxwp', // Parent slug
-        'SEO Check', // Page title
-        'SEO Check', // Menu title
-        'edit_posts', // Capability
-        'fxwp-seo-check', // Menu slug
-        'fxwp_seo_check_page' // Function
-    );
-
     // email log
     add_submenu_page(
         'fxwp', // Parent slug
