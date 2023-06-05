@@ -15,7 +15,7 @@ function fxwp_register_debugging_widget()
 
     wp_add_dashboard_widget(
         'fxwp_debugging_widget', // Widget slug.
-        'FxM Custom Debugging', // Title.
+        'F&times;M Debug',
         'fxwp_debugging_widget' // Display function.
     );
 }
