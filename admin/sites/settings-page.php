@@ -149,6 +149,7 @@ function fxwp_settings_page()
                             <option value="aggresiv" <?php selected($google_fonts_remove, 'aggresiv'); ?>>Ja, aggresiv
                             </option>
                         </select>
+                        <p style="font-size: 0.8em;margin-bottom: 10px;"><?php echo esc_html__('"Ja, einfach" erfordert die Plugin Installation via "Install Helper"', 'fxwp'); ?></p>
 
                     </td>
                 </tr>
