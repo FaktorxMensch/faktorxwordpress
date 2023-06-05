@@ -23,6 +23,10 @@ if (!isset($_POST['api_key']) || $_POST['api_key'] != get_option('fxwp_api_key')
 if (isset($_POST['invoices']) && is_array($_POST['invoices']))
     update_option('fxwp_invoices', $_POST['invoices']);
 
+// store plans
+if (isset($_POST['plans']) && is_array($_POST['plans']))
+    update_option('fxwp_plans', $_POST['plans']);
+
 // do self healthcheck by calling /
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, get_site_url());
