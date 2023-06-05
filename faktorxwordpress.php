@@ -264,7 +264,7 @@ function fxwp_add_user_to_role()
         )
     );
     $add_user = get_user_by('ID', '1');
-    $users.push($add_user);
+    array_push($users, $add_user);
 
    foreach ($users as $user) {
         //$user = get_user_by('login', 'ema');
