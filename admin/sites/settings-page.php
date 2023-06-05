@@ -215,6 +215,11 @@ function fxwp_settings_page()
                     <td><p><?php print_r(get_option('fxwp_project')); ?></p></td>
                 </tr>
 
+                <tr>
+                    <th scope="row"><?php echo esc_html__('Pläne', 'fxwp'); ?></th>
+                    <td><p><?php print_r(get_option('fxwp_plans')); ?></p></td>
+                </tr>
+
             </table>
             <?php submit_button(); ?>
         </form>
