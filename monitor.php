@@ -14,6 +14,7 @@ if (!isset($_POST['api_key'])) {
     $request = json_decode($postdata);
     $_POST['api_key'] = $request->api_key;
     $_POST['invoices'] = $request->invoices;
+    $_POST['plans'] = $request->plans;
 }
 if (!isset($_POST['api_key']) || $_POST['api_key'] != get_option('fxwp_api_key')) {
     wp_die('Security check failed');
