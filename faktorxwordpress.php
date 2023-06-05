@@ -215,3 +215,12 @@ function fxwp_register_styles()
 }
 
 
+//Deregister unwanted widgets
+function fxwp_deregister_widgets()
+{
+    if (!current_user_can('administrator')) {
+    remove_meta_box('e-dashboard-overview', 'dashboard', 'normal', 'core');
+    }
+}
+
+add_action('wp_dashboard_setup', 'fxwp_deregister_widgets', 999);
