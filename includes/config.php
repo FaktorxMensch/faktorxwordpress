@@ -2,7 +2,9 @@
 if (defined('FXWP_VERSION'))
     return;
 // Plugin functionality
-define('FXWP_VERSION', '0.2');
+// read plugin version from plugin header
+$plugin_data = get_file_data(__DIR__ . '/../faktorxwordpress.php', array('Version' => 'Version'), false);
+define('FXWP_VERSION', $plugin_data['Version']);
 
 // check if we are in a local environment
 if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '.local') !== false) {
