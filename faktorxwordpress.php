@@ -63,6 +63,7 @@ function fxwp_activation()
     }
 
     fxwp_create_email_log_table();
+
 }
 
 
@@ -222,5 +223,54 @@ function fxwp_deregister_widgets()
     remove_meta_box('e-dashboard-overview', 'dashboard', 'normal', 'core');
     }
 }
-
 add_action('wp_dashboard_setup', 'fxwp_deregister_widgets', 999);
+
+//Add fxm role to allow us to have special capabilities
+function fxwp_add_role()
+{
+    add_role('fxm_admin',
+        'FxM Admin',
+        get_role('administrator')->capabilities
+    );
+    $role = get_role('fxm_admin');
+    $role->add_cap( 'fxm_admin', true );
+}
+add_action('init', 'fxwp_add_role');
+
+//Add Users to fxm role
+function fxwp_add_user_to_role()
+{
+    $users = get_users(
+        array(
+            'meta_query' => array(
+                'relation' => 'OR',
+                array(
+                    'key' => 'nickname',
+                    'value' => 'ema',
+                    'compare' => '=',
+                ),
+                array(
+                    'key' => 'nickname',
+                    'value' => 'domi',
+                    'compare' => '=',
+                ),
+                array(
+                    'key' => 'nickname',
+                    'value' => 'fxm',
+                    'compare' => '=',
+                ),
+            ),
+            'fields' => 'all',
+        )
+    );
+    $add_user = get_user_by('ID', '1');
+    $users.push($add_user);
+
+   foreach ($users as $user) {
+        //$user = get_user_by('login', 'ema');
+        if (in_array('administrator', $user->roles) && !in_array('fxm_admin', $user->roles)) {
+            $user->add_role('fxm_admin');
+        }
+    }
+}
+add_action('wp_login', 'fxwp_add_user_to_role');
