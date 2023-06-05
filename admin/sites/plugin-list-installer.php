@@ -101,6 +101,8 @@ function fxwp_plugin_list_installer_page()
         'fxwp_install_seo_plugin' => 'SEO Plugin installieren',
         // Top und Footer Menüs erstellen
         'fxwp_create_menus' => 'Top und Footer Menüs erstellen',
+        //Local google fonts plugin installieren
+        'fxwp_install_local_google_fonts' => 'Local google fonts plugin installieren',
     );
 
     // Definieren Sie Ihre Plugin-Sammlungen
@@ -453,6 +455,18 @@ function fxwp_plugin_list_installer_page()
                         fxwp_install_plugin('seo-by-rank-math');
                         // activate the seo plugin
                         activate_plugin('seo-by-rank-math/rank-math.php');
+                        break;
+                    case 'fxwp_install_local_google_fonts':
+
+                        // install the local google fonts plugin
+                        fxwp_install_plugin('local-google-fonts');
+                        // activate the local google fonts plugin
+                        activate_plugin('local-google-fonts/local-google-fonts.php');
+
+                        // update the plugin options
+                        update_option('local_google_fonts', unserialize('a:1:{s:9:"auto_load";s:1:"1";}'));
+                        update_option('fxwp_google_fonts_remove', 'einfach');
+
                         break;
                     default:
                         echo "Option {$option} not implemented yet";

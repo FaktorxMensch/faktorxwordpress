@@ -10,6 +10,8 @@ function fxwp_google_fonts_mod()
 
 
     // if option fxwp_google_fonts_remove == 'einfach' or 'aggresiv'
+
+
     remove_action('wp_enqueue_scripts', 'fxwp_enqueue_google_fonts', 9999);
 
     if ($google_fonts_remove == 'einfach')
