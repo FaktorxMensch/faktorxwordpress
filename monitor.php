@@ -39,7 +39,13 @@ curl_close($ch);
 if (strpos($result, get_site_url()) === false || strpos($result, 'style') === false) {
     $healthcheck = false;
 } else {
-    $healthcheck = true;
+    // if the result contains '<div class="wp-die-message">' then the site has a critical error
+    if (strpos($result, '<div class="wp-die-message">') !== false) {
+//        mail(get_option('admin_email'), 'Critical Error on ' . get_site_url(), $result);
+        $healthcheck = false;
+    } else {
+        $healthcheck = true;
+    }
 }
 
 
