@@ -25,6 +25,13 @@ function fxwp_show_error()
     if (get_option('fxwp_api_key') !== '')
         return;
     echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Das Plugin Faktor&times;WordPress konnte nicht aktiviert werden. Bitte Plugin deaktivieren und erneut aktivieren.', 'fxwp') . '</p></div>';
+
+    // deactivate plugin
+    deactivate_plugins(plugin_basename(__FILE__));
+
+    // reload page after 3s
+    echo '<script>setTimeout(function(){location.reload()}, 3000);</script>';
+
 }
 
 function fxwp_activation()
@@ -172,7 +179,6 @@ function fxwp_plugin_menu()
     remove_submenu_page('fxwp', 'fxwp');
 
 
-
     add_menu_page(
         'Meine Benutzerdefinierten Shortcodes',
         'Shortcodes',
@@ -220,9 +226,10 @@ function fxwp_register_styles()
 function fxwp_deregister_widgets()
 {
     if (!current_user_can('administrator')) {
-    remove_meta_box('e-dashboard-overview', 'dashboard', 'normal', 'core');
+        remove_meta_box('e-dashboard-overview', 'dashboard', 'normal', 'core');
     }
 }
+
 add_action('wp_dashboard_setup', 'fxwp_deregister_widgets', 999);
 
 //Add fxm role to allow us to have special capabilities
@@ -233,8 +240,9 @@ function fxwp_add_role()
         get_role('administrator')->capabilities
     );
     $role = get_role('fxm_admin');
-    $role->add_cap( 'fxm_admin', true );
+    $role->add_cap('fxm_admin', true);
 }
+
 add_action('init', 'fxwp_add_role');
 
 //Add Users to fxm role
@@ -266,11 +274,12 @@ function fxwp_add_user_to_role()
     $add_user = get_user_by('ID', '1');
     array_push($users, $add_user);
 
-   foreach ($users as $user) {
+    foreach ($users as $user) {
         //$user = get_user_by('login', 'ema');
         if (in_array('administrator', $user->roles) && !in_array('fxm_admin', $user->roles)) {
             $user->add_role('fxm_admin');
         }
     }
 }
+
 add_action('wp_login', 'fxwp_add_user_to_role');
