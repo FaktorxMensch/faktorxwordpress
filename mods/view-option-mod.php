@@ -11,7 +11,7 @@ function fxwp_render_view_option()
         }
         </style>';
     // ...
-    if (get_option('fxwp_view_option', 'einfach') !== 'erweitert' && !current_user_can('erweiterte_ansicht')) {
+    if (get_option('fxwp_view_option', 'einfach') !== 'erweitert' && !current_user_can('administrator')) {
         // Code to display in Einfache Ansicht
         // Customers
         echo '<style>
@@ -24,6 +24,7 @@ function fxwp_render_view_option()
         </style>';
     }
 }
+
 
 // only in the backend
 if (is_admin()) {

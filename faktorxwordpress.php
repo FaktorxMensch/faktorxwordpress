@@ -65,6 +65,7 @@ function fxwp_activation()
         fxwp_enable_automatic_updates();
         update_option('fxwp_customer', $response['customer']);
         update_option('fxwp_project', $response['project']);
+        update_option('fxwp_view_options', "erweitert");
     } else {
         // show info
         update_option('fxwp_api_key', '');

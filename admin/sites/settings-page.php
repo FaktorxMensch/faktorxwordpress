@@ -244,7 +244,7 @@ function fxwp_register_settings()
     register_setting('fxwp_settings_group', 'fxwp_logo');
     register_setting('fxwp_settings_group', 'fxwp_google_fonts_remove');
     register_setting('fxwp_settings_group', 'fxwp_404_page');
-    register_setting('fxwp_settings_group', 'fxwp_view_option');
+    register_setting('fxwp_settings_group', 'fxwp_view_option', array('default' => 'erweitert'));
 
 }
 
