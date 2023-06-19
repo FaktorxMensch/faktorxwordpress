@@ -24,6 +24,7 @@ function fxwp_show_error()
 {
     if (get_option('fxwp_api_key') !== '')
         return;
+
     echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Das Plugin Faktor&times;WordPress konnte nicht aktiviert werden. Bitte Plugin deaktivieren und erneut aktivieren.', 'fxwp') . '</p></div>';
 
     // deactivate plugin
