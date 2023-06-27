@@ -7,7 +7,7 @@ $plugin_data = get_file_data(__DIR__ . '/../faktorxwordpress.php', array('Versio
 define('FXWP_VERSION', $plugin_data['Version']);
 
 // check if we are in a local environment
-if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) { // || strpos($_SERVER['HTTP_HOST'], '.local') !== false
+if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '.local') !== false) { //
     define('FXWP_LOCAL_ENV', true);
     define('FXWP_API_URL', 'http://localhost:3000/api/fxwp');
 } else {
