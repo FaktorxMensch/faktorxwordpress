@@ -2,7 +2,8 @@
 
 function fxwp_debugging_widget()
 {
-    echo "<p>Currently no debugging. Add custom code in fxm plugin to test stuff.</p>";
+    echo "<p>Current server: " . FXWP_API_URL . "<br/></p>";
+    echo "<p>Api key:". get_option('fxwp_api_key') . "<br/></p>";
     echo "<style>#fxwp_debugging_widget h2 {color: #E3A354;}</style>";
 }
 

@@ -42,7 +42,7 @@ function fxwp_description_widget()
     $topics = get_option('fxwp_openai_topics', []);
 
     if ($description === false || isset($_GET['fxwp_website_description_edit'])) {
-        echo '<form method="POST" action="">';
+        echo '<form method="POST" action="?refresh_topics">';
         echo '<b>WICHTIG:</b> Bitte beschreiben Sie Ihr Unternehmen in einem Satz. Dieser Satz wird zur Suchmaschinenoptimierung verwendet. Bitte beschreiben Sie alle Inhalte Ihrer Website in diesem Satz. Dieser Satz wird auch verwendet, um die Themen zu generieren, die Sie in Ihrem Blog behandeln sollten.<br>';
 
         echo '<textarea placeholder="Schreiben Sie ein bis zwei Sätze" name="fxwp_website_description" rows="4" style="margin-top:10px;width:100%"></textarea>';
@@ -59,12 +59,15 @@ function fxwp_description_widget()
             echo '<p>Klicken Sie, um einen Blogbeitrag zu einem Thema zu generieren:</p>';
             echo '<ul>';
             foreach ($topics as $topic) {
-                echo '<li><a class="topic full-block" href="/topic.php?topic=' . urlencode($topic) . '">' . esc_html($topic) . '</a></li>';
+                echo '<li><a class="topic full-block" href="topic.php?topic=' . urlencode($topic) . '">' . esc_html($topic) . '</a></li>';
             }
             echo '</ul>';
         }
 
-        echo '<a href="?refresh_topics" style="text-decoration: none"><button class="button" style="width:100%;justify-content:center;text-align:center;display:flex;gap:4px;align-items: center" id="refresh_topics"><span class="dashicons dashicons-update"></span> ' . esc_html__('Neue Themen vorschlagen', 'fxwp') . '</button></a>';
+        echo '<a href="?refresh_topics" style="text-decoration: none"><button class="button button-primary" style="width:100%;justify-content:center;text-align:center;display:flex;gap:4px;align-items: center" id="refresh_topics"><span class="dashicons dashicons-update"></span> ' . esc_html__('Neue Themen vorschlagen', 'fxwp') . '</button></a>';
+
+        // fxwp_website_description_edit
+        echo '<a href="?fxwp_website_description_edit" style="text-decoration: none"><button class="button" style="width:100%;justify-content:center;text-align:center;display:flex;gap:4px;align-items: center;margin-top:5px" id="fxwp_website_description_edit"><span class="dashicons dashicons-edit"></span> ' . esc_html__('Seiten-Beschreibung bearbeiten', 'fxwp') . '</button></a>';
 
     }
 }
