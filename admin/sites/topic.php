@@ -31,7 +31,7 @@ function fxwp_topic_page()
             <div v-if="loading" style="display:flex;justify-content:center;align-items:center;flex-direction:column">
                 <div class="loader"></div>
                 <br>
-                <p>Generierung der Inhalte. Dies kann bis zu einer Minute dauern.<br>
+                <p style="max-width:30em;text-align:center;">Generierung der Inhalte. Dies kann bis zu 5 Minuten dauern, da die Inhalte von einer Künstlichen Intelligenz generiert werden.</p>
                     <b>Bitte schließen Sie die Seite nicht während dieses Prozesses.</b></p>
             </div>
             <div v-else>
