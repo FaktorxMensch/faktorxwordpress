@@ -10,8 +10,8 @@ function fxwp_topic_page()
     ?>
 
     <div class="fxm-header"
-         style="background:#373f3f;gap:30px;display:flex;align-items:center;padding:10px 20px;color:white;width:100%;margin-left:-20px">
-        <img src="https://faktorxmensch.com/wp-content/uploads/2023/01/logo-textmarke-1.png" height="30">
+         style="background:#171717;gap:30px;display:flex;align-items:center;padding:10px 20px;color:white;width:100%;margin-left:-20px">
+        <img src="https://faktorxmensch.com/image/brand/icon--dark.svg" height="70">
         <h1 style="color:white">Schreibwerkstatt</h1>
         <div style="flex:2"></div>
         <a href="https://faktorxmensch.com" target="_blank"
