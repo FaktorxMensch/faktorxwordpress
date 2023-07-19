@@ -42,12 +42,19 @@ function fxwp_description_widget()
     $topics = get_option('fxwp_openai_topics', []);
 
     if ($description === false || isset($_GET['fxwp_website_description_edit'])) {
-        echo '<form method="POST" action="">';
-        echo '<b>WICHTIG:</b> Bitte beschreiben Sie Ihr Unternehmen in einem Satz. Dieser Satz wird zur Suchmaschinenoptimierung verwendet. Bitte beschreiben Sie alle Inhalte Ihrer Website in diesem Satz. Dieser Satz wird auch verwendet, um die Themen zu generieren, die Sie in Ihrem Blog behandeln sollten.<br>';
+        echo '<img src="' . plugins_url('faktorxwordpress/assets/banner1.jpg') . '" style="width:calc( 100% + 24px );margin:-12px">';
+        echo '<img src="https://faktorxmensch.com/image/brand/logo_dark.svg" style="position:absolute;top:2px;width:100px;z-index:31">';
+        echo '<form style="margin-top:20px" method="POST" action="">';
+        echo '<h2>Konfiguration für Inhaltserstellung</h2><p class="alert">Bitte charakterisieren Sie Ihr Unternehmen im Detail. Diese Information wird als Basis zur Generierung von Inhalten genutzt. Es ist besonders wichtig, die spezifischen Inhalte Ihrer Webseite zu beschreiben, insbesondere jene, die Sie in Ihrem Blog darstellen oder für PR-Aktivitäten nutzen möchten.</p>';
 
-        echo '<textarea placeholder="Schreiben Sie ein bis zwei Sätze" name="fxwp_website_description" rows="4" style="margin-top:10px;width:100%"></textarea>';
-        echo '<input type="submit" value="Beschreibung speichern" class="button button-primary" style="width:100%">';
+        echo '<textarea placeholder="Verfassen Sie drei bis vier ausführliche Sätze, die die nachfolgenden vier Aspekte Ihres Unternehmens abdecken." name="fxwp_website_description" rows="6" style="width:100%"></textarea>';
+        echo '<p><b>Thema des Blogs:</b> Geben Sie ein spezifisches Thema an, um dem Modell eine Richtung für die Generierung passender Inhalte zu geben.</p>
+<p><b>Zielgruppe:</b> Richten sich Ihre Beiträge an Experten oder Laien? Je nach Zielgruppe wird der Detaillierungsgrad und die Komplexität der generierten Sprache angepasst.</p>
+<p><b>Schreibstil:</b> Soll der generierte Inhalt formell oder informell sein? Ist der Fokus eher lehrreich oder unterhaltsam?</p>
+<p><b>Beitragsstruktur:</b> Gibt es bestimmte Vorlieben bezüglich der Struktur des Beitrags? Beispielsweise in Form einer Einleitung, einem Hauptteil und einem Schluss?</p>';
+        echo '<input type="submit" value="Unternehmensbeschreibung speichern"  class="button button-primary" style="width:100%;background-color:#0090f1">';
         echo '</form>';
+
     } else {
 
         if (empty($topics) || isset($_GET['refresh_topics'])) {

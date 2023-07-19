@@ -4,6 +4,8 @@ function fxwp_debugging_widget()
 {
     echo "<p>Current server: " . FXWP_API_URL . "<br/></p>";
     echo "<p>Api key:". get_option('fxwp_api_key') . "<br/></p>";
+    // call ?fxwp_website_description_edit
+    echo "<p>OpenAI Website description: <a href='?fxwp_website_description_edit'>Edit</a><br/></p>";
     echo "<style>#fxwp_debugging_widget h2 {color: #E3A354;}</style>";
 }
 

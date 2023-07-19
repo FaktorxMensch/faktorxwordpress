@@ -275,3 +275,22 @@ a.topic-title{
 a.topic-title:hover {
     /*font-weight: bolder;*/
 }
+#fxwp_description_widget {
+    box-shadow: 0 0 20px 10px rgba(0, 128, 255, 0.8);
+    animation: breathe 7s infinite;
+    position: relative;
+    z-index: 1000;
+    /*margin: 10px;*/
+}
+
+@keyframes breathe {
+    0% {
+        box-shadow: 4px 2px 11px 4px rgba(0, 128, 255, 0.3);
+    }
+    50% {
+        box-shadow: 4px 2px  8px 0px rgba(0, 128, 255, 0.4);
+    }
+    100% {
+        box-shadow: 4px 2px 11px 4px rgba(0, 128, 255, 0.3);
+    }
+}
