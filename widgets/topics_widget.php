@@ -57,14 +57,29 @@ function fxwp_description_widget()
 
         if (!empty($topics)) {
             echo '<p>Klicken Sie, um einen Blogbeitrag zu einem Thema zu generieren:</p>';
-            echo '<ul>';
+            echo '<ul style="margin-left:15px;list-style:disc">';
             foreach ($topics as $topic) {
-                echo '<li><a class="topic full-block" href="/topic.php?topic=' . urlencode($topic) . '">' . esc_html($topic) . '</a></li>';
+                echo '<li><a class="topic-title" href="admin.php?page=fxwp-topic-page&topic=' . urlencode($topic) . '">' . esc_html($topic) . '</a></li>';
             }
             echo '</ul>';
         }
 
         echo '<a href="?refresh_topics" style="text-decoration: none"><button class="button" style="width:100%;justify-content:center;text-align:center;display:flex;gap:4px;align-items: center" id="refresh_topics"><span class="dashicons dashicons-update"></span> ' . esc_html__('Neue Themen vorschlagen', 'fxwp') . '</button></a>';
+
+
+        // have line with text ODER on it
+        echo '<div style="display:flex;align-items:center;justify-content:center;margin-top:10px"><div style="width:100%;height:1px;background-color:#ddd"></div><div style="margin:0 10px">ODER</div><div style="width:100%;height:1px;background-color:#ddd"></div></div>';
+
+        echo '
+        <form method="GET" action="admin.php">
+        <input type="hidden" name="page" value="fxwp-topic-page">
+        <textarea class="topic full-block" type="text" id="topic" name="topic" placeholder="Geben Sie ein eigenes Thema ein ..." style="margin-top:10px;width:100%"></textarea>
+        <button class="button button-primary" style="width:100%;margin-top:5px;justify-content:center;text-align:center;display:flex;gap:4px;align-items: center " id="generate_topic">
+        Post zu diesem Thema generieren
+        <span class="dashicons dashicons-controls-play"></span>
+        </button>
+        </form>
+        ';
 
     }
 }
