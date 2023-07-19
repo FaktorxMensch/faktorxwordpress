@@ -36,6 +36,8 @@ function fxwp_description_widget()
 //        $response_body = json_decode($response_body, true);
 //        print_r($response_body);
 
+        // reload page to ?fxwp_website_description_edited_successfully
+        wp_redirect(admin_url('index.php?refresh_topics'));
     }
 
     $description = get_option('fxwp_website_description', false);
@@ -47,7 +49,7 @@ function fxwp_description_widget()
         echo '<form style="margin-top:20px" method="POST" action="">';
         echo '<h2>Konfiguration für Inhaltserstellung</h2><p class="alert">Bitte charakterisieren Sie Ihr Unternehmen im Detail. Diese Information wird als Basis zur Generierung von Inhalten genutzt. Es ist besonders wichtig, die spezifischen Inhalte Ihrer Webseite zu beschreiben, insbesondere jene, die Sie in Ihrem Blog darstellen oder für PR-Aktivitäten nutzen möchten.</p>';
 
-        echo '<textarea placeholder="Verfassen Sie drei bis vier ausführliche Sätze, die die nachfolgenden vier Aspekte Ihres Unternehmens abdecken." name="fxwp_website_description" rows="6" style="width:100%"></textarea>';
+        echo '<textarea placeholder="Verfassen Sie eine Anweisung, die die nachfolgenden vier Aspekte Ihres Unternehmens abdeckt." name="fxwp_website_description" rows="6" style="width:100%"></textarea>';
         echo '<p><b>Thema des Blogs:</b> Geben Sie ein spezifisches Thema an, um dem Modell eine Richtung für die Generierung passender Inhalte zu geben.</p>
 <p><b>Zielgruppe:</b> Richten sich Ihre Beiträge an Experten oder Laien? Je nach Zielgruppe wird der Detaillierungsgrad und die Komplexität der generierten Sprache angepasst.</p>
 <p><b>Schreibstil:</b> Soll der generierte Inhalt formell oder informell sein? Ist der Fokus eher lehrreich oder unterhaltsam?</p>
