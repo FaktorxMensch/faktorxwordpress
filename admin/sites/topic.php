@@ -26,13 +26,19 @@ function fxwp_topic_page()
 
             <h1 style="display:block; margin-bottom:30px;margin-top:10px;text-align:center" v-if="loading">
                 Schreibwerkstatt</h1>
-            <h1 v-else><?php echo sanitize_text_field($_GET['topic']); ?></h1>
+            <h1 v-else-if="error.length==0"><?php echo sanitize_text_field($_GET['topic']); ?></h1>
 
             <div v-if="loading" style="display:flex;justify-content:center;align-items:center;flex-direction:column">
                 <div class="loader"></div>
                 <br>
                 <p style="max-width:30em;text-align:center;">Generierung der Inhalte. Dies kann bis zu 5 Minuten dauern, da die Inhalte von einer Künstlichen Intelligenz generiert werden.</p>
                     <b>Bitte schließen Sie die Seite nicht während dieses Prozesses.</b></p>
+            </div>
+            <div v-else-if="error.length>0">
+                <h2>Es ist ein Fehler aufgetreten</h2>
+                <p>{{ error }}</p>
+                <a href="index.php?" class="button button-secondary">&larr; Zurück</a>&nbsp;
+                <a href="https://faktorxmensch.com/support" target="_blank" class="button button-primary">Support kontaktieren &rarr;</a>
             </div>
             <div v-else>
                 <label>
@@ -71,6 +77,7 @@ function fxwp_topic_page()
                 selectedImage: '',
                 images: [],
                 loading: true,
+                error: '',
                 url: '<?php echo FXWP_API_URL; ?>' + '/' + '<?php echo get_option('fxwp_api_key'); ?>' + '/blog/topic'
             }),
             methods: {
@@ -101,7 +108,19 @@ function fxwp_topic_page()
                     },
                     body: JSON.stringify({topic: '<?php echo sanitize_text_field($_GET['topic']); ?>'})
                 }).then(response => response.json())
-                    .then(({post}) => {
+                    .then((res) => {
+
+                        console.log(this.error)
+
+                        if(res.error) {
+                            this.loading = false;
+                            alert(res.error);
+                            this.error = res.error;
+                            return;
+                        }
+
+                        const post = res.post;
+
                         this.images = post.pixabay_images;
                         this.title = post.post_title;
                         this.content = post.post_content;
