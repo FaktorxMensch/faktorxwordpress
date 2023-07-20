@@ -90,7 +90,8 @@ function fxwp_topic_page()
                 </div>
 
                 <template v-else-if="generated.length > 0">
-                    <div v-html="generated" :style="!generated.includes('<') ? 'white-space:pre-wrap' : ''" class="good-prose"></div>
+                    <div v-html="generated" :style="!generated.includes('<') ? 'white-space:pre-wrap' : ''"
+                         class="good-prose"></div>
                 </template>
                 <template v-else>
                     <h1>E-Mail Kampagnen</h1>
@@ -374,11 +375,14 @@ function fxwp_topic_page()
         .form-item button:hover {
             background-color: #0056b3;
         }
+
         .good-prose {
-            font-size: 1.1rem;
-            line-height: 1.6;
             word-wrap: break-word;
-            max-width: 80em;
+            max-width: 40rem;
+        }
+
+        .good-prose p {
+            font-size: 1rem;
         }
 
         .img-container {
