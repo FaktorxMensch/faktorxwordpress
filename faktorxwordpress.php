@@ -187,7 +187,7 @@ function fxwp_plugin_menu()
         'manage_options',
         'my-custom-shortcodes',
         'fxwp_display_settings_page',
-        'dashicons-admin-generic',
+        'dashicons-shortcode',
         null
     );
 
@@ -210,6 +210,20 @@ function fxwp_plugin_menu()
         'my-custom-shortcodes-doc',
         'fxwp_display_doc_page'
     );
+
+
+
+
+        add_menu_page(
+            'Schreibwerkstatt',
+            'Schreibwerkstatt',
+            'manage_options',
+            'fxwp-topic-page',
+            'fxwp_topic_page',
+            'dashicons-format-status',
+            null
+        );
+
 
 }
 
