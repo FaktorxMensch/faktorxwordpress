@@ -79,7 +79,6 @@ function fxwp_topic_page()
         if (@$_GET["subnav"] == "email-kampagnen") {
             ?>
             <div id="app">
-                <h1>E-Mail Kampagnen</h1>
 
                 <div v-if="loading"
                      style="display:flex;justify-content:center;align-items:center;flex-direction:column;max-width:90%;margin:auto;">
@@ -91,9 +90,10 @@ function fxwp_topic_page()
                 </div>
 
                 <template v-else-if="generated.length > 0">
-                    <div v-html="generated" :style="!generated.includes('<') ? 'white-space:pre-wrap' : ''"></div>
+                    <div v-html="generated" :style="!generated.includes('<') ? 'white-space:pre-wrap' : ''" class="good-prose"></div>
                 </template>
                 <template v-else>
+                    <h1>E-Mail Kampagnen</h1>
                     <p>Erstellen Sie eine E-Mail Kampagne mit dem Assistenten.</p>
                     <div class="form-item">
                         <label for="thema">Thema:</label>
@@ -373,6 +373,12 @@ function fxwp_topic_page()
 
         .form-item button:hover {
             background-color: #0056b3;
+        }
+        .good-prose {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            word-wrap: break-word;
+            max-width: 80em;
         }
 
         .img-container {
