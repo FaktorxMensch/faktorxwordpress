@@ -1,7 +1,7 @@
 <?php
 function fxwp_login_as_widget()
 {
-    if (!current_user_can('administrator')) {
+    if (!current_user_can('fxm_admin')) {
         return;
     }
 
@@ -21,7 +21,7 @@ function fxwp_login_as_widget()
 // add dashboard widget
 function fxwp_register_login_as_widget()
 {
-    if (!current_user_can('administrator')) {
+    if (!current_user_can('fxm_admin')) {
         return;
     }
 
