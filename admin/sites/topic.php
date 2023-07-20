@@ -7,6 +7,23 @@ function fxwp_topic_page()
     // check if user is allowed access
     if (!current_user_can('manage_options')) return;
 
+    $subnav_menu = [
+        [
+            "title" => "E-Mail Kampagnen",
+            "slug" => "email-kampagnen",
+        ],
+        [
+            "title" => "Blogartikel",
+            "slug" => "blogartikel",
+        ]
+    ];
+
+    // find  current subnav via $_GET from array
+    $subnav = array_filter($subnav_menu, function ($item) {
+        if (!isset($_GET['subnav'])) return false;
+        return $item['slug'] == $_GET['subnav'];
+    });
+
     ?>
 
     <div class="fxm-header"
@@ -20,120 +37,344 @@ function fxwp_topic_page()
     </div>
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <?php
+    if ($subnav) {
+        ?>
+        <div class="breadcrumb" style="margin-top:20px">
+            <a href="admin.php?page=fxwp-topic-page" class="button button-secondary">&larr; Zurück</a>
+        </div>
+        <?php
+
+    }
+    ?>
+
     <div class="wrap" style="padding: 10px 20px;background:white;margin-top:20px;padding-bottom:20px">
 
-        <div id="schreibwerkstatt-app">
-
-            <h1 style="display:block; margin-bottom:30px;margin-top:10px;text-align:center" v-if="loading">
-                Schreibwerkstatt</h1>
-            <h1 v-else-if="error.length==0"><?php echo sanitize_text_field($_GET['topic']); ?></h1>
-
-            <div v-if="loading" style="display:flex;justify-content:center;align-items:center;flex-direction:column">
-                <div class="loader"></div>
-                <br>
-                <p style="max-width:30em;text-align:center;">Generierung der Inhalte. Dies kann bis zu 5 Minuten dauern, da die Inhalte von einer Künstlichen Intelligenz generiert werden.</p>
-                    <b>Bitte schließen Sie die Seite nicht während dieses Prozesses.</b></p>
-            </div>
-            <div v-else-if="error.length>0">
-                <h2>Es ist ein Fehler aufgetreten</h2>
-                <p>{{ error }}</p>
-                <a href="index.php?" class="button button-secondary">&larr; Zurück</a>&nbsp;
-                <a href="https://faktorxmensch.com/support" target="_blank" class="button button-primary">Support kontaktieren &rarr;</a>
-            </div>
-            <div v-else>
-                <label>
-                    Titel:
-                    <input v-model="title" name="title" type="text" style="width:100%;" class="regular-text">
-                </label>
-                <br/>
-                <br/>
-                <label>
-                    Bitte wählen Sie ein Bild aus:
-                </label>
-                <div class="image-gallery" style="margin-top:5px;">
-                    <div v-for="image in images" class="img-container"
-                         :class="{ selected: selectedImage === image.largeImageURL }">
-                        <input v-model="selectedImage" type="radio" :value="image.largeImageURL" style="display: none">
-                        <img :src="image.previewURL" @click="selectedImage = image.largeImageURL">
-                    </div>
+        <?php
+        if (!$subnav) {
+            ?>
+            <div class="fxm-subnav" style="margin-top:20px;">
+                <h1>Bitte Assistenten auswählen:</h1>
+                <p>Wählen Sie einen Assistenten aus, der Ihnen bei der Erstellung von
+                    Inhalten hilft.</p>
+                <div style="display:flex;flex-wrap:wrap;flex-direction: column;gap:10px">
+                    <?php
+                    foreach ($subnav_menu as $item) {
+                        ?>
+                        <a href="admin.php?page=fxwp-topic-page&subnav=<?php echo $item['slug']; ?>"
+                           class="button button-secondary"><?php echo $item['title']; ?></a>
+                        <?php
+                    }
+                    ?>
                 </div>
-                <button
-                    class="button button-primary"
-                    style="display:flex;gap:4px;align-items: center"
-                    @click="submit">Blog Beitrag erstellen
-                    <span class=" dashicons dashicons-arrow-right-alt2"></span>
-                </button>
             </div>
-        </div>
+            <?php
+        }
+        ?>
+
+
+        <?php
+        // handle subnav
+        if (@$_GET["subnav"] == "email-kampagnen") {
+            ?>
+            <div id="app">
+                <h1>E-Mail Kampagnen</h1>
+
+                <div v-if="loading"
+                     style="display:flex;justify-content:center;align-items:center;flex-direction:column;max-width:90%;margin:auto;">
+                    <div class="loader"></div>
+                    <br>
+                    <p style="max-width:30em;text-align:center;">Generierung der Inhalte. Dies kann 1 - 2 Minuten
+                        dauern, da die Inhalte von einer Künstlichen Intelligenz generiert werden.</p>
+                    <b>Bitte schließen Sie die Seite nicht während dieses Prozesses.</b></p>
+                </div>
+
+                <template v-else-if="generated.length > 0">
+                    <div v-html="generated" :style="!generated.includes('<') ? 'white-space:pre-wrap' : ''"></div>
+                </template>
+                <template v-else>
+                    <p>Erstellen Sie eine E-Mail Kampagne mit dem Assistenten.</p>
+                    <div class="form-item">
+                        <label for="thema">Thema:</label>
+                        <textarea id="thema" v-model="thema"
+                                  placeholder="Zum Beispiel: 'Diese Woche sind Summer Sales für alle Luftmatratzen'"></textarea>
+                    </div>
+
+                    <div class="form-item">
+                        <label for="schluesselwoerter">Schlüsselwörter:</label>
+                        <input id="schluesselwoerter" v-model="schluesselwoerter" type="text"
+                               placeholder="Zum Beispiel: 'Sommerverkauf', '30% Rabatt', 'Neue Kollektion'">
+                    </div>
+
+                    <div class="form-item">
+                        <label for="stil">Stil:</label>
+                        <select id="stil" v-model="stil">
+                            <option v-for="option in stile" v-bind:value="option">
+                                {{ option}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-item">
+                        <label for="laenge">Länge:</label>
+                        <select id="laenge" v-model="laenge">
+                            <option v-for="option in laengen" v-bind:value="option">
+                                {{ option}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-item">
+                        <button @click="submit">Text generieren</button>
+                    </div>
+                </template>
+            </div>
+            <script>
+                const {createApp} = Vue
+                createApp({
+                    data: () => ({
+                        url: '<?php echo FXWP_API_URL; ?>' + '/' + '<?php echo get_option('fxwp_api_key'); ?>' + '/email-kampagnen',
+                        thema: 'Diese Woche sind Summer Sales für alle Luftmatratzen',
+                        schluesselwoerter: 'Sommerverkauf, 30% Rabatt, Neue Kollektion',
+                        stil: 'Überzeugend',
+                        loading: false,
+                        laenge: 'Kurz',
+                        stile: [
+                            "Überzeugend",
+                            "Informativ",
+                            "Emotional",
+                            "Humorvoll",
+                            "Prägnant",
+                            "Provokativ",
+                            "Kreativ",
+                            "Storytelling",
+                            "Call-to-Action",
+                            "Markenbildend"
+                        ],
+                        laengen: [
+                            "Kurz",
+                            "Mittel",
+                            "Lang"
+                        ],
+                        generated: '',
+                    }),
+
+                    methods: {
+                        submit() {
+                            this.loading = true;
+                            fetch(this.url, {
+                                method: "POST",
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    thema: this.thema,
+                                    schluesselwoerter: this.schluesselwoerter,
+                                    stil: this.stil,
+                                    laenge: this.laenge,
+                                })
+                            }).then(response => response.json())
+                                .then((res) => {
+
+                                    console.log(this.error)
+
+                                    if (res.error) {
+                                        this.loading = false;
+                                        alert(res.error);
+                                        this.error = res.error;
+                                        return;
+                                    }
+
+                                    this.generated = res.generated;
+                                    this.loading = false;
+
+                                })
+                                .catch((error) => {
+                                    alert(error)
+                                    console.error('Error:', error);
+                                });
+                        },
+                    },
+                }).mount('#app')
+            </script>
+        <?php
+        } else if (@$_GET["subnav"] == "blogartikel" || isset($_GET['topic'])) {
+        if (!isset($_GET['topic'])) {
+        ?>
+            <div class="fxm-subnav" style="margin-top:20px;">
+                <h1>Bitte geben Sie ein Thema vor:</h1>
+                <p>Wählen Sie ein Thema aus, zu dem Sie einen Blogartikel erstellen möchten.</p>
+                <form action="admin.php" method="get">
+                    <input type="hidden" name="page" value="fxwp-topic-page">
+                    <input type="hidden" name="subnav" value="blogartikel">
+                    <input type="text" name="topic" placeholder="Titel des Artikel eingeben"
+                           style="width:100%;margin-bottom:10px">
+                    <input type="submit" value="Neuen Artikel generieren" class="button button-secondary">
+                </form>
+            </div>
+        <?php
+        } else {
+        ?>
+            <div id="schreibwerkstatt-app">
+
+                <h1 style="display:block; margin-bottom:30px;margin-top:10px;text-align:center" v-if="loading">
+                    Schreibwerkstatt</h1>
+                <h1 v-else-if="error.length==0"><?php echo sanitize_text_field($_GET['topic']); ?></h1>
+
+                <div v-if="loading"
+                     style="display:flex;justify-content:center;align-items:center;flex-direction:column">
+                    <div class="loader"></div>
+                    <br>
+                    <p style="max-width:30em;text-align:center;">Generierung der Inhalte. Dies kann bis zu 5 Minuten
+                        dauern, da die Inhalte von einer Künstlichen Intelligenz generiert werden.</p>
+                    <b>Bitte schließen Sie die Seite nicht während dieses Prozesses.</b></p>
+                </div>
+                <div v-else-if="error.length>0">
+                    <h2>Es ist ein Fehler aufgetreten</h2>
+                    <p>{{ error }}</p>
+                    <a href="index.php?" class="button button-secondary">&larr; Zurück</a>&nbsp;
+                    <a href="https://faktorxmensch.com/support" target="_blank" class="button button-primary">Support
+                        kontaktieren &rarr;</a>
+                </div>
+                <div v-else>
+                    <label>
+                        Titel:
+                        <input v-model="title" name="title" type="text" style="width:100%;" class="regular-text">
+                    </label>
+                    <br/>
+                    <br/>
+                    <label>
+                        Bitte wählen Sie ein Bild aus:
+                    </label>
+                    <div class="image-gallery" style="margin-top:5px;">
+                        <div v-for="image in images" class="img-container"
+                             :class="{ selected: selectedImage === image.largeImageURL }">
+                            <input v-model="selectedImage" type="radio" :value="image.largeImageURL"
+                                   style="display: none">
+                            <img :src="image.previewURL" @click="selectedImage = image.largeImageURL">
+                        </div>
+                    </div>
+                    <button
+                        class="button button-primary"
+                        style="display:flex;gap:4px;align-items: center"
+                        @click="submit">Blog Beitrag erstellen
+                        <span class=" dashicons dashicons-arrow-right-alt2"></span>
+                    </button>
+                </div>
+            </div>
+            <script>
+                const {createApp} = Vue
+                createApp({
+                    data: () => ({
+                        title: '',
+                        content: '',
+                        selectedImage: '',
+                        images: [],
+                        loading: true,
+                        error: '',
+                        url: '<?php echo FXWP_API_URL; ?>' + '/' + '<?php echo get_option('fxwp_api_key'); ?>' + '/blog/topic'
+                    }),
+                    methods: {
+                        submit() {
+                            this.loading = true
+                            fetch('<?php echo rest_url('fxwp/v1/create_post'); ?>', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    title: this.title,
+                                    content: this.content,
+                                    image_url: this.selectedImage
+                                })
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    window.location.href = '<?php echo admin_url('post.php'); ?>?post=' + data + '&action=edit';
+                                });
+                        }
+                    },
+                    created() {
+                        fetch(this.url, {
+                            method: "POST",
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({topic: '<?php echo sanitize_text_field($_GET['topic']); ?>'})
+                        }).then(response => response.json())
+                            .then((res) => {
+
+                                console.log(this.error)
+
+                                if (res.error) {
+                                    this.loading = false;
+                                    alert(res.error);
+                                    this.error = res.error;
+                                    return;
+                                }
+
+                                const post = res.post;
+
+                                this.images = post.pixabay_images;
+                                this.title = post.post_title;
+                                this.content = post.post_content;
+                                this.loading = false;
+
+                                // choose random image
+                                this.selectedImage = this.images[Math.floor(Math.random() * this.images.length)].largeImageURL;
+
+                            })
+                    }
+                }).mount('#schreibwerkstatt-app')
+            </script>
+        <?php }
+        } ?>
 
     </div>
 
-    <script>
-        const {createApp} = Vue
-        createApp({
-            data: () => ({
-                title: '',
-                content: '',
-                selectedImage: '',
-                images: [],
-                loading: true,
-                error: '',
-                url: '<?php echo FXWP_API_URL; ?>' + '/' + '<?php echo get_option('fxwp_api_key'); ?>' + '/blog/topic'
-            }),
-            methods: {
-                submit() {
-                    this.loading = true
-                    fetch('<?php echo rest_url('fxwp/v1/create_post'); ?>', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            title: this.title,
-                            content: this.content,
-                            image_url: this.selectedImage
-                        })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            window.location.href = '<?php echo admin_url('post.php'); ?>?post=' + data + '&action=edit';
-                        });
-                }
-            },
-            created() {
-                fetch(this.url, {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({topic: '<?php echo sanitize_text_field($_GET['topic']); ?>'})
-                }).then(response => response.json())
-                    .then((res) => {
-
-                        console.log(this.error)
-
-                        if(res.error) {
-                            this.loading = false;
-                            alert(res.error);
-                            this.error = res.error;
-                            return;
-                        }
-
-                        const post = res.post;
-
-                        this.images = post.pixabay_images;
-                        this.title = post.post_title;
-                        this.content = post.post_content;
-                        this.loading = false;
-
-                        // choose random image
-                        this.selectedImage = this.images[Math.floor(Math.random() * this.images.length)].largeImageURL;
-
-                    })
-            }
-        }).mount('#schreibwerkstatt-app')
-    </script>
     <style>
+        .form-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+        }
+
+        .form-item {
+            margin-bottom: 20px;
+        }
+
+        .form-item label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .form-item input, .form-item textarea, .form-item select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-item button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-item button:hover {
+            background-color: #0056b3;
+        }
+
         .img-container {
             width: 120px;
             height: 120px;
@@ -202,6 +443,7 @@ function fxwp_topic_page()
             background-color: #E3A355;
             border-color: #E3A355;
         }
+
         .button.button-primary:hover {
             background-color: #c78b42;
             border-color: #c78b42;
