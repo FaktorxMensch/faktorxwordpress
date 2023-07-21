@@ -243,6 +243,7 @@ function fxwp_topic_page()
                         Titel:
                         <input v-model="title" name="title" type="text" style="width:100%;" class="regular-text">
                     </label>
+                    <template  v-if="typeof images !== 'undefined' && images.length > 0">
                     <br/>
                     <br/>
                     <label>
@@ -255,7 +256,10 @@ function fxwp_topic_page()
                                    style="display: none">
                             <img :src="image.previewURL" @click="selectedImage = image.largeImageURL">
                         </div>
-                    </div>
+                    </div></template>
+                    <template v-else>
+                        <div class="good-prose" v-html="content"></div>
+                    </template>
                     <button
                         class="button button-primary"
                         style="display:flex;gap:4px;align-items: center"
