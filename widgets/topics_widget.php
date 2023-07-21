@@ -127,7 +127,7 @@ function fxwp_generate_topics($description)
 
 function fxwp_register_description_widget()
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('edit_posts')) {
         return;
     }
 

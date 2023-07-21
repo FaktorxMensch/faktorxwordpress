@@ -2,7 +2,7 @@
 // Register the widget
 function register_maintenance_mode_widget()
 {
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('editor') && !current_user_can('administrator') && !current_user_can('fxm_admin')) {
         return;
     }
 
@@ -54,6 +54,78 @@ function display_maintenance_mode_widget()
     echo '</select>';
     echo '</form>';
 
+	if (!current_user_can('fxm_admin')) {
+		return;
+	}
+
+	/**
+	 * Add buttons for multiple functions
+	 */
+	$buttons = [
+		[
+			"title"=>"Care+ Wiki-Editor",
+			"type"=>"boolean",
+			"option"=>"ziegenhagel_careplus_wiki_editor",
+			"description"=>"Schaltet den Editor für das CarePlus Wiki ein und aus.",
+			"link"=>get_admin_url()."index.php?ziegenhagel_careplus_wiki_editor=",
+		],
+		[
+			"title"=>"Care+ Entwicklungs-Modus",
+			"type"=>"boolean",
+			"option"=>"ziegenhagel_dev",
+			"description"=>"Dadurch werden Dateiüberschreibungen bei Updates verhindert.",
+			"link"=>get_admin_url()."index.php?ziegenhagel_dev=",
+		],
+		[
+			"title"=>"Care+ Update",
+			"type"=>"action",
+			"description"=>"Update this plugin from Git via regular auto repair / auto update.",
+			"link"=>get_admin_url()."index.php?ziegenhagel_sync=1",
+		],
+		[
+			"title"=>"Disconnect from Overtime",
+			"type"=>"action",
+			"description"=>"Disconnect from Overtime and remove all Care+ data.",
+			"link"=>get_admin_url()."index.php?ziegenhagel_purge=1",
+		],
+		[
+			"title"=>"Care+ Console",
+			"type"=>"boolean",
+			"option"=>"ziegenhagel_console",
+			"description"=>"Care+ Console nicht mehr anzeigen.",
+			"link"=>get_admin_url()."index.php?ziegenhagel_console=",
+		]
+	];
+	if(current_user_can('fxm_admin')) {
+		$buttons[] = [
+			"title"=>"Care+ Maintenance Mode",
+			"type"=>"boolean",
+			"option"=>"maintenance_mode",
+			"description"=>"Schaltet den Wartungsmodus ein und aus.",
+			"link"=>get_admin_url()."index.php?maintenance_mode=",
+		];
+	}
+	foreach($buttons as $index=>$button){
+
+		// line break but not for first button
+
+		// if its a boolean type, check if its true or false
+		if($button["type"]=="boolean"){
+			// set link
+			$button["link"] .= !get_option($button["option"],false)?"1":"0";
+
+			// rename "umschalten" to "ein" or "aus"
+			$button["title"] .= !get_option($button["option"],false)?" aktivieren":" deaktivieren";
+		}
+
+		// display button
+		echo '<div>
+            <a class="button" href="'.$button["link"].'"> 
+            <span style="vertical-align:sub;margin-left:-2px;margin-right:2px" class="dashicons dashicons-plugins-checked"></span>
+            '.$button["title"].' </a>
+            <br><small>'.$button["description"].'</small>
+            </div><br>';
+	}
 }
 
 

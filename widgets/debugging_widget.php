@@ -12,7 +12,7 @@ function fxwp_debugging_widget()
 function fxwp_register_debugging_widget()
 {
 
-    if (!current_user_can('administrator')) {
+    if (!current_user_can('fxm_admin')) {
         return;
     }
 

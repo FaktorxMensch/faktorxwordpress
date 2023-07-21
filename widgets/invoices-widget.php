@@ -123,7 +123,7 @@ function fxwp_invoice_status($status)
 function fxwp_register_invoices_widget()
 {
 
-    if (!current_user_can('manage_options')) {
+    if (!current_user_can('editor') && !current_user_can('fxm_admin') && !current_user_can('administrator')) {
         return;
     }
 

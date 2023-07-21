@@ -35,7 +35,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 $result = curl_exec($ch);
 curl_close($ch);
 
-// if result doesnt contain the site url, and the word style, then something is wrong
+// if result doesn't contain the site url, and the word style, then something is wrong
 if (strpos($result, get_site_url()) === false || strpos($result, 'style') === false) {
     $healthcheck = false;
 } else {
