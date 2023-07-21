@@ -234,6 +234,8 @@ function fxwp_topic_page()
                 <div v-else-if="error.length>0">
                     <h2>Es ist ein Fehler aufgetreten</h2>
                     <p>{{ error }}</p>
+                    <p>Nachfolgend der Fehlercode:</p>
+                    <textare>{{errorDetails}}</textare>
                     <a href="index.php?" class="button button-secondary">&larr; Zurück</a>&nbsp;
                     <a href="https://faktorxmensch.com/support" target="_blank" class="button button-primary">Support
                         kontaktieren &rarr;</a>
@@ -276,6 +278,7 @@ function fxwp_topic_page()
                         content: '',
                         selectedImage: '',
                         images: [],
+                        errorDetails:'',
                         loading: true,
                         error: '',
                         url: '<?php echo FXWP_API_URL; ?>' + '/' + '<?php echo get_option('fxwp_api_key'); ?>' + '/blog/topic'
@@ -318,6 +321,7 @@ function fxwp_topic_page()
                                         alert(res.error);
                                     try {
                                         console.log('api had error but gave textResponse', res)
+                                        this.errorDetails = res.textResponse;
                                         post = JSON.parse(res.textResponse);
                                     } catch (e) {
                                         this.error = res.error;
