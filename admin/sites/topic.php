@@ -314,7 +314,8 @@ function fxwp_topic_page()
                                 let post = res.post;
                                 if (res.error) {
                                     this.loading = false;
-                                    alert(res.error);
+                                    if(res.error !== 'Could not parse response')
+                                        alert(res.error);
                                     try {
                                         console.log('api had error but gave textResponse', res)
                                         post = JSON.parse(res.textResponse);
