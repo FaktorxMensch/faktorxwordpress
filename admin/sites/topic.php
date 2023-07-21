@@ -52,7 +52,7 @@ function fxwp_topic_page()
     <div class="wrap" style="padding: 10px 20px;background:white;margin-top:20px;padding-bottom:20px">
 
         <?php
-        if (!$subnav) {
+        if (!$subnav && !isset($_GET['topic'])) {
             ?>
             <div class="fxm-subnav" style="margin-top:20px;">
                 <h1>Bitte Assistenten auswählen:</h1>
@@ -307,15 +307,21 @@ function fxwp_topic_page()
                             .then((res) => {
 
                                 console.log(this.error)
-
+                                let post = res.post;
                                 if (res.error) {
                                     this.loading = false;
                                     alert(res.error);
-                                    this.error = res.error;
-                                    return;
+                                    try {
+                                        console.log('api had error but gave textResponse', res)
+                                        post = JSON.parse(res.textResponse);
+                                    } catch (e) {
+                                        this.error = res.error;
+                                        console.log('eror in eror', e)
+                                        return;
+                                    }
                                 }
 
-                                const post = res.post;
+                                // const post = res.post;
 
                                 this.images = post.pixabay_images;
                                 this.title = post.post_title;
