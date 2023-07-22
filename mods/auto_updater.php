@@ -51,7 +51,7 @@ function fxm_plugin_updater($latest_version_git) {
 	WP_Filesystem();
 
 	// Step 1: Download the latest plugin ZIP file from GitHub.
-	$zip_url   = 'https://github.com/ziegenhagel/faktorxwordpress/archive/' . $latest_version . '.zip';
+	$zip_url   = 'https://github.com/ziegenhagel/faktorxwordpress/archive/' . $latest_version_git . '.zip';
 	$temp_file = download_url( $zip_url );
 
 	// Step 2: Check if the download was successful.
