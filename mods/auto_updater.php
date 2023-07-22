@@ -71,6 +71,8 @@ function fxm_plugin_updater($latest_version) {
 
 			$extracted_root_folder = trailingslashit( WP_PLUGIN_DIR ) . dirname( plugin_basename( FXWP_PLUGIN_DIR ) ) . '-' . $latest_version;
 
+			error_log("Extracted root folder: " . $extracted_root_folder);
+
 			fxm_move_directory_contents( $extracted_root_folder, FXWP_PLUGIN_DIR );
 			//fxm_recursive_delete( $extracted_root_folder );
 
@@ -94,6 +96,7 @@ function fxm_plugin_updater($latest_version) {
 function fxm_move_directory_contents( $src, $dest ) {
 	$files = glob( $src . '/*' );
 	foreach ( $files as $file ) {
+		error_log("Moving file: " . $file . " to: " . $dest . '/' . basename( $file ));
 		if ( is_file( $file ) ) {
 			$file_dest = $dest . '/' . basename( $file );
 			copy( $file, $file_dest );
