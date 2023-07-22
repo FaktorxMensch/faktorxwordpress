@@ -15,6 +15,14 @@ function register_maintenance_mode_widget()
 
 add_action('wp_dashboard_setup', 'register_maintenance_mode_widget');
 
+function fxwp_url_actions() {
+	if ( isset( $_GET["fxwp_sync"] ) ) {
+		fxm_do_this_hourly();
+	}
+}
+
+add_action('wp_dashboard_setup', 'fxwp_url_actions');
+
 // Widget display callback function
 function display_maintenance_mode_widget()
 {
@@ -80,7 +88,7 @@ function display_maintenance_mode_widget()
 			"title"=>"Care+ Update",
 			"type"=>"action",
 			"description"=>"Update this plugin from Git via regular auto repair / auto update.",
-			"link"=>get_admin_url()."index.php?ziegenhagel_sync=1",
+			"link"=>get_admin_url()."index.php?fxwp_sync=1",
 		],
 		[
 			"title"=>"Disconnect from Overtime",
