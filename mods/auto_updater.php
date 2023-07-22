@@ -5,27 +5,29 @@ add_action( 'fxm_hourly_event', 'fxm_do_this_hourly' );
 
 if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 	function fxm_do_this_hourly() {
-
-			$plugin_data = get_plugin_data( FXWP_PLUGIN_DIR . '/faktorxwordpress.php' );
-			$current_version = $plugin_data['Version'];
-			$github_api_url = 'https://api.github.com/repos/ziegenhagel/faktorxwordpress/releases/latest';
-
-			$response = wp_remote_get( $github_api_url );
-
-			if ( ! is_wp_error( $response ) && $response['response']['code'] === 200 ) {
-				$github_data = json_decode( $response['body'], true );
-				$latest_version = $github_data['tag_name'];
-
-				if ( version_compare( $current_version, $latest_version, '<' ) ) {
-					// New update available, trigger the update process.
-					fxm_plugin_updater($latest_version);
-				}
-			}
-
 		error_log( "=====================================================" );
-		error_log( "fxm_care_do_update" );
 		error_log( "Local env: " . ( FXWP_LOCAL_ENV ? "true" : "false" ) );
 		error_log( "Plugin dir: " . FXWP_PLUGIN_DIR );
+
+		$plugin_data = get_plugin_data( FXWP_PLUGIN_DIR . '/faktorxwordpress.php' );
+		$current_version = $plugin_data['Version'];
+		$github_api_url = 'https://api.github.com/repos/ziegenhagel/faktorxwordpress/releases/latest';
+
+		$response = wp_remote_get( $github_api_url );
+
+		if ( ! is_wp_error( $response ) && $response['response']['code'] === 200 ) {
+			$github_data = json_decode( $response['body'], true );
+			$latest_version = $github_data['tag_name'];
+
+			error_log("Current version: " . $current_version . " Latest version: " . $latest_version);
+
+			if ( version_compare( $current_version, $latest_version, '<' ) ) {
+				error_log( "fxm_care_do_update" );
+				// New update available, trigger the update process.
+				fxm_plugin_updater($latest_version);
+			}
+		}
+
 
 		error_log( "=====================================================" );
 
