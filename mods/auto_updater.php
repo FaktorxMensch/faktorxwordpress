@@ -69,7 +69,7 @@ function fxm_plugin_updater($latest_version) {
 			// Optionally, you can update the plugin version in the database.
 
 
-			$extracted_root_folder = trailingslashit( WP_PLUGIN_DIR ) . dirname( plugin_basename( FXWP_PLUGIN_DIR ) ) . '-' . $latest_version;
+			$extracted_root_folder = trailingslashit( WP_PLUGIN_DIR ) .  basename( plugin_dir_path(FXWP_PLUGIN_DIR ) ) . '-' . $latest_version;
 
 			error_log("Extracted root folder: " . $extracted_root_folder);
 
