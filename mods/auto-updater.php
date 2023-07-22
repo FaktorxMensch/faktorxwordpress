@@ -76,6 +76,7 @@ if (!function_exists('fxm_care_do_update')) {
 		error_log("=====================================================");
 		error_log("fxm_care_do_update");
 		error_log("Local env: " . (FXWP_LOCAL_ENV ? "true" : "false"));
+		error_log("Plugin dir: " . FXWP_PLUGIN_DIR);
 		error_log("=====================================================");
 		//if(FXWP_LOCAL_ENV) return; // dont do updates when developing
 
