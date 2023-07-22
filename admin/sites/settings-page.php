@@ -20,6 +20,7 @@ function fxwp_settings_page()
             do_settings_sections('fxwp_settings_group');
             ?>
             <table class="form-table">
+                <!-- Favicon -->
                 <tr>
                     <th scope="row"><?php echo esc_html__('Favicon auswählen', 'fxwp'); ?></th>
                     <td>
@@ -59,10 +60,9 @@ function fxwp_settings_page()
                         }
                         ?>
                     </td>
-
-
                 </tr>
 
+                <!-- Logo -->
                 <tr>
                     <th scope="row"><?php echo esc_html__('Logo auswählen', 'fxwp'); ?></th>
                     <td>
@@ -101,9 +101,9 @@ function fxwp_settings_page()
                         }
                         ?>
                     </td>
-
-
                 </tr>
+
+                <!-- 404 page -->
                 <tr>
                     <th scope="row"><?php echo esc_html__('404 Seite auswählen', 'fxwp'); ?></th>
                     <td>
@@ -130,100 +130,111 @@ function fxwp_settings_page()
                     </td>
                 </tr>
 
-                <tr>
-                    <th scope="row">
-                        <?php echo esc_html__('Google Fonts entfernen', 'fxwp'); ?>
-                    </th>
-                    <td>
-                        <p><?php echo esc_html__('Sollen die Google Fonts entfernt werden?', 'fxwp'); ?></p>
-                        <select name="fxwp_google_fonts_remove">
-                            <option value="nein" <?php selected($google_fonts_remove, 'nein'); ?>>Nein</option>
-                            <option value="einfach" <?php selected($google_fonts_remove, 'einfach'); ?>>Ja, einfach
-                            </option>
-                            <option value="aggresiv" <?php selected($google_fonts_remove, 'aggresiv'); ?>>Ja, aggresiv
-                            </option>
-                        </select>
-                        <p style="font-size: 0.8em;margin-bottom: 10px;"><?php echo esc_html__('"Ja, einfach" erfordert die Plugin Installation via "Install Helper"', 'fxwp'); ?></p>
+                <!-- Google Fonts if current user is fxm_admin -->
+                <?php if(current_user_can('fxm_admin')) { ?>
+                    <tr>
+                        <th scope="row">
+                            <?php echo esc_html__('Google Fonts entfernen', 'fxwp'); ?>
+                        </th>
+                        <td>
+                            <p><?php echo esc_html__('Sollen die Google Fonts entfernt werden?', 'fxwp'); ?></p>
+                            <select name="fxwp_google_fonts_remove">
+                                <option value="nein" <?php selected($google_fonts_remove, 'nein'); ?>>Nein</option>
+                                <option value="einfach" <?php selected($google_fonts_remove, 'einfach'); ?>>Ja, einfach
+                                </option>
+                                <option value="aggresiv" <?php selected($google_fonts_remove, 'aggresiv'); ?>>Ja, aggresiv
+                                </option>
+                            </select>
+                            <p style="font-size: 0.8em;margin-bottom: 10px;"><?php echo esc_html__('"Ja, einfach" erfordert die Plugin Installation via "Install Helper"', 'fxwp'); ?></p>
 
-                    </td>
-                </tr>
+                        </td>
+                    </tr>
+                <?php } ?>
 
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Ansichtsoptionen', 'fxwp'); ?></th>
-                    <td>
-                        <p><?php echo esc_html__('Wählen Sie die gewünschte Ansichtsoption aus:', 'fxwp'); ?></p>
-                        <label>
-                            <input type="radio" name="fxwp_view_option"
-                                   value="einfach" <?php checked(get_option('fxwp_view_option', 'einfach'), 'einfach'); ?>>
-                            <?php echo esc_html__('Einfache Ansicht', 'fxwp'); ?>
-                        </label>
-                        <br>
-                        <label>
-                            <input type="radio" name="fxwp_view_option"
-                                   value="erweitert" <?php checked(get_option('fxwp_view_option'), 'erweitert'); ?>>
-                            <?php echo esc_html__('Erweiterte Ansicht', 'fxwp'); ?>
-                        </label>
-                    </td>
-                </tr>
+                <!-- View options if current user is fxm_admin -->
+                <?php if(current_user_can("fxm_admin")) { ?>
+                    <tr>
+                        <th scope="row"><?php echo esc_html__('Ansichtsoptionen', 'fxwp'); ?></th>
+                        <td>
+                            <p><?php echo esc_html__('Wählen Sie die gewünschte Ansichtsoption aus:', 'fxwp'); ?></p>
+                            <label>
+                                <input type="radio" name="fxwp_view_option"
+                                       value="einfach" <?php checked(get_option('fxwp_view_option', 'einfach'), 'einfach'); ?>>
+                                <?php echo esc_html__('Einfache Ansicht', 'fxwp'); ?>
+                            </label>
+                            <br>
+                            <label>
+                                <input type="radio" name="fxwp_view_option"
+                                       value="erweitert" <?php checked(get_option('fxwp_view_option'), 'erweitert'); ?>>
+                                <?php echo esc_html__('Erweiterte Ansicht', 'fxwp'); ?>
+                            </label>
+                        </td>
+                    </tr>
+                <?php } ?>
 
+                <!-- API Key if current user is fxm_admin-->
+                <?php if (current_user_can("fxm_admin")) { ?>
+                    <tr>
+                        <th scope="row"><?php echo esc_html__('Faktor&times;WP Lizenz', 'fxwp'); ?></th>
+                        <td>
+                            <p><?php echo esc_html__('Bitte geben Sie Ihren Lizenz Schlüssel ein.', 'fxwp'); ?></p>
+                            <div class="flex">
+                                <input type="text" name="fxwp_api_key" value="<?php echo esc_attr($api_key); ?>"/>
+                                <!-- have a new activation button -->
+                                <?php if ($api_key) { ?>
+                                    <a href="<?php echo esc_url(admin_url('admin.php?page=fxwp-settings&fxwp_api_key_renew=true')); ?>"
+                                       class="button button-secondary"><?php echo esc_html__('Lizenz erneuern', 'fxwp'); ?></a>
+                                <?php } ?>
+                            </div>
+                        </td>
+                    </tr>
+                <?php } ?>
 
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Faktor&times;WP Lizenz', 'fxwp'); ?></th>
-                    <td>
-                        <p><?php echo esc_html__('Bitte geben Sie Ihren Lizenz Schlüssel ein.', 'fxwp'); ?></p>
-                        <div class="flex">
-                            <input type="text" name="fxwp_api_key" value="<?php echo esc_attr($api_key); ?>"/>
-                            <!-- have a new activation button -->
-                            <?php if ($api_key) { ?>
-                                <a href="<?php echo esc_url(admin_url('admin.php?page=fxwp-settings&fxwp_api_key_renew=true')); ?>"
-                                   class="button button-secondary"><?php echo esc_html__('Lizenz erneuern', 'fxwp'); ?></a>
-                            <?php } ?>
-                        </div>
-                    </td>
-                </tr>
-
-                <tr>
-                    <!-- local env? -->
-                    <th scope="row"><?php echo esc_html__('Lokale Umgebung', 'fxwp'); ?></th>
-                    <td>
-                        <!-- use FXWP_LOCAL_ENV constant -->
-                        <p><?php
-                            if (defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV) {
-                                echo esc_html__('Sie befinden sich in einer lokalen Umgebung.', 'fxwp');
-                            } else {
-                                echo esc_html__('Sie befinden sich nicht in einer lokalen Umgebung.', 'fxwp');
-                            }
-                            ?>
-                        </p>
-                    </td>
-                </tr>
+                <!-- local env? if current user can fxm_admin -->
+                <?php if(current_user_can("fxm_admin")) { ?>
+                    <tr>
+                        <th scope="row"><?php echo esc_html__('Lokale Umgebung', 'fxwp'); ?></th>
+                        <td>
+                            <!-- use FXWP_LOCAL_ENV constant -->
+                            <p><?php
+                                if (defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV) {
+                                    echo esc_html__('Sie befinden sich in einer lokalen Umgebung.', 'fxwp');
+                                } else {
+                                    echo esc_html__('Sie befinden sich nicht in einer lokalen Umgebung.', 'fxwp');
+                                }
+                                ?>
+                            </p>
+                        </td>
+                    </tr>
+                <?php } ?>
 
                 <!-- print get_option for fxwp_customer and fxwp_project -->
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Kunde', 'fxwp'); ?></th>
-                    <td><p><?php print_r(get_option('fxwp_customer')); ?></p></td>
-                </tr>
+                <!-- only if current user is fxm_admin -->
+                <?php if (current_user_can("fxm_admin")) { ?>
+                    <tr>
+                        <th scope="row"><?php echo esc_html__('Kunde', 'fxwp'); ?></th>
+                        <td><p><?php print_r(get_option('fxwp_customer')); ?></p></td>
+                    </tr>
 
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Projekt', 'fxwp'); ?></th>
-                    <td><p><?php print_r(get_option('fxwp_project')); ?></p></td>
-                </tr>
+                    <tr>
+                        <th scope="row"><?php echo esc_html__('Projekt', 'fxwp'); ?></th>
+                        <td><p><?php print_r(get_option('fxwp_project')); ?></p></td>
+                    </tr>
 
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Pläne', 'fxwp'); ?></th>
-                    <td><p><?php print_r(get_option('fxwp_plans')); ?></p></td>
-                </tr>
+                    <tr>
+                        <th scope="row"><?php echo esc_html__('Pläne', 'fxwp'); ?></th>
+                        <td><p><?php print_r(get_option('fxwp_plans')); ?></p></td>
+                    </tr>
+                <?php } ?>
 
             </table>
             <?php submit_button(); ?>
         </form>
 
         <form method="post" action="">
-            <input type="hidden" name="fxwp_self_update" value="true"/>
-            <?php wp_nonce_field('fxwp_self_update', 'fxwp_self_update_nonce'); ?>
             <?php echo esc_html__('Version', 'fxwp'); ?>
             <?php echo esc_html(FXWP_VERSION); ?>
-            <a href="<?php echo esc_url(admin_url('admin.php?page=fxwp-settings&fxwp_self_update=true')); ?>"
+            <a href="<?php echo esc_url(admin_url('index.php?fxwp_sync=1')); ?>"
             ><?php echo esc_html__('Prüfen auf Updates', 'fxwp'); ?></a>
         </form>
 
@@ -233,9 +244,11 @@ function fxwp_settings_page()
 
 function fxwp_register_settings()
 {
-    register_setting('fxwp_settings_group', 'fxwp_api_key');
-    register_setting('fxwp_settings_group', 'fxwp_google_fonts_remove');
-    register_setting('fxwp_settings_group', 'fxwp_view_option', array('default' => 'erweitert'));
+    if (current_user_can("fxm_admin")) {
+	    register_setting( 'fxwp_settings_group', 'fxwp_api_key' );
+	    register_setting( 'fxwp_settings_group', 'fxwp_google_fonts_remove' );
+	    register_setting( 'fxwp_settings_group', 'fxwp_view_option', array( 'default' => 'erweitert' ) );
+    }
     register_setting('fxwp_settings_group', 'fxwp_favicon');
     register_setting('fxwp_settings_group', 'fxwp_logo');
     register_setting('fxwp_settings_group', 'fxwp_404_page');
