@@ -15,7 +15,7 @@ if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTT
     define('FXWP_API_URL', 'https://localhost:3000/api/fxwp');
 } else {
     define('FXWP_LOCAL_ENV', false);
-    define('FXWP_API_URL', 'https://p2.faktorxmensch.com/api/fxwp');
+    define('FXWP_API_URL', 'https://cors.faktorxmensch.com/api/fxwp');
 }
 
 // Server Settings
