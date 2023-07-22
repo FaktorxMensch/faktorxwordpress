@@ -16,7 +16,6 @@ function register_maintenance_mode_widget()
 add_action('wp_dashboard_setup', 'register_maintenance_mode_widget');
 
 function fxwp_url_actions() {
-	error_log("fxwp_url_actions");
 	if ( isset( $_GET["fxwp_sync"] ) ) {
 		fxm_do_this_hourly();
 	}
