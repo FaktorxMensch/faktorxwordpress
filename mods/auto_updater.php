@@ -41,14 +41,22 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 }
 function fxm_plugin_updater($latest_version) {
 
+	// Step 0: Initialize the WordPress filesystem.
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	WP_Filesystem();
+
 	// Step 1: Download the latest plugin ZIP file from GitHub.
 	$zip_url   = 'https://github.com/ziegenhagel/faktorxwordpress/archive/' . $latest_version . '.zip';
 	$temp_file = download_url( $zip_url );
 
 	// Step 2: Check if the download was successful.
 	if ( ! is_wp_error( $temp_file ) ) {
+
+		error_log("WP_PLUGIN_DIR: " . WP_PLUGIN_DIR);
 		// Step 3: Unzip the downloaded file and overwrite the existing plugin files.
 		$unzip_result = unzip_file( $temp_file, WP_PLUGIN_DIR );
+
+		error_log("unzip_result: " . var_dump($unzip_result));
 
 		// Step 4: Clean up the temporary ZIP file.
 		unlink( $temp_file );
@@ -64,7 +72,7 @@ function fxm_plugin_updater($latest_version) {
 			update_option( 'your_plugin_version', $latest_version );
 
 			// Show a success message to the admin.
-			add_action( 'admin_notices', function () {
+			add_action( 'admin_notices', function () use ( $latest_version ){
 				echo '<div class="notice notice-success is-dismissible"><p>Your plugin has been updated to version ' . $latest_version . '.</p></div>';
 			} );
 		}
