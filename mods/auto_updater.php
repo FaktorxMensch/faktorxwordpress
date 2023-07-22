@@ -17,11 +17,12 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 
 		if ( ! is_wp_error( $response ) && $response['response']['code'] === 200 ) {
 			$github_data = json_decode( $response['body'], true );
-			$latest_version = $github_data['tag_name'];
+			$latest_version_git = $github_data['tag_name'];
 
 			//if version contains "v" remove it
-			if (strpos($latest_version, 'v') !== false) {
-				$latest_version = str_replace("v", "", $latest_version);
+			$latest_version = $latest_version_git;
+			if (strpos($latest_version_git, 'v') !== false) {
+				$latest_version = str_replace("v", "", $latest_version_git);
 			}
 
 			error_log("Current version: " . $current_version . " Latest version: " . $latest_version);
@@ -29,7 +30,7 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 			if ( version_compare( $current_version, $latest_version, '<' ) ) {
 				error_log( "fxm_care_do_update" );
 				// New update available, trigger the update process.
-				fxm_plugin_updater($latest_version);
+				fxm_plugin_updater($latest_version_git);
 			}
 		}
 
