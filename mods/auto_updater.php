@@ -81,9 +81,6 @@ function fxm_plugin_updater($latest_version_git) {
 			fxm_move_directory_contents( $extracted_root_folder, FXWP_PLUGIN_DIR );
 			fxm_recursive_delete( $extracted_root_folder );
 
-
-			update_option( 'your_plugin_version', $latest_version );
-
 			// Show a success message to the admin.
 			add_action( 'admin_notices', function () use ( $latest_version ){
 				echo '<div class="notice notice-success is-dismissible"><p>Your plugin has been updated to version ' . $latest_version . '.</p></div>';
