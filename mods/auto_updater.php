@@ -37,7 +37,7 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 			} else {
 				error_log( "No update available" );
 				add_action( 'admin_notices', function (){
-					echo '<div class="notice notice-success is-dismissible"><p>Your plugin is up to date.</p></div>';
+					echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin is up to date.</p></div>';
 				} );
 			}
 		}
@@ -85,7 +85,7 @@ function fxm_plugin_updater($latest_version_git) {
 
 			// Show a success message to the admin.
 			add_action( 'admin_notices', function () use ( $latest_version ){
-				echo '<div class="notice notice-success is-dismissible"><p>Your plugin has been updated to version ' . $latest_version . '.</p></div>';
+				echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin has been updated to version ' . $latest_version . '.</p></div>';
 			} );
 		}
 	} else {
