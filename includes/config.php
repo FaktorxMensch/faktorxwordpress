@@ -6,6 +6,9 @@ if (defined('FXWP_VERSION'))
 $plugin_data = get_file_data(__DIR__ . '/../faktorxwordpress.php', array('Version' => 'Version'), false);
 define('FXWP_VERSION', $plugin_data['Version']);
 
+//Get plugin root path, so go one directory up
+define('FXWP_PLUGIN_DIR', plugin_dir_path(__DIR__ . '/../'));
+
 // check if we are in a local environment
 if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '.local') !== false) { //
     define('FXWP_LOCAL_ENV', true);

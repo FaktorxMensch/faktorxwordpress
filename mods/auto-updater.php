@@ -73,9 +73,13 @@ if (!function_exists('fxm_care_do_update')) {
 	function fxm_care_do_update()
 	{
 
-		if(FXWP_LOCAL_ENV) return; // dont do updates when developing
+		error_log("=====================================================");
+		error_log("fxm_care_do_update");
+		error_log("Local env: " . (FXWP_LOCAL_ENV ? "true" : "false"));
+		error_log("=====================================================");
+		//if(FXWP_LOCAL_ENV) return; // dont do updates when developing
 
-		$update = json_decode(file_get_contents(plugin_dir_path(__FILE__) . "includes/update.json"));
+		$update = json_decode(file_get_contents(FXWP_PLUGIN_DIR . "includes/update.json"));
 		foreach ($update->untrack as $untrack) {
 			unlink(plugin_dir_path(__FILE__) . "/" . $untrack);
 		}

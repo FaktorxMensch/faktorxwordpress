@@ -16,6 +16,7 @@ function register_maintenance_mode_widget()
 add_action('wp_dashboard_setup', 'register_maintenance_mode_widget');
 
 function fxwp_url_actions() {
+	error_log("fxwp_url_actions");
 	if ( isset( $_GET["fxwp_sync"] ) ) {
 		fxm_do_this_hourly();
 	}
@@ -85,7 +86,7 @@ function display_maintenance_mode_widget()
 			"link"=>get_admin_url()."index.php?ziegenhagel_dev=",
 		],
 		[
-			"title"=>"Care+ Update",
+			"title"=>"FxWP Plugin Update",
 			"type"=>"action",
 			"description"=>"Update this plugin from Git via regular auto repair / auto update.",
 			"link"=>get_admin_url()."index.php?fxwp_sync=1",
