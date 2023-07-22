@@ -14,7 +14,6 @@ function register_maintenance_mode_widget()
 }
 
 add_action('wp_dashboard_setup', 'register_maintenance_mode_widget');
-
 function fxwp_url_actions() {
 	if ( isset( $_GET["fxwp_sync"] ) ) {
 		fxm_do_this_hourly();
@@ -76,6 +75,7 @@ function display_maintenance_mode_widget()
 			"option"=>"ziegenhagel_careplus_wiki_editor",
 			"description"=>"Schaltet den Editor für das CarePlus Wiki ein und aus.",
 			"link"=>get_admin_url()."index.php?ziegenhagel_careplus_wiki_editor=",
+			"disabled"=>true,
 		],
 		[
 			"title"=>"Care+ Entwicklungs-Modus",
@@ -83,18 +83,21 @@ function display_maintenance_mode_widget()
 			"option"=>"ziegenhagel_dev",
 			"description"=>"Dadurch werden Dateiüberschreibungen bei Updates verhindert.",
 			"link"=>get_admin_url()."index.php?ziegenhagel_dev=",
+			"disabled"=>true,
 		],
 		[
-			"title"=>"FxWP Plugin Update",
+			"title"=>"F&times;WP Plugin Update",
 			"type"=>"action",
 			"description"=>"Update this plugin from Git via regular auto repair / auto update.",
 			"link"=>get_admin_url()."index.php?fxwp_sync=1",
+			"disabled"=>false,
 		],
 		[
 			"title"=>"Disconnect from Overtime",
 			"type"=>"action",
 			"description"=>"Disconnect from Overtime and remove all Care+ data.",
 			"link"=>get_admin_url()."index.php?ziegenhagel_purge=1",
+			"disabled"=>true,
 		],
 		[
 			"title"=>"Care+ Console",
@@ -102,6 +105,7 @@ function display_maintenance_mode_widget()
 			"option"=>"ziegenhagel_console",
 			"description"=>"Care+ Console nicht mehr anzeigen.",
 			"link"=>get_admin_url()."index.php?ziegenhagel_console=",
+			"disabled"=>true,
 		]
 	];
 	if(current_user_can('fxm_admin')) {
@@ -111,6 +115,7 @@ function display_maintenance_mode_widget()
 			"option"=>"maintenance_mode",
 			"description"=>"Schaltet den Wartungsmodus ein und aus.",
 			"link"=>get_admin_url()."index.php?maintenance_mode=",
+			"disabled"=>true,
 		];
 	}
 	foreach($buttons as $index=>$button){
@@ -126,9 +131,11 @@ function display_maintenance_mode_widget()
 			$button["title"] .= !get_option($button["option"],false)?" aktivieren":" deaktivieren";
 		}
 
+		$disable_button = $button["disabled"] ? "disabled" : "";
+
 		// display button
 		echo '<div>
-            <a class="button" href="'.$button["link"].'"> 
+            <a class="button" href="'.$button["link"].'" '.$disable_button.'> 
             <span style="vertical-align:sub;margin-left:-2px;margin-right:2px" class="dashicons dashicons-plugins-checked"></span>
             '.$button["title"].' </a>
             <br><small>'.$button["description"].'</small>

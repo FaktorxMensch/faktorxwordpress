@@ -1,12 +1,6 @@
 <?php
 function fxwp_settings_page()
 {
-
-    // check if self update was triggered
-    if (isset($_GET['fxwp_self_update']) && $_GET['fxwp_self_update'] == 'true') {
-        fxwp_self_update();
-    }
-
     // check if we want fxwp_api_key_renew
     if (isset($_GET['fxwp_api_key_renew']) && $_GET['fxwp_api_key_renew'] == 'true') {
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Ihr API-Schlüssel wurde erfolgreich erneuert.', 'fxwp') . '</p></div>';
@@ -240,11 +234,11 @@ function fxwp_settings_page()
 function fxwp_register_settings()
 {
     register_setting('fxwp_settings_group', 'fxwp_api_key');
+    register_setting('fxwp_settings_group', 'fxwp_google_fonts_remove');
+    register_setting('fxwp_settings_group', 'fxwp_view_option', array('default' => 'erweitert'));
     register_setting('fxwp_settings_group', 'fxwp_favicon');
     register_setting('fxwp_settings_group', 'fxwp_logo');
-    register_setting('fxwp_settings_group', 'fxwp_google_fonts_remove');
     register_setting('fxwp_settings_group', 'fxwp_404_page');
-    register_setting('fxwp_settings_group', 'fxwp_view_option', array('default' => 'erweitert'));
 
 }
 

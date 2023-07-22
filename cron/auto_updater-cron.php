@@ -78,7 +78,7 @@ function fxm_plugin_updater($latest_version_git) {
 		} else {
 			// Successful update.
 
-			$extracted_root_folder = trailingslashit( WP_PLUGIN_DIR ) . basename(FXWP_PLUGIN_DIR )  . '-' . $latest_version;
+			$extracted_root_folder = auto_updater . phptrailingslashit( WP_PLUGIN_DIR ) . basename( FXWP_PLUGIN_DIR ) . '-' . $latest_version;
 
 			fxm_move_directory_contents( $extracted_root_folder, FXWP_PLUGIN_DIR );
 			fxm_recursive_delete( $extracted_root_folder );
@@ -116,7 +116,7 @@ function fxm_recursive_delete($path) {
 	} elseif (is_dir($path)) {
 		$files = array_diff(scandir($path), array('.', '..'));
 		foreach ($files as $file) {
-			fxm_recursive_delete(realpath($path) . '/' . $file);
+			fxm_recursive_delete( realpath( $path ) . 'auto_updater-cron.php/' . $file);
 		}
 		return rmdir($path);
 	}
