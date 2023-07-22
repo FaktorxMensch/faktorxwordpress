@@ -7,13 +7,13 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 	function fxm_do_this_hourly() {
 		error_log( "================  FXWP Plugin Update  ====================" );
 		error_log( "Local env: " . ( FXWP_LOCAL_ENV ? "true" : "false" ) );
-		if (FXWP_LOCAL_ENV) {
-			error_log("Not checking for updates in local environment");
-			add_action( 'admin_notices', function (){
-				echo '<div class="notice notice-error is-dismissible"><p>You are running the plugin on a localhost. Plugin will not update.</p></div>';
-			} );
-			return;
-		}
+//		if (FXWP_LOCAL_ENV) {
+//			error_log("Not checking for updates in local environment");
+//			add_action( 'admin_notices', function (){
+//				echo '<div class="notice notice-error is-dismissible"><p>You are running the plugin on a localhost. Plugin will not update.</p></div>';
+//			} );
+//			return;
+//		}
 
 		$plugin_data = get_plugin_data( FXWP_PLUGIN_DIR . '/faktorxwordpress.php' );
 		$current_version = $plugin_data['Version'];
@@ -36,7 +36,19 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 			if ( version_compare( $current_version, $latest_version, '<' ) ) {
 				//error_log( "fxm_care_do_update" );
 				// New update available, trigger the update process.
-				fxm_plugin_updater($latest_version_git);
+				$output = array();
+				exec("which git", $output);
+				if (!in_array("not found", $output)) {
+					error_log("Git is installed");
+					fxm_git_plugin_updater($latest_version_git);
+				} else {
+					error_log("Git is not installed, trying to upgrade plugin anyways...");
+					add_action( 'admin_notices', function (){
+						echo '<div class="notice notice-error is-dismissible"><p>Git is not installed on your server. Plugin will try to update the old way but withour any warranty.</p></div>';
+					} );
+					fxm_NO_git_plugin_updater($latest_version_git);
+					return;
+				}
 			} else {
 				error_log( "No update available" );
 				add_action( 'admin_notices', function () use ( $latest_version_git ){
@@ -50,7 +62,37 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 
 	}
 }
-function fxm_plugin_updater($latest_version_git) {
+
+function fxm_git_plugin_updater($latest_version_git) {
+
+	//If plugin includes a .git folder, use git to update
+	$plugin_git_dir = FXWP_PLUGIN_DIR . "/.git";
+	if (file_exists($plugin_git_dir)) {
+		error_log("Plugin includes a .git folder, using git to update");
+		$output = array();
+		exec("cd " . FXWP_PLUGIN_DIR . " && git pull origin master", $output);
+		error_log("Git output: " . implode("\n", $output));
+		add_action( 'admin_notices', function () use ( $latest_version_git ){
+			echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin has been updated to version ' . $latest_version_git . '.</p></div>';
+		} );
+	} else {
+		//Delete plugin folder and clone project from git
+		error_log("Plugin does not include a .git folder, deleting plugin folder and cloning project from git");
+
+		$output = array();
+		exec("cd " . FXWP_PLUGIN_DIR . ' && find . -path "*/*" -delete', $output);
+
+		$output = array();
+		exec("git clone https://github.com/ziegenhagel/faktorxwordpress.git .", $output);
+		error_log("Git output: " . implode("\n", $output));
+		add_action( 'admin_notices', function () use ( $latest_version_git ){
+			echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin has been updated via git to version ' . $latest_version_git . '.</p></div>';
+		} );
+	}
+}
+
+
+function fxm_NO_git_plugin_updater($latest_version_git) {
 
 	$latest_version = $latest_version_git;
 	if (strpos($latest_version_git, 'v') !== false) {
@@ -71,9 +113,6 @@ function fxm_plugin_updater($latest_version_git) {
 		// Step 3: Unzip the downloaded file and overwrite the existing plugin files.
 		$unzip_result = unzip_file( $temp_file, WP_PLUGIN_DIR );
 
-		// Step 4: Clean up the temporary ZIP file.
-		unlink( $temp_file );
-
 		if ( is_wp_error( $unzip_result ) ) {
 			// Error occurred while unzipping.
 			// You may want to handle this case gracefully.
@@ -91,6 +130,10 @@ function fxm_plugin_updater($latest_version_git) {
 				echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin has been updated to version ' . $latest_version . '.</p></div>';
 			} );
 		}
+
+		// Step 4: Clean up the temporary ZIP file.
+		unlink( $temp_file );
+
 	} else {
 		// Error occurred while downloading the update.
 		// You may want to handle this case gracefully.
