@@ -9,6 +9,9 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 		error_log( "Local env: " . ( FXWP_LOCAL_ENV ? "true" : "false" ) );
 		if (FXWP_LOCAL_ENV) {
 			error_log("Not checking for updates in local environment");
+			add_action( 'admin_notices', function (){
+				echo '<div class="notice notice-info is-dismissible"><p>You are running the plugin on a localhost. Plugin will not update.</p></div>';
+			} );
 			return;
 		}
 
@@ -36,8 +39,8 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 				fxm_plugin_updater($latest_version_git);
 			} else {
 				error_log( "No update available" );
-				add_action( 'admin_notices', function (){
-					echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin is up to date.</p></div>';
+				add_action( 'admin_notices', function () use ( $latest_version_git ){
+					echo '<div class="notice notice-info is-dismissible"><p>FXWP plugin is up to date, current version is '.$latest_version_git.'.</p></div>';
 				} );
 			}
 		}
