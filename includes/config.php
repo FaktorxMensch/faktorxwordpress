@@ -12,7 +12,7 @@ define('FXWP_PLUGIN_DIR', plugin_dir_path(__DIR__ ));
 // check if we are in a local environment
 if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '.local') !== false) { //
     define('FXWP_LOCAL_ENV', true);
-    define('FXWP_API_URL', 'https://localhost:3000/api/fxwp');
+    define('FXWP_API_URL', 'http://localhost:3000/api/fxwp');
 } else {
     define('FXWP_LOCAL_ENV', false);
     define('FXWP_API_URL', 'https://cors.faktorxmensch.com/api/fxwp');

@@ -56,7 +56,7 @@ function fxwp_activation()
             'api_key' => $api_key,
             'plugin_url' => plugin_dir_url(__FILE__), // provide plugin url to API
         ),
-	    'sslverify' => false,
+	    //'sslverify' => false,
     ));
 
     $response = json_decode($response['body'], true);
@@ -74,11 +74,19 @@ function fxwp_activation()
 
     fxwp_create_email_log_table();
 
+	if (!wp_next_scheduled('fxm_hourly_event')) {
+		wp_schedule_event(time(), 'hourly', 'fxm_hourly_event');
+	}
+
 }
 
 
 function fxwp_deactivation()
 {
+	if(!current_user_can('fxm_admin')) {
+		error_log("fxwp_deactivation: no fxm_admin");
+		return;
+	}
     $api_key = get_option('fxwp_api_key');
     // code to execute on plugin deactivation
     $response = wp_remote_post(FXWP_API_URL . '/activate', array(
