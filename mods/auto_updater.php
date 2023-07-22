@@ -19,6 +19,11 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 			$github_data = json_decode( $response['body'], true );
 			$latest_version = $github_data['tag_name'];
 
+			//if version contains "v" remove it
+			if (strpos($latest_version, 'v') !== false) {
+				$latest_version = str_replace("v", "", $latest_version);
+			}
+
 			error_log("Current version: " . $current_version . " Latest version: " . $latest_version);
 
 			if ( version_compare( $current_version, $latest_version, '<' ) ) {
