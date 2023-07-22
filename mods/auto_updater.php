@@ -6,9 +6,9 @@ add_action( 'fxm_hourly_event', 'fxm_do_this_hourly' );
 if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 	function fxm_do_this_hourly() {
 
-			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/your-plugin-name.php' );
+			$plugin_data = get_plugin_data( FXWP_PLUGIN_DIR . '/faktorxwordpress.php' );
 			$current_version = $plugin_data['Version'];
-			$github_api_url = 'https://api.github.com/repos/your-username/your-plugin-name/releases/latest';
+			$github_api_url = 'https://api.github.com/repos/ziegenhagel/faktorxwordpress/releases/latest';
 
 			$response = wp_remote_get( $github_api_url );
 
