@@ -81,7 +81,7 @@ function fxm_plugin_updater($latest_version_git) {
 		} else {
 			// Successful update.
 
-			$extracted_root_folder = auto_updater . phptrailingslashit( WP_PLUGIN_DIR ) . basename( FXWP_PLUGIN_DIR ) . '-' . $latest_version;
+			$extracted_root_folder = trailingslashit( WP_PLUGIN_DIR ) . basename( FXWP_PLUGIN_DIR ) . '-' . $latest_version;
 
 			fxm_move_directory_contents( $extracted_root_folder, FXWP_PLUGIN_DIR );
 			fxm_recursive_delete( $extracted_root_folder );
