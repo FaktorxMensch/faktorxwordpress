@@ -56,8 +56,6 @@ function fxm_plugin_updater($latest_version) {
 		// Step 3: Unzip the downloaded file and overwrite the existing plugin files.
 		$unzip_result = unzip_file( $temp_file, WP_PLUGIN_DIR );
 
-		error_log("unzip_result: " . var_dump($unzip_result));
-
 		// Step 4: Clean up the temporary ZIP file.
 		unlink( $temp_file );
 
@@ -69,6 +67,14 @@ function fxm_plugin_updater($latest_version) {
 			// Successful update.
 			// You can do additional tasks here, like running database updates, etc.
 			// Optionally, you can update the plugin version in the database.
+
+
+			$extracted_root_folder = trailingslashit( WP_PLUGIN_DIR ) . dirname( plugin_basename( FXWP_PLUGIN_DIR ) ) . '-' . $latest_version;
+
+			fxm_move_directory_contents( $extracted_root_folder, FXWP_PLUGIN_DIR );
+			//fxm_recursive_delete( $extracted_root_folder );
+
+
 			update_option( 'your_plugin_version', $latest_version );
 
 			// Show a success message to the admin.
@@ -82,4 +88,31 @@ function fxm_plugin_updater($latest_version) {
 		error_log( "Error occurred while downloading the update.");
 	}
 
+}
+
+// Helper function to move the contents from one directory to another.
+function fxm_move_directory_contents( $src, $dest ) {
+	$files = glob( $src . '/*' );
+	foreach ( $files as $file ) {
+		if ( is_file( $file ) ) {
+			$file_dest = $dest . '/' . basename( $file );
+			copy( $file, $file_dest );
+			unlink( $file );
+		}
+	}
+}
+
+
+// Helper function to recursively delete a directory and its contents.
+function fxm_recursive_delete($path) {
+	if (is_file($path)) {
+		return unlink($path);
+	} elseif (is_dir($path)) {
+		$files = array_diff(scandir($path), array('.', '..'));
+		foreach ($files as $file) {
+			fxm_recursive_delete(realpath($path) . '/' . $file);
+		}
+		return rmdir($path);
+	}
+	return false;
 }
