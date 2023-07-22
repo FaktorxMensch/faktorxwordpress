@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 1.1.5
+ * Version: 1.1.6
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
@@ -246,16 +246,14 @@ function fxwp_register_styles()
     wp_enqueue_style('fxwp');
 }
 
-
-//Deregister unwanted widgets
-function fxwp_deregister_widgets()
-{
-    if (!current_user_can('fxm_admin')) {
-        remove_meta_box('e-dashboard-overview', 'dashboard', 'normal', 'core');
-    }
+/* adminbar frontend */
+if (!function_exists('fxm_adminbar')) {
+	function fxm_adminbar()
+	{
+		wp_enqueue_style('adminbar.css', plugins_url('admin/css/adminbar.css', __FILE__), false, '1.0.0', 'all');
+	}
 }
-
-add_action('wp_dashboard_setup', 'fxwp_deregister_widgets', 999);
+add_action('wp_enqueue_scripts', "fxm_adminbar");
 
 //Add fxm role to allow us to have special capabilities
 function fxwp_add_role()

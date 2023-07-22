@@ -14,5 +14,9 @@ function remove_dashboard_widgets () {
 	remove_meta_box('dashboard_primary', 'dashboard', 'side' );
 	remove_meta_box('dashboard_secondary', 'dashboard', 'side' );
 	remove_meta_box('dashboard_quick_press', 'dashboard', 'side');
-}
 
+	//Hide elemntor and other widgets
+	if (!current_user_can('fxm_admin')) {
+		remove_meta_box('e-dashboard-overview', 'dashboard', 'normal', 'core');
+	}
+}

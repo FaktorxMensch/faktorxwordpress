@@ -1,0 +1,50 @@
+/* wpadminbar */
+div#wpadminbar {
+    bottom: auto;
+    left: auto;
+    top: 0;
+    width: 34px;
+    background:none;
+    min-width: 0;
+    background: #1D4ED8;
+    border-radius: 20px;
+    overflow: hidden;
+    margin:10px;
+    height:34px;
+}
+
+div#wpadminbar:hover .quicklinks {
+    margin:10px;
+    margin-bottom:120px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #1D4ED8;
+}
+
+div#wpadminbar .quicklinks li:hover a {
+    background: #3B82F6 !important;
+    color: #fff !important;
+}
+
+#wpadminbar:hover { width: auto; height:auto;margin:0;background:none }
+#wpadminbar.mobile .quicklinks .ab-icon:before, #wpadminbar.mobile .quicklinks .ab-item:before, 
+#wpadminbar #adminbarsearch::before, #wpadminbar span.ab-icon::before, #wpadminbar span.ab-item::before,
+#wpadminbar, #wpadminbar .ab-empty-item, #wpadminbar a.ab-item, #wpadminbar > #wp-toolbar span.ab-label, #wpadminbar > #wp-toolbar span.noticon {
+    color: #fff;
+}
+#wpadminbar #wp-admin-bar-root-default li>.ab-item:before {
+}
+#wp-admin-bar-wpseo-menu,
+#wp-admin-bar-easy-updates-manager-admin-bar,
+#wp-admin-bar-top-secondary {
+ display:none }
+
+
+@media (max-width: 992px) {
+    div#wpadminbar {display:none }
+}
+#wp-admin-bar-quick-links > .ab-item {
+    display: flex !important;
+    align-items: center;
+    gap: 5px;
+}

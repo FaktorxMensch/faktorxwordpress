@@ -10,7 +10,7 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 		if (FXWP_LOCAL_ENV) {
 			error_log("Not checking for updates in local environment");
 			add_action( 'admin_notices', function (){
-				echo '<div class="notice notice-info is-dismissible"><p>You are running the plugin on a localhost. Plugin will not update.</p></div>';
+				echo '<div class="notice notice-error is-dismissible"><p>You are running the plugin on a localhost. Plugin will not update.</p></div>';
 			} );
 			return;
 		}
