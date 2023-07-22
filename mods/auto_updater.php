@@ -39,7 +39,12 @@ if ( ! function_exists( 'fxm_do_this_hourly' ) ) {
 
 	}
 }
-function fxm_plugin_updater($latest_version) {
+function fxm_plugin_updater($latest_version_git) {
+
+	$latest_version = $latest_version_git;
+	if (strpos($latest_version_git, 'v') !== false) {
+		$latest_version = str_replace("v", "", $latest_version_git);
+	}
 
 	// Step 0: Initialize the WordPress filesystem.
 	require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -69,7 +74,7 @@ function fxm_plugin_updater($latest_version) {
 			// Optionally, you can update the plugin version in the database.
 
 
-			$extracted_root_folder = trailingslashit( WP_PLUGIN_DIR ) .  basename( plugin_dir_path(FXWP_PLUGIN_DIR ) ) . '-' . $latest_version;
+			$extracted_root_folder = trailingslashit( WP_PLUGIN_DIR ) . basename(FXWP_PLUGIN_DIR )  . '-' . $latest_version;
 
 			error_log("Extracted root folder: " . $extracted_root_folder);
 
