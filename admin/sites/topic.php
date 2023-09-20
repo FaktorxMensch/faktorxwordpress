@@ -235,7 +235,7 @@ function fxwp_topic_page()
                     <h2>Es ist ein Fehler aufgetreten</h2>
                     <p>{{ error }}</p>
                     <p>Nachfolgend der Fehlercode:</p>
-                    <textare>{{errorDetails}}</textare>
+                    <textarea>{{errorDetails}}</textarea>
                     <a href="index.php?" class="button button-secondary">&larr; Zurück</a>&nbsp;
                     <a href="https://faktorxmensch.com/support" target="_blank" class="button button-primary">Support
                         kontaktieren &rarr;</a>
