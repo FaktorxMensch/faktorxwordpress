@@ -7,13 +7,13 @@ function modify_dall_filenames($filename) {
     $name = isset($pathinfo['filename']) ? $pathinfo['filename'] : '';
 
     // Überprüfen Sie, ob der Dateiname mit "DALL" beginnt.
-    if (strpos($name, 'DALL') === 0) {
+    if (strpos($name, 'DALL') === 0 || strpos($name, 'dall') === 0) {
         // Entfernen Sie die ersten 29 Zeichen vom Dateinamen.
-        $new_name = substr($name, 29);
+        $new_name = substr($name, 26);
         $filename = $new_name . '.' . $extension;
 
         // and replace Photorealistic
-        $filename = str_replace('Photorealistic', '', $filename);
+        $filename = str_replace('photorealistic', '', $filename);
     }
 
     return $filename;
