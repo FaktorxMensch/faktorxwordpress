@@ -28,7 +28,7 @@ function modify_dall_attachment_title($data, $postarr) {
     // Überprüfen Sie, ob der Dateiname mit "DALL" oder "dall" beginnt.
     if (strpos($filename, 'DALL') === 0 || strpos($filename, 'dall') === 0) {
         // Entfernen Sie die ersten 26 Zeichen vom Titel.
-        $new_title = substr($data['post_title'], 26);
+        $new_title = substr($data['post_title'], 29);
 
         // Ersetzen Sie "photorealistic" im Titel.
         $new_title = str_replace('photorealistic', '', $new_title);
