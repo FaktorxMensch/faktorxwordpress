@@ -14,7 +14,27 @@ function modify_dall_filenames($filename) {
 
         // and replace Photorealistic
         $filename = str_replace('photorealistic', '', $filename);
+        $filename = str_replace('Photorealistic', '', $filename);
     }
 
     return $filename;
+}
+
+add_filter('wp_insert_attachment_data', 'modify_dall_attachment_title', 10, 2);
+
+function modify_dall_attachment_title($data, $postarr) {
+    $filename = $data['post_name'];  // Der Slug des Attachments, der oft dem Dateinamen entspricht.
+
+    // Überprüfen Sie, ob der Dateiname mit "DALL" oder "dall" beginnt.
+    if (strpos($filename, 'DALL') === 0 || strpos($filename, 'dall') === 0) {
+        // Entfernen Sie die ersten 26 Zeichen vom Titel.
+        $new_title = substr($data['post_title'], 26);
+
+        // Ersetzen Sie "photorealistic" im Titel.
+        $new_title = str_replace('photorealistic', '', $new_title);
+
+        $data['post_title'] = $new_title;
+    }
+
+    return $data;
 }
