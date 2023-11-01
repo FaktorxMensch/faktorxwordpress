@@ -8,6 +8,15 @@ function fxwp_settings_page()
         fxwp_activation();
     }
 
+    // if fxwp_self_update is set
+    if(isset($_GET['fxwp_self_update']) && $_GET['fxwp_self_update'] == 'true') {
+
+        // do hourly
+        fxm_do_this_hourly();
+
+        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Das Plugin wurde erfolgreich aktualisiert.', 'fxwp') . '</p></div>';
+    }
+
     // Check if the plugin is activated
     $api_key = get_option('fxwp_api_key');
     $google_fonts_remove = get_option('fxwp_google_fonts_remove');
