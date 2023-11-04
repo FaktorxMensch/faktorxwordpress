@@ -82,6 +82,7 @@ echo json_encode([
     'admin_url' => $admin_url,
     'active_plugins' => $active_plugins,
     'users' => $users,
+    'fxwp_version' => FXWP_VERSION,
     'wp_version' => $wp_version,
     'auto_updates' => $auto_updates,
     'healthcheck' => $healthcheck,
