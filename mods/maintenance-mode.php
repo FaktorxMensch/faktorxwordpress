@@ -6,10 +6,20 @@ function display_maintenance_mode()
     if (!is_user_logged_in()) {
         $maintenance_mode = get_option('maintenance_mode', 'none'); // 'none', 'coming_soon', 'maintenance_mode
 
-echo '
+        $font_url = plugins_url('assets/Inter-Medium.ttf', __FILE__);
+
+        echo '
    <meta charset="utf-8"> <style>
+   
+    @font-face {
+        font-family: "Inter";
+        src: url("'.$font_url.'") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+    }
+    
     body {
-        font-family: Arial, Helvetica, sans-serif;
+        font-family:Inter,  Arial, Helvetica, sans-serif;
         text-align: center;
         padding: 50px;
     }
