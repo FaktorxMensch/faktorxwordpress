@@ -12,7 +12,6 @@ echo '
         font-family: Arial, Helvetica, sans-serif;
         text-align: center;
         padding: 50px;
-        font-size: 1.4em;
     }
 
     p {
