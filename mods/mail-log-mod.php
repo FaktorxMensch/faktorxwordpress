@@ -25,7 +25,7 @@ function fxwp_log_outgoing_mail($args)
     $table_name = $wpdb->prefix . "email_logs";
     $wpdb->insert($table_name, $email_content);
 
-    echo '<div class="notice notice-success"><p>' . esc_html('Die E-Mail wurde erfolgreich geloggt.') . '</p></div>';
+//    echo '<div class="notice notice-success"><p>' . esc_html('Die E-Mail wurde erfolgreich geloggt.') . '</p></div>';
 
     // don't forget to return the args to ensure the email is sent
     return $args;
