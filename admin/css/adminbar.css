@@ -1,4 +1,5 @@
 /* wpadminbar */
+@media screen { html { margin-top: 0 !important; }}
 div#wpadminbar {
     bottom: auto;
     left: auto;
