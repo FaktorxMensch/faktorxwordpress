@@ -14,14 +14,14 @@ function display_maintenance_mode()
    
     @font-face {
         font-family: "Inter";
-        src: url("'.$font_url.'") format("truetype");
+        src: url("' . $font_url . '") format("truetype");
         font-weight: normal;
         font-style: normal;
     }
     
     @font-face {
         font-family: "Inter";
-        src: url("'.$font_bold_url.'") format("truetype");
+        src: url("' . $font_bold_url . '") format("truetype");
         font-weight: bold;
         font-style: normal;
     }
@@ -29,13 +29,26 @@ function display_maintenance_mode()
     body {
         font-family:Inter,  Arial, Helvetica, sans-serif;
         text-align: center;
-        padding: 50px;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    img {
+        max-width: 100%;
+        margin-bottom: 30px;
+        margin-top: 10px;   
+        display: block;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,.2);
     }
 
     p {
         font-size: 1.9em;
         max-width: 20em;
-        margin: 50px auto;
+        margin: 20px auto;
     }
 
     a {
@@ -66,7 +79,9 @@ function display_maintenance_mode()
             return;
         }
 
-        echo '<div> Ein Projekt mit <a target="_blank" href="https://faktorxmensch.com">FAKTOR<span>&times;</span>MENSCH</a>. </div>';
+        echo '<img src="' . plugins_url('../assets/img/maintenance1.jpeg', __FILE__) . '" class=img alt="Logo" height="400">';
+
+        echo '<div style="margin-bottom:80px"> Ein Projekt mit <a target="_blank" href="https://faktorxmensch.com">FAKTOR<span>&times;</span>MENSCH</a>. </div>';
 
         die(); // Stop further execution
     }
