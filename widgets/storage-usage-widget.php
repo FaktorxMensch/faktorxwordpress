@@ -94,9 +94,6 @@ function fxwp_format_file_size($bytes)
     return round($bytes, 2) . ' ' . $units[$index];
 }
 
-add_action('admin_notices', 'fxwp_display_storage_limit_notice');
-
-
 // add dashboard widget
 function fxwp_register_storage_usage_widget()
 {
@@ -107,4 +104,10 @@ function fxwp_register_storage_usage_widget()
     );
 }
 
-add_action('wp_dashboard_setup', 'fxwp_register_storage_usage_widget');
+$proj = get_option('fxwp_project', array());
+$external_hosting = $proj['website_meta']['hoster'];
+error_log("external_hosting: " . print_r($external_hosting, true));
+if ( $external_hosting == "" || $external_hosting == null ) {
+    add_action('admin_notices', 'fxwp_display_storage_limit_notice');
+    add_action('wp_dashboard_setup', 'fxwp_register_storage_usage_widget');
+}
