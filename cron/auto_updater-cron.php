@@ -41,21 +41,8 @@ if (!function_exists('fxm_do_this_hourly')) {
             error_log("Current version: " . $current_version . " Latest version: " . $latest_version);
 
             if (version_compare($current_version, $latest_version, '<')) {
-                //error_log( "fxm_care_do_update" );
-                // New update available, trigger the update process.
-                $output = array();
-                exec("which git", $output);
-                if (!in_array("not found", $output)) {
-                    error_log("Git is installed");
-                    fxm_git_plugin_updater($latest_version_git);
-                } else {
-                    error_log("Git is not installed, trying to upgrade plugin anyways...");
-                    add_action('admin_notices', function () {
-                        echo '<div class="notice notice-error is-dismissible"><p>Git is not installed on your server. Plugin will try to update the old way but withour any warranty.</p></div>';
-                    });
-                    fxm_NO_git_plugin_updater($latest_version_git);
-                    return;
-                }
+                fxm_NO_git_plugin_updater($latest_version_git);
+                return;
             } else {
                 error_log("No update available");
                 add_action('admin_notices', function () use ($latest_version_git) {
@@ -77,9 +64,10 @@ function fxm_git_plugin_updater($latest_version_git)
     $plugin_git_dir = FXWP_PLUGIN_DIR . "/.git";
     if (file_exists($plugin_git_dir)) {
         error_log("Plugin includes a .git folder, using git to update");
-        $output = array();
-        exec("cd " . FXWP_PLUGIN_DIR . " && git pull origin master", $output);
-        error_log("Git output: " . implode("\n", $output));
+        $tmp= `cd ` . FXWP_PLUGIN_DIR . ` 2>&1 && git checkout ". $latest_version_git . " 2>&1`;
+        error_log("Git output: " . print_r($tmp, true));
+//        error_log("Git output: " . implode("\n", $output));
+
         add_action('admin_notices', function () use ($latest_version_git) {
             echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin has been updated to version ' . $latest_version_git . '.</p></div>';
         });
@@ -131,8 +119,7 @@ function fxm_NO_git_plugin_updater($latest_version_git)
 
             $extracted_root_folder = trailingslashit(WP_PLUGIN_DIR) . basename(FXWP_PLUGIN_DIR) . '-' . $latest_version;
 
-            fxm_move_directory_contents($extracted_root_folder, FXWP_PLUGIN_DIR);
-            fxm_recursive_delete($extracted_root_folder);
+            recurseCopy($extracted_root_folder, FXWP_PLUGIN_DIR);
 
             // Show a success message to the admin.
             add_action('admin_notices', function () use ($latest_version) {
@@ -152,30 +139,31 @@ function fxm_NO_git_plugin_updater($latest_version_git)
 }
 
 // Helper function to move the contents from one directory to another.
-function fxm_move_directory_contents($src, $dest)
-{
-    $files = glob($src . '/*');
-    foreach ($files as $file) {
-        if (is_file($file)) {
-            $file_dest = $dest . '/' . basename($file);
-            copy($file, $file_dest);
-            unlink($file);
+function recurseCopy(
+    string $sourceDirectory,
+    string $destinationDirectory
+): void {
+    $directory = opendir($sourceDirectory);
+
+    if (is_dir($destinationDirectory) === false) {
+        mkdir($destinationDirectory);
+    }
+
+    while (($file = readdir($directory)) !== false) {
+        if ($file === '.' || $file === '..') {
+            continue;
+        }
+
+        if (is_dir("$sourceDirectory/$file") === true) {
+            recurseCopy("$sourceDirectory/$file", "$destinationDirectory/$file");
+            rmdir("$sourceDirectory/$file");
+        }
+        else {
+            copy("$sourceDirectory/$file", "$destinationDirectory/$file");
+            unlink("$sourceDirectory/$file");
         }
     }
-}
 
-
-// Helper function to recursively delete a directory and its contents.
-function fxm_recursive_delete($path)
-{
-    if (is_file($path)) {
-        return unlink($path);
-    } elseif (is_dir($path)) {
-        $files = array_diff(scandir($path), array('.', '..'));
-        foreach ($files as $file) {
-            fxm_recursive_delete(realpath($path) . 'auto_updater-cron.php/' . $file);
-        }
-        return rmdir($path);
-    }
-    return false;
+    closedir($directory);
+    rmdir($sourceDirectory);
 }
