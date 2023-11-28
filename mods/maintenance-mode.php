@@ -6,7 +6,8 @@ function display_maintenance_mode()
     if (!is_user_logged_in()) {
         $maintenance_mode = get_option('maintenance_mode', 'none'); // 'none', 'coming_soon', 'maintenance_mode
 
-        $font_url = plugins_url('assets/Inter-Medium.ttf', __FILE__);
+        $font_url = plugins_url('../assets/Inter-Medium.ttf', __FILE__);
+        $font_bold_url = plugins_url('../assets/Inter-Bold.ttf', __FILE__);
 
         echo '
    <meta charset="utf-8"> <style>
@@ -18,6 +19,13 @@ function display_maintenance_mode()
         font-style: normal;
     }
     
+    @font-face {
+        font-family: "Inter";
+        src: url("'.$font_bold_url.'") format("truetype");
+        font-weight: bold;
+        font-style: normal;
+    }
+    
     body {
         font-family:Inter,  Arial, Helvetica, sans-serif;
         text-align: center;
@@ -25,7 +33,7 @@ function display_maintenance_mode()
     }
 
     p {
-        font-size: 2em;
+        font-size: 1.9em;
         max-width: 20em;
         margin: 50px auto;
     }
@@ -33,7 +41,7 @@ function display_maintenance_mode()
     a {
         text-decoration: none;
         color: #000;
-        font-weight: bolder;
+        font-weight: bold;
         transition: .1s;
         display: inline-block;
         border-bottom: 2px solid transparent;
