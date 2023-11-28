@@ -41,7 +41,7 @@ if (!function_exists('fxm_do_this_hourly')) {
             error_log("Current version: " . $current_version . " Latest version: " . $latest_version);
 
             if (version_compare($current_version, $latest_version, '<')) {
-                fxm_NO_git_plugin_updater($latest_version_git);
+                fxm_plugin_updater($latest_version_git);
                 return;
             } else {
                 error_log("No update available");
@@ -57,38 +57,7 @@ if (!function_exists('fxm_do_this_hourly')) {
     }
 }
 
-function fxm_git_plugin_updater($latest_version_git)
-{
-
-    //If plugin includes a .git folder, use git to update
-    $plugin_git_dir = FXWP_PLUGIN_DIR . "/.git";
-    if (file_exists($plugin_git_dir)) {
-        error_log("Plugin includes a .git folder, using git to update");
-        $tmp= `cd ` . FXWP_PLUGIN_DIR . ` 2>&1 && git checkout ". $latest_version_git . " 2>&1`;
-        error_log("Git output: " . print_r($tmp, true));
-//        error_log("Git output: " . implode("\n", $output));
-
-        add_action('admin_notices', function () use ($latest_version_git) {
-            echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin has been updated to version ' . $latest_version_git . '.</p></div>';
-        });
-    } else {
-        //Delete plugin folder and clone project from git
-        error_log("Plugin does not include a .git folder, deleting plugin folder and cloning project from git");
-
-        $output = array();
-        exec("cd " . FXWP_PLUGIN_DIR . ' && find . -path "*/*" -delete', $output);
-
-        $output = array();
-        exec("git clone https://github.com/ziegenhagel/faktorxwordpress.git .", $output);
-        error_log("Git output: " . implode("\n", $output));
-        add_action('admin_notices', function () use ($latest_version_git) {
-            echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin has been updated via git to version ' . $latest_version_git . '.</p></div>';
-        });
-    }
-}
-
-
-function fxm_NO_git_plugin_updater($latest_version_git)
+function fxm_plugin_updater($latest_version_git)
 {
 
     $latest_version = $latest_version_git;
@@ -134,6 +103,10 @@ function fxm_NO_git_plugin_updater($latest_version_git)
         // Error occurred while downloading the update.
         // You may want to handle this case gracefully.
         error_log("Error occurred while downloading the update.");
+        // Show a error message to the admin.
+        add_action('admin_notices', function () use ($latest_version) {
+            echo '<div class="notice notice-error is-dismissible"><p>Error downloading the new version ' . $latest_version . '.</p></div>';
+        });
     }
 
 }
