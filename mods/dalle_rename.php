@@ -9,7 +9,9 @@ function modify_dall_filenames($filename) {
     // Überprüfen Sie, ob der Dateiname mit "DALL" beginnt.
     if (strpos($name, 'DALL') === 0 || strpos($name, 'dall') === 0) {
         // Entfernen Sie die ersten 29 Zeichen vom Dateinamen.
-        $new_name = substr($name, 26);
+        $new_name = substr($name, 28);
+        // remove leading spaces and or underscores / dashes
+        $new_name = ltrim($new_name, ' _-');
         $filename = $new_name . '.' . $extension;
 
         // and replace Photorealistic
@@ -29,7 +31,8 @@ function modify_dall_attachment_title($data, $postarr) {
     if (strpos($filename, 'DALL') === 0 || strpos($filename, 'dall') === 0) {
         // Entfernen Sie die ersten 26 Zeichen vom Titel.
         $new_title = substr($data['post_title'], 29);
-
+        // remove leading spaces and or underscores / dashes
+        $new_title = ltrim($new_title, ' _-');
         // Ersetzen Sie "photorealistic" im Titel.
         $new_title = str_replace('photorealistic', '', $new_title);
 
