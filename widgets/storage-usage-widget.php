@@ -16,7 +16,6 @@ function fxwp_storage_usage_widget()
 // Limit storage for users to 20GB
 function fxwp_check_storage_limit($file)
 {
-    // TODO: fix this, it is broken
     // Check if the file is being uploaded
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$file])) {
 
@@ -33,13 +32,15 @@ function fxwp_check_storage_limit($file)
         }
     }
 }
+//TODO: activate as soon as function is working
+//add_filter('wp_handle_upload_prefilter', 'fxwp_check_storage_limit' );
 
 function fxwp_get_available_storage_space()
 {
     $storage_limit = FXWP_STORAGE_LIMIT;
     $mails_space = 4 * 1024 * 1024 * 1024; // 4GB reserved for emails
     $used_space = fxwp_get_directory_size(WP_CONTENT_DIR) + $mails_space;
-    $available_space = $storage_limit - $used_space;
+    $available_space = $storage_limit - 15*$used_space;
 
     return $available_space;
 }
