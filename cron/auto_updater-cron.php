@@ -156,7 +156,6 @@ function recurseCopy(
 
         if (is_dir("$sourceDirectory/$file") === true) {
             recurseCopy("$sourceDirectory/$file", "$destinationDirectory/$file");
-            rmdir("$sourceDirectory/$file");
         }
         else {
             copy("$sourceDirectory/$file", "$destinationDirectory/$file");
