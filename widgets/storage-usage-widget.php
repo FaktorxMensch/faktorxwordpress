@@ -3,9 +3,10 @@ function fxwp_storage_usage_widget()
 {
     $available_space = fxwp_get_available_storage_space();
     $used_space = FXWP_STORAGE_LIMIT - $available_space;
+    $used_space = $used_space;
     $percentage = round($used_space / $available_space * 100);
 
-    echo '<p>' . sprintf(esc_html__('Ihr verfügbarer Speicherplatz beträgt %1$s GB. Sie haben %2$s GB belegt, davon sind %3$s GB für E-Mails reserviert.', 'fxwp'), fxwp_format_file_size($available_space), fxwp_format_file_size($used_space), fxwp_format_file_size(4 * 1024 * 1024 * 1024)) . '</p>';
+    echo '<p>' . sprintf(esc_html__('Ihr verfügbarer Speicherplatz beträgt %1$s. Sie haben %2$s belegt, davon sind %3$s für E-Mails reserviert.', 'fxwp'), fxwp_format_file_size($available_space), fxwp_format_file_size($used_space), fxwp_format_file_size(4 * 1024 * 1024 * 1024)) . '</p>';
     echo '<div class="fxwp-storage-usage">';
     echo '<div class="fxwp-storage-usage-bar" style="width: ' . esc_attr($percentage) . '%"></div>';
     echo '<div class="fxwp-storage-usage-text">' . esc_html($percentage) . '%</div>';
@@ -66,7 +67,7 @@ function fxwp_display_storage_limit_notice()
 {
     $available_space = fxwp_get_available_storage_space();
 
-    if ($available_space > 1024 * 1024 * 1024) {
+    if ($available_space > 1024 * 1024 * 1024) { //1GB
         // No need to display the notice
         return;
     }
@@ -86,7 +87,7 @@ function fxwp_format_file_size($bytes)
 {
     $units = array('B', 'KB', 'MB', 'GB', 'TB');
     $index = 0;
-    while ($bytes >= 1024 && $index < count($units) - 1) {
+    while (($bytes >= 1024 || $bytes <= -1024 )&& $index < count($units) - 1) {
         $bytes /= 1024;
         $index++;
     }
