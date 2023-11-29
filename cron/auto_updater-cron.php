@@ -73,39 +73,45 @@ function fxm_plugin_updater($latest_version_git)
     $zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/' . $latest_version_git . '.zip';
     $temp_file = download_url($zip_url);
 
-    // Step 2: Check if the download was successful.
-    if (!is_wp_error($temp_file)) {
+    try {
 
-        // Step 3: Unzip the downloaded file and overwrite the existing plugin files.
-        $unzip_result = unzip_file($temp_file, WP_PLUGIN_DIR);
+        // Step 2: Check if the download was successful.
+        if (!is_wp_error($temp_file)) {
 
-        if (is_wp_error($unzip_result)) {
-            // Error occurred while unzipping.
-            // You may want to handle this case gracefully.
-            error_log("Error occurred while unzipping.");
+            // Step 3: Unzip the downloaded file
+            $unzip_result = unzip_file($temp_file, WP_PLUGIN_DIR);
+
+            if (is_wp_error($unzip_result)) {
+                throw new Exception('Error occurred while unzipping the update.');
+            } else {
+                // Successful update.
+
+                $extracted_root_folder = trailingslashit(WP_PLUGIN_DIR) . pathinfo($temp_file, PATHINFO_FILENAME);
+
+                //Check if $extracted_root_folder exists, otherwise throw error
+                if (!file_exists($extracted_root_folder)) {
+                    throw new Exception('Name of unzipped folder does not match expected name.');
+                }
+                recurseCopy($extracted_root_folder, FXWP_PLUGIN_DIR);
+
+                // Show a success message to the admin.
+                add_action('admin_notices', function () use ($latest_version) {
+                    echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin has been updated to version ' . $latest_version . '.</p></div>';
+                });
+            }
+
+            // Step 4: Clean up the temporary ZIP file.
+            unlink($temp_file);
+
         } else {
-            // Successful update.
-
-            $extracted_root_folder = trailingslashit(WP_PLUGIN_DIR) . basename(FXWP_PLUGIN_DIR) . '-' . $latest_version;
-
-            recurseCopy($extracted_root_folder, FXWP_PLUGIN_DIR);
-
-            // Show a success message to the admin.
-            add_action('admin_notices', function () use ($latest_version) {
-                echo '<div class="notice notice-success is-dismissible"><p>FXWP plugin has been updated to version ' . $latest_version . '.</p></div>';
-            });
+            throw new Exception('Error occurred while downloading the update.');
         }
 
-        // Step 4: Clean up the temporary ZIP file.
-        unlink($temp_file);
-
-    } else {
-        // Error occurred while downloading the update.
-        // You may want to handle this case gracefully.
-        error_log("Error occurred while downloading the update.");
+    } catch (Exception $e) {
+        error_log("Error occurred: " . $e->getMessage());
         // Show a error message to the admin.
         add_action('admin_notices', function () use ($latest_version) {
-            echo '<div class="notice notice-error is-dismissible"><p>Error downloading the new version ' . $latest_version . '.</p></div>';
+            echo '<div class="notice notice-error is-dismissible"><p>Error occurred while updating.</p></div>';
         });
     }
 
