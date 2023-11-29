@@ -40,7 +40,7 @@ function fxwp_get_available_storage_space()
     $storage_limit = FXWP_STORAGE_LIMIT;
     $mails_space = 4 * 1024 * 1024 * 1024; // 4GB reserved for emails
     $used_space = fxwp_get_directory_size(WP_CONTENT_DIR) + $mails_space;
-    $available_space = $storage_limit - 15*$used_space;
+    $available_space = $storage_limit - $used_space;
 
     return $available_space;
 }
