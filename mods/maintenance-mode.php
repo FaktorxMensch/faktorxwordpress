@@ -4,7 +4,11 @@
 function display_maintenance_mode()
 {
     if (!is_user_logged_in()) {
-        $maintenance_mode = get_option('maintenance_mode', 'none'); // 'none', 'coming_soon', 'maintenance_mode
+        $maintenance_mode = get_option('maintenance_mode', 'none'); // 'none', 'coming_soon', 'maintenance_mode'
+
+        if ($maintenance_mode == 'none') {
+            return;
+        }
 
         $font_url = plugins_url('../assets/Inter-Medium.ttf', __FILE__);
         $font_bold_url = plugins_url('../assets/Inter-Bold.ttf', __FILE__);
