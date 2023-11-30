@@ -13,27 +13,64 @@ function fxwp_storage_usage_widget()
     echo '</div>';
 }
 
-// Limit storage for users to 20GB
-function fxwp_check_storage_limit($file)
+// Cancel the upload if the file exceeds the storage limit
+function fxwp_check_uploading_file_exceedes_storage_limit($file)
 {
-    // Check if the file is being uploaded
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES[$file])) {
 
-        $available_space = fxwp_get_available_storage_space();
+    $available_space = fxwp_get_available_storage_space();
 
-        // Get the uploaded file size
-        $file_size = $_FILES[$file]['size'];
+    // Get the uploaded file size
+    $file_size = $file['size'];
 
-        // Check if the uploaded file exceeds the available space
-        if ($file_size > $available_space) {
-            // File upload failed, display error message
-            $error_message = __('You have exceeded your storage limit of 20GB. Please delete some files or contact the administrator.', 'fxwp');
-            wp_die($error_message);
+ //Check if the uploaded file exceeds the available space
+    if ($file_size > $available_space) {
+        $error_message = __('You have exceeded your storage limit of '.fxwp_format_file_size(FXWP_STORAGE_LIMIT).'. Please delete some files or contact the administrator.', 'fxwp');
+        //stop upload and set error message, which is currently not displayed anywhere but who knows, maybe in the future?
+        $file['error'] = $error_message;
+    }
+    return $file;
+}
+
+// Limit the upload size to the available storage space
+function fxwp_limit_upload_size($size)
+{
+    $available_space = fxwp_get_available_storage_space();
+    if ($size > $available_space) {
+    return $available_space;
+    } else {
+        return $size;
+    }
+}
+
+// Add error message to the media page if the storage limit is exceeded
+function fxwp_admin_notice_upload_media_storage_limit() {
+    // Check if we're on the media page
+    $screen = get_current_screen();
+    if ( isset( $screen->id ) && $screen->id === 'upload' ) {
+        if (fxwp_get_available_storage_space() < 50 * 1024 * 1024) { //50MB
+            echo '<div class="notice notice-error"><p>'.__('You have less than 50MB free storage. Upload is not possible anymore. Please free up some space first! ', 'fxwp').'</p></div>';
+        }
+        else if (fxwp_get_available_storage_space() < 500 * 1024 * 1024) { //500MB
+            echo '<div class="notice notice-error"><p>'.__('You have less than 500MB free storage. Your upload may cancel if the file is too large. ', 'fxwp').'</p></div>';
         }
     }
 }
-//TODO: activate as soon as function is working
-//add_filter('wp_handle_upload_prefilter', 'fxwp_check_storage_limit' );
+
+function fxwp_disable_upload_button() {
+    $screen = get_current_screen();
+    if ( isset( $screen->id ) && $screen->id === 'upload' ) {
+        if(fxwp_get_available_storage_space() < 50 * 1024 * 1024) { //50MB
+            // Add custom CSS to disable the upload button
+            echo '<style>
+                    .page-title-action {
+                        pointer-events: none;
+                        opacity: 0.5;
+                    }
+                  </style>';
+        }
+    }
+}
+
 
 function fxwp_get_available_storage_space()
 {
@@ -62,7 +99,6 @@ function fxwp_get_directory_size($dir)
     return $size;
 }
 
-//add_filter('wp_handle_upload_prefilter', 'fxwp_check_storage_limit');
 
 function fxwp_display_storage_limit_notice()
 {
@@ -109,6 +145,12 @@ $proj = get_option('fxwp_project', array());
 $external_hosting = $proj['website_meta']['hoster'];
 error_log("external_hosting: " . print_r($external_hosting, true));
 if ( $external_hosting == "" || $external_hosting == null ) {
+    //Enable all this only if the website is hosted by us
     add_action('admin_notices', 'fxwp_display_storage_limit_notice');
     add_action('wp_dashboard_setup', 'fxwp_register_storage_usage_widget');
+    add_filter('wp_handle_upload_prefilter', 'fxwp_check_uploading_file_exceedes_storage_limit' );
+    add_filter('upload_size_limit', 'fxwp_limit_upload_size', 20);
+    add_action( 'admin_notices', 'fxwp_admin_notice_upload_media_storage_limit' );
+    add_action( 'admin_head', 'fxwp_disable_upload_button' );
+
 }
