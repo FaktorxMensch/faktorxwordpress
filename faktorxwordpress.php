@@ -2,11 +2,11 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 1.4.6
+ * Version: 1.4.7
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
- * Change Log: Fix for maintenance mode always setting styles and title.
+ * Change Log: Limited normal "administrator" access to "fxm_admin" role, some minor changes and fixes
  */
 
 // Prevent direct file access
@@ -302,20 +302,9 @@ function fxwp_add_user_to_role()
 
     foreach ($users as $user) {
         if (in_array('administrator', $user->roles) && !in_array('fxm_admin', $user->roles)) {
-            $user->add_cap('fxm_admin');
+            $user->add_role('fxm_admin');
         }
     }
 }
 
 add_action('wp_login', 'fxwp_add_user_to_role');
-
-
-//If user is fxm_admin but has not the correct capabilities, add them
-function fxwp_fix_fxm_admin_capabilities()
-{
-    $user = wp_get_current_user();
-    if (!in_array('administrator', (array)$user->roles) && in_array('fxm_admin', (array)$user->roles)) {
-        $user->add_cap('administrator');
-    }
-}
-add_action('wp_login', 'fxwp_fix_fxm_admin_capabilities');
