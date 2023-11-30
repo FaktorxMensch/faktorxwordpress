@@ -272,36 +272,37 @@ add_action('init', 'fxwp_add_role');
 //Add Users to fxm role
 function fxwp_add_user_to_role()
 {
-    $users = get_users(
-        array(
-            'meta_query' => array(
-                'relation' => 'OR',
-                array(
-                    'key' => 'nickname',
-                    'value' => 'ema',
-                    'compare' => '=',
-                ),
-                array(
-                    'key' => 'nickname',
-                    'value' => 'domi',
-                    'compare' => '=',
-                ),
-                array(
-                    'key' => 'nickname',
-                    'value' => 'fxm',
-                    'compare' => '=',
-                ),
-            ),
-            'fields' => 'all',
-        )
-    );
+    //ToDo: Change this because this is unsafe. Find new way to define who is fxm and who is not
+//    $users = get_users(
+//        array(
+//            'meta_query' => array(
+//                'relation' => 'OR',
+//                array(
+//                    'key' => 'nickname',
+//                    'value' => 'ema',
+//                    'compare' => '=',
+//                ),
+//                array(
+//                    'key' => 'nickname',
+//                    'value' => 'domi',
+//                    'compare' => '=',
+//                ),
+//                array(
+//                    'key' => 'nickname',
+//                    'value' => 'fxm',
+//                    'compare' => '=',
+//                ),
+//            ),
+//            'fields' => 'all',
+//        )
+//    );
+    $users = array();
     $add_user = get_user_by('ID', '1');
     array_push($users, $add_user);
 
     foreach ($users as $user) {
-        //$user = get_user_by('login', 'ema');
         if (in_array('administrator', $user->roles) && !in_array('fxm_admin', $user->roles)) {
-            $user->add_role('fxm_admin');
+            $user->add_cap('fxm_admin');
         }
     }
 }
