@@ -38,7 +38,7 @@ if (!function_exists('fxm_do_this_hourly')) {
                 $latest_version = str_replace("v", "", $latest_version_git);
             }
 
-            error_log("Current version: " . $current_version . " Latest version: " . $latest_version);
+            error_log("Currently installed version: " . $current_version . " Latest version: " . $latest_version);
 
             if (version_compare($current_version, $latest_version, '<')) {
                 fxm_plugin_updater($latest_version_git);

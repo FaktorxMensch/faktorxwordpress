@@ -143,7 +143,7 @@ function fxwp_register_storage_usage_widget()
 
 $proj = get_option('fxwp_project', array());
 $external_hosting = $proj['website_meta']['hoster'];
-error_log("external_hosting: " . print_r($external_hosting, true));
+//error_log("external_hosting: " . print_r($external_hosting, true));
 if ( $external_hosting == "" || $external_hosting == null ) {
     //Enable all this only if the website is hosted by us
     add_action('admin_notices', 'fxwp_display_storage_limit_notice');

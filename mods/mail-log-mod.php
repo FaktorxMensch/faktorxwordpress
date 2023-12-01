@@ -16,9 +16,13 @@ function fxwp_log_outgoing_mail($args)
         'subject' => $args['subject'],
         'message' => $args['message'],
         'headers' => $args['headers'],
-        'attachments' => $args['attachments'],
+        //if $args['attachments'] is an array, convert it to a string
+        'attachments' => is_array($args['attachments']) ? implode(',', $args['attachments']) : $args['attachments'],
+//        'attachments' => $args['attachments'],
         'timestamp' => current_time('mysql'),
     );
+
+//    error_log("fxwp_log_outgoing_mail: " . print_r($email_content, true));
 
     // Save to the database
     global $wpdb;
