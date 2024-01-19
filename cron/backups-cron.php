@@ -209,6 +209,7 @@ function fxwp_delete_expired_backups()
     foreach ($files as $file) {
         if (!in_array($file, $keptBackups)) {
             unlink($file);
+            unlink($file.".sql");
         }
     }
 }
