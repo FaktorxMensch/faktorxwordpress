@@ -73,6 +73,14 @@ function fxm_plugin_updater($latest_version_git)
     $zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/' . $latest_version_git . '.zip';
     $temp_file = download_url($zip_url);
 
+    if (is_wp_error($temp_file)) {
+        error_log("Error occurred while downloading the update. Maybe disk space is full?");
+        error_log($temp_file->get_error_message());
+        return new WP_Error('download_error', __('Something went wrong while downloading the latest plugin ZIP file. Maybe disk space is full?', 'fxwp'));
+    } else {
+        error_log("Downloaded update to " . $temp_file);
+    }
+
     try {
 
         // Step 2: Check if the download was successful.
