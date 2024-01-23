@@ -103,6 +103,8 @@ function fxwp_plugin_list_installer_page()
         'fxwp_create_menus' => 'Top und Footer Menüs erstellen',
         //Local google fonts plugin installieren
         'fxwp_install_local_google_fonts' => 'Local google fonts plugin installieren',
+        //Complianz GDPR plugin installieren
+        'fxwp_install_complianz_gdpr' => 'Complianz GDPR plugin installieren',
     );
 
     // Definieren Sie Ihre Plugin-Sammlungen
@@ -162,7 +164,17 @@ function fxwp_plugin_list_installer_page()
                 'name' => 'elementor',
                 'options' => array(),
             )
-        )
+        ),
+        'DSGVO' => array(
+            array(
+                'name' => 'complianz-gdpr',
+                'options' => array(),
+            ),
+            array(
+                'name' => 'local-google-fonts',
+                'options' => array(),
+            ),
+        ),
     );
 
     echo '<div class="wrap">';
@@ -468,6 +480,12 @@ function fxwp_plugin_list_installer_page()
                         update_option('local_google_fonts', unserialize('a:1:{s:9:"auto_load";s:1:"1";}'));
                         update_option('fxwp_google_fonts_remove', 'einfach');
 
+                        break;
+                    case 'fxwp_install_complianz_gdpr':
+                        // install the local google fonts plugin
+                        fxwp_install_plugin('complianz-gdpr');
+                        // activate the local google fonts plugin
+                        activate_plugin('complianz-gdpr/complianz-gdpr.php');
                         break;
                     default:
                         echo "Option {$option} not implemented yet";
