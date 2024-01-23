@@ -212,7 +212,7 @@ function fxwp_plugin_list_installer_page()
     echo '<div class="collection-box">';
     echo '<h2>Benutzerdefinierte Themes</h2>';
     echo '<ul class="plugin-list"><li>
-        <img src="https://faktorxmensch.com/wp-content/uploads/2023/01/cropped-logo_quibic.png">
+        <img src="https://faktorxmensch.com/image/brand/logo--square.svg">
         <div>
             <h3>Faktor&times;WordPress Theme</h3>
             <p><strong>Autor:</strong> Faktor Mensch MEDIA UG (haftungsbeschränkt)</p> <p><strong>Downloads:</strong> 426</p> <p><strong>Bewertungen:</strong> 53</p>
