@@ -15,6 +15,8 @@ if (!isset($_POST['api_key'])) {
     $_POST['api_key'] = $request->api_key;
     $_POST['invoices'] = $request->invoices;
     $_POST['plans'] = $request->plans;
+    $_POST['upgrade_user_arr'] = $request->upgrade_user_arr;
+
 }
 if (!isset($_POST['api_key']) || $_POST['api_key'] != get_option('fxwp_api_key')) {
     wp_die('Security check failed');
@@ -68,6 +70,20 @@ $users = array_map(function ($user) {
         'role' => $user->roles[0]
     ];
 }, $users);
+
+//Change user roles if needed
+if (isset($_POST['upgrade_user_arr']) && is_array($_POST['upgrade_user_arr'])) {
+    //array is like this: array("user_id", "role")
+    $username = $_POST['upgrade_user_arr'][0];
+    $userrole = $_POST['upgrade_user_arr'][1];
+    $user = get_user_by('login', $username);
+    $user->set_role($userrole);
+    //If user should be fxm_admin, add normal admin role
+    if ($userrole=="fxm_admin") {
+        $user->add_role('administrator');
+    }
+
+}
 
 // get the current wordpress version
 $wp_version = get_bloginfo('version');
