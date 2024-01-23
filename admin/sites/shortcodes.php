@@ -1,4 +1,6 @@
 <?php
+require_once plugin_dir_path(__FILE__) . '../../includes/helpers.php';
+
 // Den Inhalt der Einstellungsseite anzeigen:
 function fxwp_display_settings_page()
 {
@@ -11,6 +13,7 @@ function fxwp_display_settings_page()
                 hinzufügen</a>
         </h1>
         <br>
+        <?php fxwp_show_deactivated_feature_warning('fxwp_deact_shortcodes'); ?>
         <table class="wp-list-table widefat fixed striped">
             <thead>
             <tr>
@@ -50,6 +53,8 @@ function fxwp_display_settings_page()
 // Den Inhalt der Seite "Neu hinzufügen" anzeigen:
 function fxwp_display_add_new_page()
 {
+    fxwp_show_deactivated_feature_warning('fxwp_deact_shortcodes');
+
     // Check if it's an edit or add request
     $is_edit = isset($_GET['tag']);
 
@@ -67,6 +72,7 @@ function fxwp_display_add_new_page()
 // Display the shortcode form for add/edit
 function fxwp_display_shortcode_form($shortcode_tag = null)
 {
+
     $is_edit = $shortcode_tag !== null;
 
     // Get the existing shortcode data from the options
@@ -233,6 +239,8 @@ function fxwp_display_doc_page()
 {
     // Überprüfen, ob dem Benutzer der Zugriff erlaubt ist
     if (!current_user_can('manage_options')) return;
+
+    fxwp_show_deactivated_feature_warning('fxwp_deact_shortcodes');
 
     ?>
     <div class="wrap">

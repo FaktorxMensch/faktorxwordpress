@@ -1,5 +1,5 @@
 <?php
-
+require_once plugin_dir_path(__FILE__) . '../../includes/helpers.php';
 function fxwp_mock_backups()
 {
     // delete all backups
@@ -68,6 +68,7 @@ function fxwp_backups_page()
            class="button button-primary"> <?php _e('Neue Sicherung erstellen', 'fxwp'); ?> </a>
 
         <br>
+        <?php fxwp_show_deactivated_feature_warning('fxwp_deact_backups'); ?>
         <br>
         <?php if (!empty($backups)): ?>
             <table class="wp-list-table widefat fixed striped">

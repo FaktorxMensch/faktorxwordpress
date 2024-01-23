@@ -2,12 +2,16 @@
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
+require_once plugin_dir_path(__FILE__) . '../includes/helpers.php';
 
 if (!wp_next_scheduled('fxwp_backup_task')) {
     wp_schedule_event(time(), 'hourly', 'fxwp_backup_task');
 }
 
 add_action('fxwp_backup_task', function () {
+    if (fxwp_check_deactivated_features('fxwp_deact_backups')) {
+        return;
+    }
     fxwp_create_backup();
     fxwp_delete_expired_backups();
 });

@@ -27,7 +27,7 @@ function fxwp_plans_widget()
 }
 
 // Register the plans widget
-function register_plans_widget()
+function fxwp_register_plans_widget()
 {
     wp_add_dashboard_widget(
         'fxwp_plans_widget', // Widget slug
@@ -36,4 +36,4 @@ function register_plans_widget()
     );
 }
 
-add_action('wp_dashboard_setup', 'register_plans_widget');
+add_action('wp_dashboard_setup', 'fxwp_register_plans_widget');

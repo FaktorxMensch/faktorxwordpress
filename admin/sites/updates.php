@@ -1,12 +1,22 @@
 <?php
+require_once plugin_dir_path(__FILE__) . '../../includes/helpers.php';
 
+//deactivate updates if they are still activated
+if (fxwp_check_deactivated_features('fxwp_deact_autoupdates')) {
+    fxwp_disable_automatic_updates();
+}
 function fxwp_enable_automatic_updates()
 {
     if ( ! function_exists( 'get_plugins' ) ) {
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
     }
+    if (fxwp_check_deactivated_features('fxwp_deact_autoupdates')) {
+        fxwp_disable_automatic_updates();
+        return;
+    }
 
     update_option('fxwp_automatic_updates', true);
+    remove_filter( 'automatic_updater_disabled', '__return_true' );
     add_filter('auto_update_core', '__return_true');
     add_filter('auto_update_plugin', '__return_true');
     add_filter('auto_update_theme', '__return_true');
@@ -33,6 +43,7 @@ function fxwp_disable_automatic_updates()
     }
 
     update_option('fxwp_automatic_updates', false);
+    add_filter( 'automatic_updater_disabled', '__return_true' );
     remove_filter('auto_update_core', '__return_true');
     remove_filter('auto_update_plugin', '__return_true');
     remove_filter('auto_update_theme', '__return_true');
@@ -71,7 +82,7 @@ function fxwp_updates_page()
     ?>
     <div class="wrap">
         <h1>Aktualisierungen</h1>
-
+        <?php fxwp_show_deactivated_feature_warning('fxwp_deact_autoupdates'); ?>
         <h2>Automatische Aktualisierungen</h2>
         <form method="post" action="">
             <?php wp_nonce_field('fxwp_update_settings', 'fxwp_update_settings_nonce'); ?>

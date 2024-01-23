@@ -27,6 +27,14 @@ function fxwp_display_email_logs()
     $email_logs = $wpdb->get_results("SELECT * FROM $table_name ORDER BY timestamp DESC LIMIT 50");
     echo '<div class="wrap"><h1>Email Log</h1>';
 
+    if(current_user_can('fxm_admin') && fxwp_check_deactivated_features('fxwp_deact_email_log')) {
+        ?>
+        <br>
+        <div class="notice notice-error">
+            <p><?php _e('Email Log ist nicht sichtbar für Kundis auf Grund der Plugin Einstellungen!', 'fxwp'); ?></p>
+        </div>
+        <?php
+    }
     if (count($email_logs) == 0) {
         echo '<p>' . esc_html('Bisher wurden keine E-Mails von dieser Website gesendet.') . '</p>';
 

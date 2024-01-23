@@ -24,18 +24,19 @@ function fxwp_settings_page()
     if(current_user_can("fxm_admin")) {
         // Deactivated features description
         $deactivated_features_description = array(
-            'fxwp_ai' => 'KI Funktionen deaktivieren',
-            'fxwp_backups' => 'Backups deaktivieren',
-            'fxwp_updates' => 'Automatische Plugin Updates deaktivieren',
-            'fxwp_email_log' => 'E-Mail Log deaktivieren',
-            'fxwp_shortcodes' => 'Shortcodes deaktivieren',
-            'fxwp_customer_settings' => 'Kundi Settings komplett deaktivieren',
-            'fxwp_hide_plugin' => 'Plugin vor Kundis komplett verstecken',
+            'fxwp_deact_ai' => 'KI Funktionen deaktivieren',
+            'fxwp_deact_backups' => 'Backups deaktivieren',
+            'fxwp_deact_autoupdates' => 'Automatische Updates deaktivieren',
+            'fxwp_deact_email_log' => 'E-Mail Log für Kundis ausblenden',
+            'fxwp_deact_shortcodes' => 'Shortcodes für Kundis ausblenden',
+            'fxwp_deact_dashboards' => 'Alle Dashboards für Kundis ausblenden',
+            'fxwp_deact_customer_settings' => 'Settings für Kundis komplett ausblenden',
+            'fxwp_deact_hide_plugin' => 'Plugin vor Kundis komplett verstecken',
         );
 
         // Get disabled features
         $deactivated_features = get_option('fxwp_deactivated_features');
-        // if disabled features is not an array or is empty, fill it with false
+        // if disabled features is empty, fill it with false
         if (empty($deactivated_features)) {
             $deactivated_features = array_fill_keys(array_keys($deactivated_features_description), false);
         } else {
@@ -256,6 +257,7 @@ function fxwp_settings_page()
                                 echo "/><label for='{$option}'>{$label}</label></li>";
                                } ?>
                            </ul>
+                            <p style="color: red"><?php echo __('Achtung: Entfernte Haken aktivieren Features nicht direkt wieder! (zb Auto Update muss manuell noch gestaret werden)', 'fxwp'); ?></p>
                         </td>
                     </tr>
                 <?php } ?>
@@ -297,6 +299,11 @@ function fxwp_settings_page()
         document.getElementById('deactivated_features_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
             deactivated_features_list[el.id] = el.checked
         })
+        // If plugin should be hidden, hide menu item as well
+        if (deactivated_features_list['fxwp_deact_hide_plugin']) {
+            deactivated_features_list['fxwp_deact_customer_settings'] = true
+            deactivated_features_list['fxwp_deact_dashboards'] = true
+        }
         e.formData.append('fxwp_deactivated_features', JSON.stringify(deactivated_features_list))
         console.log(e.formData)
     });

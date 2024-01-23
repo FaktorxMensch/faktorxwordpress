@@ -2,11 +2,11 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 1.5.1
+ * Version: 1.5.2
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
- * Change Log: Limited normal "administrator" access to "fxm_admin" role, some minor changes and fixes
+ * Change Log: Added functionality to hide or deactivate features
  */
 
 // Prevent direct file access
@@ -14,6 +14,7 @@ if (!defined('ABSPATH')) exit;
 
 // Define constants
 require_once plugin_dir_path(__FILE__) . 'includes/autoload.php';
+require_once plugin_dir_path(__FILE__) . 'includes/helpers.php';
 
 register_activation_hook(__FILE__, 'fxwp_activation');
 register_deactivation_hook(__FILE__, 'fxwp_deactivation');
@@ -105,6 +106,9 @@ function fxwp_plugin_menu()
 {
     if (get_option('fxwp_api_key') === '')
         return;
+    if (!current_user_can('fxm_admin') && fxwp_check_deactivated_features('fxwp_deact_customer_settings')) {
+        return;
+    }
 
     add_menu_page(
         'Faktor &times; WordPress', // Page title
@@ -138,24 +142,28 @@ function fxwp_plugin_menu()
     );
 
     // backups
-    add_submenu_page(
-        'fxwp', // Parent slug
-        'Backups', // Page title
-        'Backups', // Menu title
-        'administrator', // Capability
-        'fxwp-backups', // Menu slug
-        'fxwp_backups_page' // Function
-    );
+    if (current_user_can('fxm_admin') || !fxwp_check_deactivated_features('fxwp_deact_backups')) {
+        add_submenu_page(
+            'fxwp', // Parent slug
+            'Backups', // Page title
+            'Backups', // Menu title
+            'administrator', // Capability
+            'fxwp-backups', // Menu slug
+            'fxwp_backups_page' // Function
+        );
+    }
 
     // email log
-    add_submenu_page(
-        'fxwp', // Parent slug
-        'Email Log', // Page title
-        'Email Log', // Menu title
-        'administrator', // Capability
-        'fxwp-email-log', // Menu slug
-        'fxwp_display_email_logs' // Function
-    );
+    if (current_user_can('fxm_admin') || !fxwp_check_deactivated_features('fxwp_deact_email_log')) {
+        add_submenu_page(
+            'fxwp', // Parent slug
+            'Email Log', // Page title
+            'Email Log', // Menu title
+            'administrator', // Capability
+            'fxwp-email-log', // Menu slug
+            'fxwp_display_email_logs' // Function
+        );
+    }
 
     // image optimizer
     add_submenu_page(
@@ -190,40 +198,41 @@ function fxwp_plugin_menu()
 
     remove_submenu_page('fxwp', 'fxwp');
 
+    // Shortcodes
+    if (current_user_can('fxm_admin') || !fxwp_check_deactivated_features('fxwp_deact_shortcodes')) {
+        add_menu_page(
+            'Meine Benutzerdefinierten Shortcodes',
+            'Shortcodes',
+            'manage_options',
+            'my-custom-shortcodes',
+            'fxwp_display_settings_page',
+            'dashicons-shortcode',
+            null
+        );
 
-    add_menu_page(
-        'Meine Benutzerdefinierten Shortcodes',
-        'Shortcodes',
-        'manage_options',
-        'my-custom-shortcodes',
-        'fxwp_display_settings_page',
-        'dashicons-shortcode',
-        null
-    );
+        // Eine Unterseite unter unserem Top-Level-Menü hinzufügen:
+        add_submenu_page(
+            'my-custom-shortcodes',
+            'Neuen Shortcode hinzufügen',
+            'Neu hinzufügen',
+            'manage_options',
+            'my-custom-shortcodes-add-new',
+            'fxwp_display_add_new_page'
+        );
 
-    // Eine Unterseite unter unserem Top-Level-Menü hinzufügen:
-    add_submenu_page(
-        'my-custom-shortcodes',
-        'Neuen Shortcode hinzufügen',
-        'Neu hinzufügen',
-        'manage_options',
-        'my-custom-shortcodes-add-new',
-        'fxwp_display_add_new_page'
-    );
+        // Eine weitere Unterseite für die Dokumentation hinzufügen:
+        add_submenu_page(
+            'my-custom-shortcodes',
+            'Shortcode Dokumentation',
+            'Dokumentation',
+            'manage_options',
+            'my-custom-shortcodes-doc',
+            'fxwp_display_doc_page'
+        );
+    }
 
-    // Eine weitere Unterseite für die Dokumentation hinzufügen:
-    add_submenu_page(
-        'my-custom-shortcodes',
-        'Shortcode Dokumentation',
-        'Dokumentation',
-        'manage_options',
-        'my-custom-shortcodes-doc',
-        'fxwp_display_doc_page'
-    );
-
-
-
-
+    if (current_user_can('fxm_admin') || !fxwp_check_deactivated_features('fxwp_deact_ai')) {
+        // Schreibwerkstatt
         add_menu_page(
             'Schreibwerkstatt',
             'Schreibwerkstatt',
@@ -233,6 +242,7 @@ function fxwp_plugin_menu()
             'dashicons-format-status',
             null
         );
+    }
 
 
 }

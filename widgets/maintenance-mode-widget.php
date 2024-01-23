@@ -1,19 +1,19 @@
 <?php
 // Register the widget
-function register_maintenance_mode_widget()
+function fxwp_register_maintenance_mode_widget()
 {
     if (!current_user_can('editor') && !current_user_can('administrator') && !current_user_can('fxm_admin')) {
         return;
     }
 
     wp_add_dashboard_widget(
-        'maintenance_mode_widget', // Widget ID
+        'fxwp_maintenance_mode_widget', // Widget ID
         'Maintenance Mode', // Widget title
-        'display_maintenance_mode_widget' // Display callback function
+        'fxwp_display_maintenance_mode_widget' // Display callback function
     );
 }
 
-add_action('wp_dashboard_setup', 'register_maintenance_mode_widget');
+add_action('wp_dashboard_setup', 'fxwp_register_maintenance_mode_widget');
 function fxwp_url_actions() {
 	if ( isset( $_GET["fxwp_sync"] ) ) {
 		fxm_do_this_hourly();
@@ -23,7 +23,7 @@ function fxwp_url_actions() {
 add_action('wp_dashboard_setup', 'fxwp_url_actions');
 
 // Widget display callback function
-function display_maintenance_mode_widget()
+function fxwp_display_maintenance_mode_widget()
 {
 
     if (isset($_POST['maintenance_mode'])) {

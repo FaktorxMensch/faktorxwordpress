@@ -7,6 +7,8 @@ function fxwp_topic_page()
     // check if user is allowed access
     if (!current_user_can('manage_options')) return;
 
+    fxwp_show_deactivated_feature_warning('fxwp_deact_ai');
+
     $subnav_menu = [
         [
             "title" => "E-Mail Kampagnen",

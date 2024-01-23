@@ -127,7 +127,7 @@ function fxwp_generate_topics($description)
 
 function fxwp_register_description_widget()
 {
-    if (!current_user_can('edit_posts')) {
+    if (!current_user_can('edit_posts') || (!current_user_can('fxm_admin') && fxwp_check_deactivated_features('fxwp_deact_ai'))) {
         return;
     }
 
