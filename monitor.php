@@ -58,7 +58,7 @@ $site_url = site_url();
 $admin_url = admin_url();
 
 // get the list of plugins
-$active_plugins = get_option('active_plugins');
+$active_plugins = array_values(get_option('active_plugins'));
 
 // get the list of users
 $users = get_users();
@@ -82,6 +82,16 @@ if (isset($_POST['upgrade_user_arr']) && is_array($_POST['upgrade_user_arr'])) {
     if ($userrole=="fxm_admin") {
         $user->add_role('administrator');
     }
+    // get the new list of users
+    $users = get_users();
+    // but remove anything but id, username and role
+    $users = array_map(function ($user) {
+        return [
+            'id' => $user->ID,
+            'username' => $user->user_login,
+            'role' => $user->roles[0]
+        ];
+    }, $users);
 
 }
 
