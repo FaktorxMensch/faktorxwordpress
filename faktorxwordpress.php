@@ -109,7 +109,7 @@ function fxwp_plugin_menu()
     add_menu_page(
         'Faktor &times; WordPress', // Page title
         'Faktor&hairsp;&times;WP', // Menu title
-        'edit_posts', // Capability
+        'edit_theme_options', // Capability
         'fxwp', // Menu slug
         'fxwp_updates_page', // Function
         'dashicons-shield', // Icon
