@@ -34,6 +34,7 @@ function fxwp_show_deactivated_feature_warning($feature_to_check) {
         'fxwp_deact_autoupdates' => esc_html__('Auto Updates sind in den Plugin Einstellungen deaktiviert!', 'fxwp'),
         'fxwp_deact_email_log' => esc_html__('Email Log ist via den Plugin Einstellungen für Kundis ausgeblendet!', 'fxwp'),
         'fxwp_deact_shortcodes' => esc_html__('Shortcodes sind via den Plugin Einstellungen für Kundis ausgeblendet!', 'fxwp'),
+        'fxwp_deact_dashboards' => esc_html__('Alle Dashboards sind via den Plugin Einstellungen für Kundis ausgeblendet!', 'fxwp'),
         'fxwp_deact_customer_settings' => esc_html__('FxWP Einstellungen sind für Kundis via den Plugin Einstellungen komplett ausgeblendet!', 'fxwp'),
         'fxwp_deact_hide_plugin' =>  esc_html__('Plugin ist via den Plugin Einstellungen für Kundis komplett ausgeblendet!', 'fxwp'),
     );
@@ -71,6 +72,9 @@ function fxwp_remove_dashboards()
 //                unset($wp_meta_boxes["dashboard"][$position]["core"][$widget_id]);
             }
         }
+    }
+    if (current_user_can('fxm_admin') && fxwp_check_deactivated_features('fxwp_deact_dashboards')) {
+        fxwp_show_deactivated_feature_warning('fxwp_deact_dashboards');
     }
 }
 add_action( 'wp_dashboard_setup', 'fxwp_remove_dashboards',100);
