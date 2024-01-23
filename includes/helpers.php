@@ -6,3 +6,4 @@ function fxwp_show_log($log)
     print_r($log);
     echo '</textarea>';
 }
+

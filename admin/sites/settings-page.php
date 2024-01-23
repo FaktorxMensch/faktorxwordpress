@@ -22,8 +22,8 @@ function fxwp_settings_page()
     $google_fonts_remove = get_option('fxwp_google_fonts_remove');
 
     if(current_user_can("fxm_admin")) {
-        // Deactivated functions description
-        $deactivated_functions_description = array(
+        // Deactivated features description
+        $deactivated_features_description = array(
             'fxwp_ai' => 'KI Funktionen deaktivieren',
             'fxwp_backups' => 'Backups deaktivieren',
             'fxwp_updates' => 'Automatische Plugin Updates deaktivieren',
@@ -33,13 +33,13 @@ function fxwp_settings_page()
             'fxwp_hide_plugin' => 'Plugin vor Kundis komplett verstecken',
         );
 
-        // Get disabled functions
-        $deactivated_functions = get_option('fxwp_deactivated_functions');
-        // if disabled functions is not an array or is empty, fill it with false
-        if (empty($deactivated_functions)) {
-            $deactivated_functions = array_fill_keys(array_keys($deactivated_functions_description), false);
+        // Get disabled features
+        $deactivated_features = get_option('fxwp_deactivated_features');
+        // if disabled features is not an array or is empty, fill it with false
+        if (empty($deactivated_features)) {
+            $deactivated_features = array_fill_keys(array_keys($deactivated_features_description), false);
         } else {
-            $deactivated_functions = get_object_vars(json_decode($deactivated_functions));
+            $deactivated_features = get_object_vars(json_decode($deactivated_features));
         }
     }
     ?>
@@ -239,16 +239,16 @@ function fxwp_settings_page()
                     </tr>
                 <?php } ?>
 
-                <!-- disable functions if current user can fxm_admin -->
+                <!-- disable features if current user can fxm_admin -->
                 <?php if(current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Funktionen de-/aktivieren', 'fxwp'); ?></th>
                         <td>
-                           <ul class="checkbox-list" id="deactivated_functions_list">
+                           <ul class="checkbox-list" id="deactivated_features_list">
                                <?php
-                                foreach ($deactivated_functions_description as $option => $label) {
+                                foreach ($deactivated_features_description as $option => $label) {
                                 echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
-                                if ($deactivated_functions[$option]) {
+                                if ($deactivated_features[$option]) {
                                     echo " checked value='true'";
                                 } else {
                                     echo " value='false'";
@@ -293,11 +293,11 @@ function fxwp_settings_page()
     </div>
     <script>
     document.addEventListener('formdata', (e) => {
-        let deactivated_functions_list = {}
-        document.getElementById('deactivated_functions_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
-            deactivated_functions_list[el.id] = el.checked
+        let deactivated_features_list = {}
+        document.getElementById('deactivated_features_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
+            deactivated_features_list[el.id] = el.checked
         })
-        e.formData.append('fxwp_deactivated_functions', JSON.stringify(deactivated_functions_list))
+        e.formData.append('fxwp_deactivated_features', JSON.stringify(deactivated_features_list))
         console.log(e.formData)
     });
     </script>
@@ -310,7 +310,7 @@ function fxwp_register_settings()
 	    register_setting( 'fxwp_settings_group', 'fxwp_api_key' );
 	    register_setting( 'fxwp_settings_group', 'fxwp_google_fonts_remove' );
 	    register_setting( 'fxwp_settings_group', 'fxwp_view_option', array( 'default' => 'erweitert' ) );
-	    register_setting( 'fxwp_settings_group', 'fxwp_deactivated_functions');
+	    register_setting( 'fxwp_settings_group', 'fxwp_deactivated_features');
 
     }
     register_setting('fxwp_settings_group', 'fxwp_favicon');
