@@ -13,7 +13,11 @@ function fxwp_show_log($log)
  */
 function fxwp_check_deactivated_features($feature_to_check) :bool {
     // Get disabled features
-    $deactivated_features = get_object_vars(json_decode(get_option('fxwp_deactivated_features')));
+    $deactivated_features = get_option('fxwp_deactivated_features');
+    if ($deactivated_features === false) {
+        return false;
+    }
+    $deactivated_features = get_object_vars(json_decode($deactivated_features));
     // find feature_to_check in array keys and return value
     if (array_key_exists($feature_to_check, $deactivated_features)) {
         return $deactivated_features[$feature_to_check];
