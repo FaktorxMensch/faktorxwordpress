@@ -39,6 +39,7 @@ function fxwp_show_deactivated_feature_warning($feature_to_check) {
         'fxwp_deact_email_log' => esc_html__('Email Log ist via den Plugin Einstellungen für Kundis ausgeblendet!', 'fxwp'),
         'fxwp_deact_shortcodes' => esc_html__('Shortcodes sind via den Plugin Einstellungen für Kundis ausgeblendet!', 'fxwp'),
         'fxwp_deact_dashboards' => esc_html__('Alle Dashboards sind via den Plugin Einstellungen für Kundis ausgeblendet!', 'fxwp'),
+		'fxwp_deact_debug_log_widget' => esc_html__('Debug Log Widget ist via den Plugin Einstellungen ausgeblendet!', 'fxwp'),
         'fxwp_deact_customer_settings' => esc_html__('FxWP Einstellungen sind für Kundis via den Plugin Einstellungen komplett ausgeblendet!', 'fxwp'),
         'fxwp_deact_hide_plugin' =>  esc_html__('Plugin ist via den Plugin Einstellungen für Kundis komplett ausgeblendet!', 'fxwp'),
     );

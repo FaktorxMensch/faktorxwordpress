@@ -70,6 +70,27 @@ function fxwp_display_maintenance_mode_widget()
 	 */
 	$buttons = [
 		[
+			"title"=>"F&times;WP Plugin Update",
+			"type"=>"action",
+			"description"=>"Update this plugin from Git via regular auto repair / auto update.",
+			"link"=>get_admin_url()."index.php?fxwp_sync=1",
+			"disabled"=>false,
+		],
+		[
+			"title"=>"Change debugging",
+			"type"=>"action",
+			"description"=>"Go to plugin settings to control debugging behaviour.",
+			"link"=>esc_url(admin_url('admin.php?page=fxwp-settings#fxwp-debugging')),
+			"disabled"=>false,
+		],
+		[
+			"title"=>"Open project in p2",
+			"type"=>"action",
+			"description"=>"Opens the associated project in p2 for faster access.",
+			"link"=>FXWP_P2_URL.'/project/'.(get_option('fxwp_customer')['_id']),
+			"disabled"=>false,
+		],
+/*		[
 			"title"=>"Care+ Wiki-Editor",
 			"type"=>"boolean",
 			"option"=>"ziegenhagel_careplus_wiki_editor",
@@ -86,13 +107,6 @@ function fxwp_display_maintenance_mode_widget()
 			"disabled"=>true,
 		],
 		[
-			"title"=>"F&times;WP Plugin Update",
-			"type"=>"action",
-			"description"=>"Update this plugin from Git via regular auto repair / auto update.",
-			"link"=>get_admin_url()."index.php?fxwp_sync=1",
-			"disabled"=>false,
-		],
-		[
 			"title"=>"Disconnect from Overtime",
 			"type"=>"action",
 			"description"=>"Disconnect from Overtime and remove all Care+ data.",
@@ -106,18 +120,21 @@ function fxwp_display_maintenance_mode_widget()
 			"description"=>"Care+ Console nicht mehr anzeigen.",
 			"link"=>get_admin_url()."index.php?ziegenhagel_console=",
 			"disabled"=>true,
-		]
+		]*/
 	];
-	if(current_user_can('fxm_admin')) {
+/*	if(current_user_can('fxm_admin')) {
 		$buttons[] = [
 			"title"=>"Care+ Maintenance Mode",
 			"type"=>"boolean",
 			"option"=>"maintenance_mode",
 			"description"=>"Schaltet den Wartungsmodus ein und aus.",
 			"link"=>get_admin_url()."index.php?maintenance_mode=",
-			"disabled"=>true,
+			"disabled"=>false,
 		];
-	}
+	}*/
+
+	echo "<div style='margin-top: 20px'>";
+
 	foreach($buttons as $index=>$button){
 
 		// line break but not for first button
@@ -131,16 +148,17 @@ function fxwp_display_maintenance_mode_widget()
 			$button["title"] .= !get_option($button["option"],false)?" aktivieren":" deaktivieren";
 		}
 
-		$disable_button = $button["disabled"] ? "disabled" : "";
+		$disable_button = $button["disabled"] ? "disabled style='pointer-events: none'" : "";
 
 		// display button
 		echo '<div>
-            <a class="button" href="'.$button["link"].'" '.$disable_button.'> 
+            <a class="button" href="'.$button["link"].'" '.$disable_button.' > 
             <span style="vertical-align:sub;margin-left:-2px;margin-right:2px" class="dashicons dashicons-plugins-checked"></span>
             '.$button["title"].' </a>
             <br><small>'.$button["description"].'</small>
             </div><br>';
 	}
+	echo "</div>";
 }
 
 

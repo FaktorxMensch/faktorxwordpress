@@ -30,17 +30,28 @@ function fxwp_settings_page()
             'fxwp_deact_email_log' => 'E-Mail Log für Kundis ausblenden',
             'fxwp_deact_shortcodes' => 'Shortcodes für Kundis ausblenden',
             'fxwp_deact_dashboards' => 'Alle Dashboards für Kundis ausblenden',
+	        'fxwp_deact_debug_log_widget' => 'Debug Log Widget ausblenden',
             'fxwp_deact_customer_settings' => 'Settings für Kundis komplett ausblenden',
             'fxwp_deact_hide_plugin' => 'Plugin vor Kundis komplett verstecken',
         );
+        //Get debugging options description from mods/debug-mod.php
+        global $debugging_options_description;
 
-        // Get disabled features
+        // Get deactivated features
         $deactivated_features = get_option('fxwp_deactivated_features');
-        // if disabled features is empty, fill it with false
+        // if deactivated features is empty, fill it with false
         if (empty($deactivated_features)) {
             $deactivated_features = array_fill_keys(array_keys($deactivated_features_description), false);
         } else {
             $deactivated_features = get_object_vars(json_decode($deactivated_features));
+        }
+        // Get debugging options
+        $debugging_options = get_option('fxwp_debugging_options');
+        // if debugging options are empty, fill it with false
+        if (empty($debugging_options)) {
+	        $debugging_options = array_fill_keys(array_keys($debugging_options_description), false);
+        } else {
+	        $debugging_options = get_object_vars(json_decode($debugging_options));
         }
     }
     ?>
@@ -240,7 +251,7 @@ function fxwp_settings_page()
                     </tr>
                 <?php } ?>
 
-                <!-- disable features if current user can fxm_admin -->
+                <!-- deactivate features if current user can fxm_admin -->
                 <?php if(current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Funktionen de-/aktivieren', 'fxwp'); ?></th>
@@ -257,10 +268,42 @@ function fxwp_settings_page()
                                 echo "/><label for='{$option}'>{$label}</label></li>";
                                } ?>
                            </ul>
-                            <p style="color: red"><?php echo __('Achtung: Entfernte Haken aktivieren Features nicht direkt wieder! (zb Auto Update muss manuell noch gestaret werden)', 'fxwp'); ?></p>
+                            <p style="color: #E88813"><?php echo __('Achtung: Entfernte Haken aktivieren Features nicht direkt wieder! (zb Auto Update muss manuell noch gestaret werden)', 'fxwp'); ?></p>
                         </td>
                     </tr>
                 <?php } ?>
+
+                <!-- change debugging mode -->
+	            <?php if (current_user_can("fxm_admin")) { ?>
+                    <tr id="fxwp-debugging-options">
+                        <th scope="row"><?php echo esc_html__('Debugging de-/aktivieren', 'fxwp'); ?></th>
+                        <td>
+                            <ul class="checkbox-list" id="deactivated_features_list">
+			                    <?php
+			                    foreach ($debugging_options_description as $option => $label) {
+				                    echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
+				                    if ($debugging_options[$option]) {
+					                    echo " checked value='true'";
+				                    } else {
+					                    echo " value='false'";
+				                    }
+				                    echo "/><label for='{$option}'><code>{$label}</code></label></li>";
+			                    } ?>
+                            </ul>
+                        </td>
+                    </tr>
+                    <script>
+<!--                        Flash this area if url contains #fxwp-debugging -->
+                        if (window.location.hash === '#fxwp-debugging') {
+                            //Instead of making background red, show red border
+                            document.getElementById('fxwp-debugging').style.border = '5px solid #E88813';
+                            //remove flash 1s later
+                            setTimeout(function () {
+                                document.getElementById('fxwp-debugging').style.border = 'none';
+                            }, 500);
+                        }
+                    </script>
+	            <?php } ?>
 
                 <!-- print get_option for fxwp_customer and fxwp_project -->
                 <!-- only if current user is fxm_admin -->
@@ -299,12 +342,17 @@ function fxwp_settings_page()
         document.getElementById('deactivated_features_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
             deactivated_features_list[el.id] = el.checked
         })
-        // If plugin should be hidden, hide menu item as well
+        // If fxwp plugin should be completely hidden, hide menu items as well
         if (deactivated_features_list['fxwp_deact_hide_plugin']) {
             deactivated_features_list['fxwp_deact_customer_settings'] = true
             deactivated_features_list['fxwp_deact_dashboards'] = true
         }
         e.formData.append('fxwp_deactivated_features', JSON.stringify(deactivated_features_list))
+        let debugging_options_list = {}
+        document.getElementById('fxwp-debugging-options').querySelectorAll('input[type="checkbox"]').forEach((el) => {
+            debugging_options_list[el.id] = el.checked
+        })
+        e.formData.append('fxwp_debugging_options', JSON.stringify(debugging_options_list))
         console.log(e.formData)
     });
     </script>
@@ -318,6 +366,7 @@ function fxwp_register_settings()
 	    register_setting( 'fxwp_settings_group', 'fxwp_google_fonts_remove' );
 	    register_setting( 'fxwp_settings_group', 'fxwp_view_option', array( 'default' => 'erweitert' ) );
 	    register_setting( 'fxwp_settings_group', 'fxwp_deactivated_features');
+	    register_setting( 'fxwp_settings_group', 'fxwp_debugging_options');
 
     }
     register_setting('fxwp_settings_group', 'fxwp_favicon');

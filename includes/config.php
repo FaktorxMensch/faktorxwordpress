@@ -17,6 +17,7 @@ if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) {  //|| strpos($_SERVE
     define('FXWP_LOCAL_ENV', false);
     define('FXWP_API_URL', 'https://cors.faktorxmensch.com/api/fxwp');
 }
+define('FXWP_P2_URL', 'https://p2.faktorxmensch.com');
 
 // Server Settings
 define('FXWP_STORAGE_LIMIT', 20 * 1024 * 1024 * 1024); // 20GB

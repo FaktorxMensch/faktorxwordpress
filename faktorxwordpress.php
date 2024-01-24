@@ -2,11 +2,11 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 1.5.2
+ * Version: 1.5.3
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
- * Change Log: Added functionality to hide or deactivate features
+ * Change Log: Added functionality to set debug mode from plugin settings and added debug widget. v1.5.2: Added functionality to hide or deactivate features
  */
 
 // Prevent direct file access
