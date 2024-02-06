@@ -327,22 +327,45 @@ function fxwp_settings_page()
             <?php submit_button(); ?>
         </form>
 
-        <form method="post" action="">
+        <form method="post" action="" class="inline">
             <?php echo esc_html__('Version', 'fxwp'); ?>
             <?php echo esc_html(FXWP_VERSION); ?>
             <a href="<?php echo esc_url(admin_url('index.php?fxwp_sync=1')); ?>">
                 <?php echo esc_html__('Prüfen auf Updates', 'fxwp'); ?>
             </a>
         </form>
-        <!--        Spacer 100px-->
-        <div style="height: 100px"></div>
-        <form method="post" action="index.php?fxwp_sync=1">
-	        Plugin
+        <svg class="inline"
+             height="1.5em"
+             xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24"
+             onclick="document.querySelector('svg.inline').classList.toggle('flip');document.querySelector('.tag-update').classList.toggle('inline');"
+             >
+            <title>chevron-left</title>
+            <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
+        </svg>
+        <form method="post" action="index.php?fxwp_sync=1" class="tag-update">
             <input type="text" name="fxwp_self_update_tag" placeholder="Tag" required style="width:60px"/>
-            <input type="submit" value="<?php echo esc_html__('manuell installieren', 'fxwp'); ?>" />
+            <input type="submit" class="button button-primary" value="<?php echo esc_html__('manuell installieren', 'fxwp'); ?>" />
         </form>
-
     </div>
+    <style>
+        form.inline {
+            display: inline;
+        }
+        .inline svg {
+            display: inline;
+            margin-bottom: -5px;
+        }
+        .tag-update {
+            display: none;
+        }
+        .flip {
+            -webkit-transform: rotate(180deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(180deg);
+        }
+    </style>
+
     <script>
     document.addEventListener('formdata', (e) => {
         let deactivated_features_list = {}
