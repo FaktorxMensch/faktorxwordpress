@@ -46,7 +46,7 @@ if (!function_exists('fxm_do_this_hourly')) {
             } else {
                 error_log("No update available");
                 add_action('admin_notices', function () use ($latest_version_git) {
-                    echo '<div class="notice notice-info is-dismissible"><p>FXWP plugin is up-to-date, current version is ' . $latest_version_git . '.</p></div>';
+                    echo '<div class="notice notice-info is-dismissible"><p>FXWP plugin is up-to-date, current version is ' . $latest_version_git . ' or higher.</p></div>';
                 });
             }
         }
@@ -74,12 +74,11 @@ function fxm_plugin_updater($latest_version_git, $debug_update = null)
 		$zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/refs/tags/' . $latest_version_git . '.zip';
 	} else {
 		$zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/' . $latest_version_git . '.zip';
-		error_log("In if: " .$zip_url);
 	}
-		error_log("After if: " .$zip_url);
 	$temp_file = download_url($zip_url);
 
     if (is_wp_error($temp_file)) {
+	    echo '<div class="notice notice-error is-dismissible"><p>Error downloading update:  ' . $temp_file->get_error_message() . '.</p></div>';
         error_log("Error occurred while downloading the update. Maybe disk space is full?");
         error_log($temp_file->get_error_message());
         return new WP_Error('download_error', __('Something went wrong while downloading the latest plugin ZIP file. Maybe disk space is full?', 'fxwp'));
