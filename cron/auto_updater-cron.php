@@ -70,12 +70,13 @@ function fxm_plugin_updater($latest_version_git, $debug_update = null)
     WP_Filesystem();
 
     // Step 1: Download the latest plugin ZIP file from GitHub.
-	$zip_url = null;
-	if ($debug_update) {
+	if ($debug_update === true) {
 		$zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/refs/tags/' . $latest_version_git . '.zip';
 	} else {
 		$zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/' . $latest_version_git . '.zip';
+		error_log("In if: " .$zip_url);
 	}
+		error_log("After if: " .$zip_url);
 	$temp_file = download_url($zip_url);
 
     if (is_wp_error($temp_file)) {
