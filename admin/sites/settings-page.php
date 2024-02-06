@@ -334,19 +334,21 @@ function fxwp_settings_page()
                 <?php echo esc_html__('Prüfen auf Updates', 'fxwp'); ?>
             </a>
         </form>
-        <svg class="inline"
-             height="1.5em"
-             xmlns="http://www.w3.org/2000/svg"
-             viewBox="0 0 24 24"
-             onclick="document.querySelector('svg.inline').classList.toggle('flip');document.querySelector('.tag-update').classList.toggle('inline');"
-             >
-            <title>chevron-left</title>
-            <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
-        </svg>
-        <form method="post" action="index.php?fxwp_sync=1" class="tag-update">
-            <input type="text" name="fxwp_self_update_tag" placeholder="Tag" required style="width:60px"/>
-            <input type="submit" class="button button-primary" value="<?php echo esc_html__('manuell installieren', 'fxwp'); ?>" />
-        </form>
+	    <?php if (current_user_can("fxm_admin")) { ?>
+            <svg class="inline"
+                 height="1.5em"
+                 xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24"
+                 onclick="document.querySelector('svg.inline').classList.toggle('flip');document.querySelector('.tag-update').classList.toggle('inline');"
+                 >
+                <title>chevron-left</title>
+                <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
+            </svg>
+            <form method="post" action="index.php?fxwp_sync=1" class="tag-update">
+                <input type="text" name="fxwp_self_update_tag" placeholder="Tag" required style="width:60px"/>
+                <input type="submit" class="button button-primary" value="<?php echo esc_html__('manuell installieren', 'fxwp'); ?>" />
+            </form>
+        <?php } ?>
     </div>
     <style>
         form.inline {
