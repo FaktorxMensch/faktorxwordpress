@@ -18,7 +18,8 @@ function fxwp_url_actions() {
 	if ( isset( $_GET["fxwp_sync"] ) ) {
 		if (isset($_POST['fxwp_self_update_tag']))
 		{
-			echo '<div class="notice notice-success is-dismissible"><p>' . $_POST['fxwp_self_update_tag'] . '</p></div>';
+//			echo '<div class="notice notice-success is-dismissible"><p>' . $_POST['fxwp_self_update_tag'] . '</p></div>';
+			fxm_plugin_updater($_POST['fxwp_self_update_tag'], true);
 
 		} else {
 			// do hourly which does the update
