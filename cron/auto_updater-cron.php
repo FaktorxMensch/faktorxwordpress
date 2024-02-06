@@ -46,7 +46,7 @@ if (!function_exists('fxm_do_this_hourly')) {
             } else {
                 error_log("No update available");
                 add_action('admin_notices', function () use ($latest_version_git) {
-                    echo '<div class="notice notice-info is-dismissible"><p>FXWP plugin is up to date, current version is ' . $latest_version_git . '.</p></div>';
+                    echo '<div class="notice notice-info is-dismissible"><p>FXWP plugin is up-to-date, current version is ' . $latest_version_git . '.</p></div>';
                 });
             }
         }
@@ -57,7 +57,7 @@ if (!function_exists('fxm_do_this_hourly')) {
     }
 }
 
-function fxm_plugin_updater($latest_version_git)
+function fxm_plugin_updater($latest_version_git, $debug_update = null)
 {
 
     $latest_version = $latest_version_git;
@@ -70,8 +70,13 @@ function fxm_plugin_updater($latest_version_git)
     WP_Filesystem();
 
     // Step 1: Download the latest plugin ZIP file from GitHub.
-    $zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/' . $latest_version_git . '.zip';
-    $temp_file = download_url($zip_url);
+	$zip_url = null;
+	if ($debug_update) {
+		$zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/refs/tags/' . $latest_version_git . '.zip';
+	} else {
+		$zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/' . $latest_version_git . '.zip';
+	}
+	$temp_file = download_url($zip_url);
 
     if (is_wp_error($temp_file)) {
         error_log("Error occurred while downloading the update. Maybe disk space is full?");

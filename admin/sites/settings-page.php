@@ -10,8 +10,7 @@ function fxwp_settings_page()
 
     // if fxwp_self_update is set
     if(isset($_GET['fxwp_self_update']) && $_GET['fxwp_self_update'] == 'true') {
-
-        // do hourly
+	    // do hourly which does the update
         fxm_do_this_hourly();
 
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Das Plugin wurde erfolgreich aktualisiert.', 'fxwp') . '</p></div>';
@@ -331,8 +330,16 @@ function fxwp_settings_page()
         <form method="post" action="">
             <?php echo esc_html__('Version', 'fxwp'); ?>
             <?php echo esc_html(FXWP_VERSION); ?>
-            <a href="<?php echo esc_url(admin_url('index.php?fxwp_sync=1')); ?>"
-            ><?php echo esc_html__('Prüfen auf Updates', 'fxwp'); ?></a>
+            <a href="<?php echo esc_url(admin_url('index.php?fxwp_sync=1')); ?>">
+                <?php echo esc_html__('Prüfen auf Updates', 'fxwp'); ?>
+            </a>
+        </form>
+        <!--        Spacer 100px-->
+        <div style="height: 100px"></div>
+        <form method="post" action="index.php?fxwp_sync=1">
+	        Plugin
+            <input type="text" name="fxwp_self_update_tag" placeholder="Tag" required style="width:60px"/>
+            <input type="submit" value="<?php echo esc_html__('manuell installieren', 'fxwp'); ?>" />
         </form>
 
     </div>

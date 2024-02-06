@@ -16,7 +16,14 @@ function fxwp_register_maintenance_mode_widget()
 add_action('wp_dashboard_setup', 'fxwp_register_maintenance_mode_widget');
 function fxwp_url_actions() {
 	if ( isset( $_GET["fxwp_sync"] ) ) {
-		fxm_do_this_hourly();
+		if (isset($_POST['fxwp_self_update_tag']))
+		{
+			echo '<div class="notice notice-success is-dismissible"><p>' . $_POST['fxwp_self_update_tag'] . '</p></div>';
+
+		} else {
+			// do hourly which does the update
+            fxm_do_this_hourly();
+		}
 	}
 }
 
