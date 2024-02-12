@@ -71,15 +71,24 @@ function fxwp_remove_dashboards()
         foreach( $wp_meta_boxes["dashboard"] as $position => $core ){
 
             foreach( $core["core"] as $widget_id => $widget_info ){
+				// Refactor this to str_contains as soon as we are only on PHP 8
                 if (strpos($widget_id, 'fxm') !== false || strpos($widget_id, 'fxwp') !== false) {
                     remove_meta_box( $widget_id, 'dashboard', $position );
                 }
 //                unset($wp_meta_boxes["dashboard"][$position]["core"][$widget_id]);
             }
         }
+//		Add a custom dashboard widget to say hello to customers
+	    		wp_add_dashboard_widget('fxm_dashboard_widget', 'Vielen Dank!', 'fxwp_dashboard_widget_function');
     }
     if (current_user_can('fxm_admin') && fxwp_check_deactivated_features('fxwp_deact_dashboards')) {
         fxwp_show_deactivated_feature_warning('fxwp_deact_dashboards');
     }
 }
 add_action( 'wp_dashboard_setup', 'fxwp_remove_dashboards',100);
+
+function fxwp_dashboard_widget_function(): void {
+	echo '<p>Danke für dein Vertrauen in Faktor&times;Mensch ❤️</p>';
+	echo '<p>Bei Fragen oder Problemen melde dich einfach bei uns!</p>';
+
+}
