@@ -30,7 +30,7 @@ function fxwp_settings_page()
             'fxwp_deact_shortcodes' => 'Shortcodes für Kundis ausblenden',
             'fxwp_deact_dashboards' => 'Alle Dashboards für Kundis ausblenden',
 	        'fxwp_deact_debug_log_widget' => 'Debug Log Widget ausblenden',
-            'fxwp_deact_customer_settings' => 'Settings für Kundis komplett ausblenden',
+            'fxwp_deact_customer_settings' => 'Plugin Settings für Kundis komplett ausblenden',
             'fxwp_deact_hide_plugin' => 'Plugin vor Kundis komplett verstecken',
         );
         //Get debugging options description from mods/debug-mod.php
