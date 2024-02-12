@@ -14,6 +14,10 @@ function remove_dashboard_widgets () {
 	remove_meta_box('dashboard_primary', 'dashboard', 'side' );
 	remove_meta_box('dashboard_secondary', 'dashboard', 'side' );
 	remove_meta_box('dashboard_quick_press', 'dashboard', 'side');
+	// Hide events calender "news and events" widget
+	remove_meta_box('tribe_dashboard_widget', 'dashboard', 'normal');
+
+
     //Maybe remove essential addons "rate me" widget later.
     //remove_meta_box('', 'dashboard', 'normal', 'core');
 
