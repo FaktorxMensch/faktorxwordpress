@@ -106,7 +106,8 @@ function fxwp_plugin_menu()
 {
     if (get_option('fxwp_api_key') === '')
         return;
-    if (!current_user_can('fxm_admin') && fxwp_check_deactivated_features('fxwp_deact_customer_settings')) {
+	// If we have deactivated the customer settings, we don't want to show the menu unless the user is fxm_admin
+    if (fxwp_check_deactivated_features('fxwp_deact_customer_settings') && !current_user_can('fxm_admin')) {
         return;
     }
 

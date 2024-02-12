@@ -33,6 +33,25 @@ function fxwp_settings_page()
             'fxwp_deact_customer_settings' => 'Plugin Settings für Kundis komplett ausblenden',
             'fxwp_deact_hide_plugin' => 'Plugin vor Kundis komplett verstecken',
         );
+	    // Restricted features description
+	    $restricted_features_description = array(
+		    'fxwp_restr_pages'                => 'Seiten',
+		    'fxwp_restr_posts'           => 'Blogposts',
+		    'fxwp_restr_uploads'       => 'Mediendateien',
+		    'fxwp_restr_themes'         => 'Themes',
+		    'fxwp_restr_updates-submenu'         => 'Updates Submenu von Dashboard',
+		    'fxwp_restr_elememtor-templates'         => 'Elementor Templates',
+		    'fxwp_restr_wpcf7'         => 'Contact Form 7',
+		    'fxwp_restr_new-button'         => 'Admin Bar New Button',
+		    'fxwp_restr_updates-indicator'         => 'Admin Bar Updates Indicator',
+		    'fxwp_restr_my-account'         => 'Admin Bar Account',
+		    'fxwp_restr_admin_plugins'        => 'Plugins',
+		    'fxwp_restr_admin_users'        => 'Benutzer',
+		    'fxwp_restr_admin_tools'  => 'Tools',
+		    'fxwp_restr_admin_settings' => 'WP Einstellungen',
+		    'fxwp_restr_admin_elementor'       => 'Elementor Einstellungen',
+		    'fxwp_restr_admin_eael'       => 'Essential Addons for Elementor Einstellungen',
+	    );
         //Get debugging options description from mods/debug-mod.php
         global $debugging_options_description;
 
@@ -52,6 +71,14 @@ function fxwp_settings_page()
         } else {
 	        $debugging_options = get_object_vars(json_decode($debugging_options));
         }
+	    // Get deactivated features
+	    $restricted_features = get_option( 'fxwp_restricted_features' );
+	    // if deactivated features is empty, fill it with false
+	    if ( empty( $restricted_features ) ) {
+		    $restricted_features = array_fill_keys( array_keys( $restricted_features_description ), false );
+	    } else {
+		    $restricted_features = get_object_vars( json_decode( $restricted_features ) );
+	    }
     }
     ?>
     <div class="wrap">
@@ -272,6 +299,27 @@ function fxwp_settings_page()
                     </tr>
                 <?php } ?>
 
+                <!-- restrict features if current user can fxm_admin -->
+	            <?php if(current_user_can("fxm_admin")) { ?>
+                    <tr>
+                        <th scope="row"><?php echo esc_html__('Menüseiten ausblenden', 'fxwp'); ?></th>
+                        <td>
+                            <ul class="checkbox-list" id="restricted_features_list">
+					            <?php
+					            foreach ($restricted_features_description as $option => $label) {
+						            echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
+						            if ($restricted_features[$option]) {
+							            echo " checked value='true'";
+						            } else {
+							            echo " value='false'";
+						            }
+						            echo "/><label for='{$option}'>{$label}</label></li>";
+					            } ?>
+                            </ul>
+                        </td>
+                    </tr>
+	            <?php } ?>
+
                 <!-- change debugging mode -->
 	            <?php if (current_user_can("fxm_admin")) { ?>
                     <tr id="fxwp-debugging-options">
@@ -380,6 +428,18 @@ function fxwp_settings_page()
             deactivated_features_list['fxwp_deact_dashboards'] = true
         }
         e.formData.append('fxwp_deactivated_features', JSON.stringify(deactivated_features_list))
+
+        let restricted_features_list = {}
+        document.getElementById('restricted_features_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
+            restricted_features_list[el.id] = el.checked
+        })
+        // // If fxwp plugin should be completely hidden, hide menu items as well
+        // if (restricted_features_list['fxwp_deact_hide_plugin']) {
+        //     restricted_features_list['fxwp_deact_customer_settings'] = true
+        //     restricted_features_list['fxwp_deact_dashboards'] = true
+        // }
+        e.formData.append('fxwp_restricted_features', JSON.stringify(restricted_features_list))
+
         let debugging_options_list = {}
         document.getElementById('fxwp-debugging-options').querySelectorAll('input[type="checkbox"]').forEach((el) => {
             debugging_options_list[el.id] = el.checked
@@ -399,6 +459,8 @@ function fxwp_register_settings()
 	    register_setting( 'fxwp_settings_group', 'fxwp_view_option', array( 'default' => 'erweitert' ) );
 	    register_setting( 'fxwp_settings_group', 'fxwp_deactivated_features');
 	    register_setting( 'fxwp_settings_group', 'fxwp_debugging_options');
+	    register_setting( 'fxwp_settings_group', 'fxwp_restricted_features');
+
 
     }
     register_setting('fxwp_settings_group', 'fxwp_favicon');
