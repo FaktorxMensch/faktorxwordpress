@@ -2,11 +2,11 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 1.5.9
+ * Version: 1.6.0
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
- * Change Log: Default widget if all other are hidden, minor improvements. v1.5.7: Added functionality to hide pages and settings from customers. pre:Added option to manually update to any tag, added admin notice in update process if update has errors. v1.5.3: Added functionality to set debug mode from plugin settings and added debug widget. v1.5.2: Added functionality to hide or deactivate features
+ * Change Log: Fix for ionos behaving weird v1.5.8: Default widget if all other are hidden, minor improvements. v1.5.7: Added functionality to hide pages and settings from customers. pre:Added option to manually update to any tag, added admin notice in update process if update has errors. v1.5.3: Added functionality to set debug mode from plugin settings and added debug widget. v1.5.2: Added functionality to hide or deactivate features
  */
 
 // Prevent direct file access
