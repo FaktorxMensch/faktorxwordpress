@@ -156,6 +156,7 @@ function fxwp_delete_expired_backups()
     $rootDir = ABSPATH;
     $backupDir = $rootDir . 'wp-content/fxwp-backups/';
     $files = glob($backupDir . 'backup_*.zip');
+	error_log('files: '.print_r($files, true));
 
     // Sort the array so the oldest files are first but take its filename
     array_multisort(
@@ -212,10 +213,23 @@ function fxwp_delete_expired_backups()
     // Delete the backups not in the keptBackups array
     foreach ($files as $file) {
         if (!in_array($file, $keptBackups)) {
+			error_log('deleting backup: '.$file);
             unlink($file);
+			error_log('deleting backup: '.$file.".sql");
             unlink($file.".sql");
         }
     }
+
+	$all_files = glob($backupDir . '*');
+//	If file is *.sql and no other file with the same name exists but without the .sql exists, delete it
+	foreach ($all_files as $file) {
+		if (strpos($file, '.sql') !== false) {
+			$filename = str_replace('.sql', '', $file);
+			if (!in_array($filename, $all_files)) {
+				unlink($file);
+			}
+		}
+	}
 }
 
 function fxwp_restore_backup($backupFile)
