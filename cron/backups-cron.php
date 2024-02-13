@@ -39,71 +39,70 @@ function fxwp_create_backup()
     // take wp-configs DB credentials
     $output = array();
     $returnValue = null;
-    exec("mysqldump --user={" . DB_USER . "} --password={" . DB_PASSWORD . "} --host={" . DB_HOST . "} " . DB_NAME . " > $dumpFile", $output, $returnValue);
+    exec("mysqldump --user='" . DB_USER . "' --password='" . DB_PASSWORD . "' --host='" . DB_HOST . "' '" . DB_NAME . "' > $dumpFile", $output, $returnValue);
 
     // if mysqldump failed
     if ($returnValue !== 0) {
-        // fall back to PHP
-        $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+	    // fall back to PHP
+	    $mysqli = new mysqli( DB_HOST, DB_USER, DB_PASSWORD, DB_NAME );
 
-        if ($mysqli->connect_error) {
-            die('Connect Error (' . $mysqli->connect_errno . ') '
-                . $mysqli->connect_error);
-        }
+	    if ( $mysqli->connect_error ) {
+		    die( 'Connect Error (' . $mysqli->connect_errno . ') '
+		         . $mysqli->connect_error );
+	    }
 
-        $tables = array();
-        $result = $mysqli->query('SHOW TABLES');
-        while ($row = $result->fetch_array(MYSQLI_NUM)) {
-            $tables[] = $row[0];
-        }
+	    $tables = array();
+	    $result = $mysqli->query( 'SHOW TABLES' );
+	    while ( $row = $result->fetch_array( MYSQLI_NUM ) ) {
+		    $tables[] = $row[0];
+	    }
 
-        $sql = 'SET FOREIGN_KEY_CHECKS=0;' . "\n";
-        foreach ($tables as $table) {
-            $result = $mysqli->query('SELECT * FROM ' . $table);
-            $numFields = $result->field_count;
-            $numRows = $result->num_rows;
-            $i = 0;
+	    $sql = 'SET FOREIGN_KEY_CHECKS=0;' . "\n";
+	    foreach ( $tables as $table ) {
+		    $result    = $mysqli->query( 'SELECT * FROM ' . $table );
+		    $numFields = $result->field_count;
+		    $numRows   = $result->num_rows;
+		    $i         = 0;
 
-            $sql .= 'DROP TABLE IF EXISTS ' . $table . ';';
-            $row2 = $mysqli->query('SHOW CREATE TABLE ' . $table)->fetch_row();
-            $sql .= "\n\n" . $row2[1] . ";\n\n";
+		    $sql  .= 'DROP TABLE IF EXISTS ' . $table . ';';
+		    $row2 = $mysqli->query( 'SHOW CREATE TABLE ' . $table )->fetch_row();
+		    $sql  .= "\n\n" . $row2[1] . ";\n\n";
 
-            for ($j = 0; $j < $numFields; $j++) {
-                while ($row = $result->fetch_row()) {
-                    if ($i % $numRows == 0) {
-                        $sql .= 'INSERT INTO ' . $table . ' VALUES(';
-                    } else {
-                        $sql .= '(';
-                    }
+		    for ( $j = 0; $j < $numFields; $j ++ ) {
+			    while ( $row = $result->fetch_row() ) {
+				    if ( $i % $numRows == 0 ) {
+					    $sql .= 'INSERT INTO ' . $table . ' VALUES(';
+				    } else {
+					    $sql .= '(';
+				    }
 
-                    for ($k = 0; $k < $numFields; $k++) {
-                        if (isset($row[$k])) {
-                            $sql .= '"' . $mysqli->real_escape_string($row[$k]) . '"';
-                        } else {
-                            $sql .= '""';
-                        }
-                        if ($k < $numFields - 1) {
-                            $sql .= ',';
-                        }
-                    }
+				    for ( $k = 0; $k < $numFields; $k ++ ) {
+					    if ( isset( $row[ $k ] ) ) {
+						    $sql .= '"' . $mysqli->real_escape_string( $row[ $k ] ) . '"';
+					    } else {
+						    $sql .= '""';
+					    }
+					    if ( $k < $numFields - 1 ) {
+						    $sql .= ',';
+					    }
+				    }
 
-                    if ((($i + 1) % $numRows) == 0) {
-                        $sql .= ");";
-                    } else {
-                        $sql .= "),";
-                    }
-                    $i++;
-                }
-            }
-        }
-        $sql .= "\n\n\n";
+				    if ( ( ( $i + 1 ) % $numRows ) == 0 ) {
+					    $sql .= ");";
+				    } else {
+					    $sql .= "),";
+				    }
+				    $i ++;
+			    }
+		    }
+	    }
+	    $sql .= "\n\n\n";
+
+
+	    $sql .= 'SET FOREIGN_KEY_CHECKS=1;';
+
+	    file_put_contents( $dumpFile, $sql );
     }
-
-    $sql .= 'SET FOREIGN_KEY_CHECKS=1;';
-
-    file_put_contents($dumpFile, $sql);
-
-    $mysqli->close();
 
     // Create a new zip archive
     $zip = new ZipArchive();
@@ -131,6 +130,15 @@ function fxwp_create_backup()
 
     // Zip archive will be created only after closing object
     $zip->close();
+
+//	Check if the zip archive has random numbers after if (for an unknown reason). If so, rename it to the correct name. Use $backupFile as the search pattern in the current directory and be sure to not rename the file if it is $backupFile.zip
+	$currentBackupFiles = glob($backupDir . $backupFile . '*');
+	foreach ($currentBackupFiles as $file) {
+		if (strpos($file, ".zip") === false && $file !== $backupFile) {
+			rename($file, $backupFile);
+		}
+	}
+
 }
 
 function fxwp_get_backup_timestamp($filename)
@@ -156,7 +164,6 @@ function fxwp_delete_expired_backups()
     $rootDir = ABSPATH;
     $backupDir = $rootDir . 'wp-content/fxwp-backups/';
     $files = glob($backupDir . 'backup_*.zip');
-	error_log('files: '.print_r($files, true));
 
     // Sort the array so the oldest files are first but take its filename
     array_multisort(
@@ -213,9 +220,7 @@ function fxwp_delete_expired_backups()
     // Delete the backups not in the keptBackups array
     foreach ($files as $file) {
         if (!in_array($file, $keptBackups)) {
-			error_log('deleting backup: '.$file);
             unlink($file);
-			error_log('deleting backup: '.$file.".sql");
             unlink($file.".sql");
         }
     }
