@@ -54,6 +54,10 @@ function fxwp_backups_page()
                 // You would also need to pass the backup file name or other identifier as a parameter
                 fxwp_delete_backup($_GET['backup_file']);
                 break;
+            case 'cron':
+                // Start backup cron manually to simulate execution
+                do_action('fxwp_backup_task');
+                break;
         }
     }
 
@@ -66,6 +70,8 @@ function fxwp_backups_page()
         <p><?php _e('Create and restore backups of your WordPress site.', 'fxwp'); ?></p>
         <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=create'), 'fxwp_critical'); ?>"
            class="button button-primary"> <?php _e('Neue Sicherung erstellen', 'fxwp'); ?> </a>
+        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=cron'), 'fxwp_critical'); ?>"
+           class="button button-primary"> <?php _e('Cron manuell ausführen', 'fxwp'); ?> </a>
 
         <br>
         <?php fxwp_show_deactivated_feature_warning('fxwp_deact_backups'); ?>

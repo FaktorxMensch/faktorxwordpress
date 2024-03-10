@@ -231,12 +231,14 @@ function fxwp_delete_expired_backups()
     }
 
 	$all_files = glob($backupDir . '*');
-//	If file is *.sql and no other file with the same name exists but without the .sql exists, delete it
+//	If file is *.sql and no other file with the same name but without the .sql exists, delete it
 	foreach ($all_files as $file) {
 		if (strpos($file, '.sql') !== false) {
 			$filename = str_replace('.sql', '', $file);
+            error_log("Deleting file: ".$filename);
 			if (!in_array($filename, $all_files)) {
 				unlink($file);
+                error_log("Deleted file: ".$file);
 			}
 		}
 	}

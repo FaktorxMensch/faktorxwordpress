@@ -31,14 +31,14 @@ function fxwp_register_debugging_widget()
     if (current_user_can('fxm_admin') && current_user_can('administrator')) {
         wp_add_dashboard_widget(
             'fxwp_debugging_widget', // Widget slug.
-            'F&times;M Debug',
+            'F&times;M Status',
             'fxwp_debugging_widget' // Display function.
         );
     } elseif (current_user_can('administrator') && $user_has_fxm_email) {
         //Current user is admin and has fxm email address but is not fxm_admin which seems like a mistake
         wp_add_dashboard_widget(
             'fxwp_debugging_widget_without_fxm_admin_capability', // Widget slug.
-            'F&times;M Debug',
+            'F&times;M Status',
             'fxwp_debugging_widget_without_fxm_admin_capability' // Display function.
         );
     } else {
