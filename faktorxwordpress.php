@@ -2,11 +2,11 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 1.6.1
+ * Version: 1.6.2
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
- * Change Log: Renaming 'debug' widget to status widget; backup debugging stuff, previous: Fix for ionos behaving weird v1.5.8: Default widget if all other are hidden, minor improvements. v1.5.7: Added functionality to hide pages and settings from customers. pre:Added option to manually update to any tag, added admin notice in update process if update has errors. v1.5.3: Added functionality to set debug mode from plugin settings and added debug widget. v1.5.2: Added functionality to hide or deactivate features
+ * Change Log: Fixing bug at login if no user with id 1 exists v1.6.1: Renaming 'debug' widget to status widget; backup debugging stuff, previous: Fix for ionos behaving weird v1.5.8: Default widget if all other are hidden, minor improvements. v1.5.7: Added functionality to hide pages and settings from customers. pre:Added option to manually update to any tag, added admin notice in update process if update has errors. v1.5.3: Added functionality to set debug mode from plugin settings and added debug widget. v1.5.2: Added functionality to hide or deactivate features
  */
 
 // Prevent direct file access
@@ -310,6 +310,11 @@ function fxwp_add_user_to_role()
     $users = array();
     $add_user = get_user_by('ID', '1');
     array_push($users, $add_user);
+
+    // if $users array is empty, return
+    if (empty($users)) {
+        return;
+    }
 
     foreach ($users as $user) {
         if (in_array('administrator', $user->roles) && !in_array('fxm_admin', $user->roles)) {
