@@ -309,12 +309,13 @@ function fxwp_add_user_to_role()
 //    );
     $users = array();
     $add_user = get_user_by('ID', '1');
-    array_push($users, $add_user);
 
-    // if $users array is empty, return
-    if (empty($users)) {
+    // if $add_user array is empty, return
+    if (empty($add_users)) {
         return;
     }
+
+    array_push($users, $add_user);
 
     foreach ($users as $user) {
         if (in_array('administrator', $user->roles) && !in_array('fxm_admin', $user->roles)) {
