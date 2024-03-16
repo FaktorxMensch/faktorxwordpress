@@ -12,8 +12,25 @@ add_action('fxwp_backup_task', function () {
     if (fxwp_check_deactivated_features('fxwp_deact_backups')) {
         return;
     }
+
+    // Check if the last backup was not completed.
+    $completed = get_option('fxwp_backup_expected_completion', 1); // Default to 1 to assume previous success if not set
+
+    if ($completed == 0) {
+        // Last backup was interrupted.
+        $message = "The previous backup attempt was not completed successfully.";
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+        wp_mail(FXWP_ERROR_EMAIL, 'Backup not completed on ' . get_site_url(), $message, $headers);
+    }
+
+    // Attempt to set the maximum execution time to 180 seconds.
+    // Note: This might not work on all server configurations.
+    set_time_limit(180);
+    //fix max_execution_time if .use.ini exists
+    fxwp_fix_execution_time();
     fxwp_create_backup();
     fxwp_delete_expired_backups();
+    update_option('fxwp_backup_expected_completion', 1); // Mark as completed successfully
 });
 
 
@@ -148,6 +165,29 @@ function fxwp_create_backup()
 
 }
 
+function fxwp_fix_execution_time()
+{
+    $max_execution_time = ini_get('max_execution_time');
+    if ($max_execution_time < 180) {
+        ini_set('max_execution_time', 180);
+    }
+    $userIniPath = ABSPATH . '.user.ini'; // ABSPATH is the WordPress root directory
+
+    // Check if .user.ini exists or not
+    if (file_exists($userIniPath)) {
+        $currentSettings = file_get_contents($userIniPath);
+        // Check if max_execution_time is already set
+        if (strpos($currentSettings, 'max_execution_time') === false) {
+            // Append max_execution_time setting if not found
+            file_put_contents($userIniPath, "\nmax_execution_time=180", FILE_APPEND);
+        } // else if it exists and is less than 180, set it to 180
+        else {
+            $currentSettings = preg_replace('/max_execution_time\s*=\s*\d+/', 'max_execution_time=180', $currentSettings);
+            file_put_contents($userIniPath, $currentSettings);
+        }
+    }
+}
+
 function fxwp_get_backup_timestamp($filename)
 {
     // get the filename without the path
@@ -256,7 +296,7 @@ function fxwp_delete_expired_backups()
     //if there are any unsuccessful backups, sent email
     if (count($unsuccessfulBackups) > 0) {
         $unsuccessfulBackups = implode(", ", $unsuccessfulBackups);
-        $to = "wp@faktorxmensch.com";
+        $to = FXWP_ERROR_EMAIL;
         //Get site url
         $site_url = get_site_url();
         $subject = 'Unsuccessful backups on '. $site_url;

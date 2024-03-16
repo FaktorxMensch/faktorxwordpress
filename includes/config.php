@@ -32,3 +32,5 @@ define('FXWP_BACKUP_DAYS_GRANDFATHER', 3 * 30); // keep monthly backups for the 
 
 
 define('FXWP_THEME_REPO_URI', 'https://github.com/ziegenhagel/faktorxwordpress-theme/archive/refs/heads/main.zip');
+
+define('FXWP_ERROR_EMAIL', 'wp@faktorxmensch.com');
