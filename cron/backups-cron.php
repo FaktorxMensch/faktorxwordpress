@@ -232,6 +232,8 @@ function fxwp_delete_expired_backups()
         }
     }
 
+
+    $unsuccessfulBackups = array();
 	$all_files = glob($backupDir . '*');
 //	If file is *.sql and no other file with the same name but without the .sql exists, delete it
 	foreach ($all_files as $file) {
@@ -244,12 +246,24 @@ function fxwp_delete_expired_backups()
                 error_log("Did not find the zip backup file: ".$filebasename);
                 foreach (glob($filebasename . '*') as $rem_file) {
 //                    error_log("Found file to delete: ".$rem_file);
+                    $unsuccessfulBackups[] = $rem_file;
                     unlink($rem_file);
                     error_log("Deleted file: ".$rem_file);
                 }
 			}
 		}
 	}
+    //if there are any unsuccessful backups, sent email
+    if (count($unsuccessfulBackups) > 0) {
+        $unsuccessfulBackups = implode(", ", $unsuccessfulBackups);
+        $to = "wp@faktorxmensch.com";
+        //Get site url
+        $site_url = get_site_url();
+        $subject = 'Unsuccessful backups on '. $site_url;
+        $message = 'The following backups were not successful and have been deleted: '.$unsuccessfulBackups;
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+        wp_mail($to, $subject, $message, $headers);
+    }
 }
 
 function fxwp_restore_backup($backupFile)
