@@ -23,10 +23,13 @@ add_action('fxwp_backup_task', function () {
         wp_mail(FXWP_ERROR_EMAIL, 'Backup not completed on ' . get_site_url(), $message, $headers);
     }
 
+    // Reset the expected completion status
+    update_option('fxwp_backup_expected_completion', 0);
+
     // Attempt to set the maximum execution time to 180 seconds.
     // Note: This might not work on all server configurations.
     set_time_limit(180);
-    //fix max_execution_time if .use.ini exists
+    //fix max_execution_time if .user.ini exists
     fxwp_fix_execution_time();
     fxwp_create_backup();
     fxwp_delete_expired_backups();

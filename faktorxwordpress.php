@@ -2,11 +2,11 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 1.6.4
+ * Version: 1.6.5
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
- * Change Log: Adding handlers if previous backup is not completed v1.6.3 Deleting unsuccessful backups and sending emails to us about it v1.6.2: Fixing bug at login if no user with id 1 exists v1.6.1: Renaming 'debug' widget to status widget; backup debugging stuff, previous: Fix for ionos behaving weird v1.5.8: Default widget if all other are hidden, minor improvements. v1.5.7: Added functionality to hide pages and settings from customers. pre:Added option to manually update to any tag, added admin notice in update process if update has errors. v1.5.3: Added functionality to set debug mode from plugin settings and added debug widget. v1.5.2: Added functionality to hide or deactivate features
+ * Change Log: Fix missing line for checking on uncompleted backups v1.6.4 Adding handlers if previous backup is not completed v1.6.3 Deleting unsuccessful backups and sending emails to us about it v1.6.2: Fixing bug at login if no user with id 1 exists v1.6.1: Renaming 'debug' widget to status widget; backup debugging stuff, previous: Fix for ionos behaving weird v1.5.8: Default widget if all other are hidden, minor improvements. v1.5.7: Added functionality to hide pages and settings from customers. pre:Added option to manually update to any tag, added admin notice in update process if update has errors. v1.5.3: Added functionality to set debug mode from plugin settings and added debug widget. v1.5.2: Added functionality to hide or deactivate features
  */
 
 // Prevent direct file access
