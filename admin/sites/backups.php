@@ -55,7 +55,9 @@ function fxwp_backups_page()
                 fxwp_delete_backup($_GET['backup_file']);
                 break;
             case 'cron':
-                // Start backup cron manually to simulate execution
+                error_log('Manually running cron for backups');
+                // do cron manually but first sent the user to the backup page
+                wp_redirect(admin_url('admin.php?page=fxwp-backups'));
                 do_action('fxwp_backup_task');
                 break;
         }

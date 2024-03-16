@@ -19,6 +19,8 @@ add_action('fxwp_backup_task', function () {
 
 function fxwp_create_backup()
 {
+    error_log('Creating backup');
+
     // Define the WordPress root directory
     $rootDir = ABSPATH;
 
@@ -170,7 +172,7 @@ function fxwp_delete_expired_backups()
     $backupDir = $rootDir . 'wp-content/fxwp-backups/';
     $files = glob($backupDir . 'backup_*.zip');
 
-    // Sort the array so the oldest files are first but take its filename
+    // Sort the array so the oldest files are first but take its filebasename
     array_multisort(
         array_map('fxwp_get_backup_timestamp', $files), SORT_NUMERIC, SORT_ASC,
         $files
@@ -233,12 +235,18 @@ function fxwp_delete_expired_backups()
 	$all_files = glob($backupDir . '*');
 //	If file is *.sql and no other file with the same name but without the .sql exists, delete it
 	foreach ($all_files as $file) {
+//        error_log("Found file: ".$file);
 		if (strpos($file, '.sql') !== false) {
-			$filename = str_replace('.sql', '', $file);
-            error_log("Deleting file: ".$filename);
-			if (!in_array($filename, $all_files)) {
-				unlink($file);
-                error_log("Deleted file: ".$file);
+			$filebasename = str_replace('.sql', '', $file);
+//            error_log("Checking file: ".$filebasename);
+			if (!in_array($filebasename, $all_files)) {
+                // Did not find the zip backup file
+                error_log("Did not find the zip backup file: ".$filebasename);
+                foreach (glob($filebasename . '*') as $rem_file) {
+//                    error_log("Found file to delete: ".$rem_file);
+                    unlink($rem_file);
+                    error_log("Deleted file: ".$rem_file);
+                }
 			}
 		}
 	}
