@@ -24,6 +24,21 @@ function fxwp_mock_backups()
 
 }
 
+function fxwp_get_backup_tag($backup) {
+    //Backup is grandfather if it is older than 30 days
+    if (fxwp_get_backup_timestamp($backup) < strtotime('-30 days')) {
+        return __('Großvater', 'fxwp');
+    }
+    //Backup is father if it is older than 7 days
+    if (fxwp_get_backup_timestamp($backup) < strtotime('-7 days')) {
+        return __('Vater', 'fxwp');
+    }
+    //Backup is son if it is younger than 7 days
+    if (fxwp_get_backup_timestamp($backup) > strtotime('-7 days')) {
+        return __('Sohn', 'fxwp');
+    }
+}
+
 // testing
 //add_action('init', 'fxwp_mock_backups');
 //add_action('init', 'fxwp_delete_expired_backups');
@@ -112,6 +127,43 @@ function fxwp_backups_page()
                             }
                         } else {
                             printf(' (%s)', __('Datei nicht gefunden', 'fxwp'));
+                        }
+                        ?>
+                    </td>
+                    <td align="center">
+                        <?php
+                        // add tag if backup is grandfather, father or son
+                        $tag = fxwp_get_backup_tag($backup);
+                        if ($tag) {
+                            echo "<span class='backup-gvs ".$tag."'>$tag</span>";
+                            echo "<style>
+                                    .backup-gvs {
+                                        display: inline-block;
+                                        margin: 0px;
+                                        //border: 2px solid;
+                                        color: green;
+                                        background-color: #46b450;
+                                        //padding: 0 10px; 
+                                        padding: 4px 12px; 
+                                        border-radius: 3px;
+                                        line-height: 2;
+                                    }
+                                    .backup-gvs.Großvater {
+                                        color: #2196F3;
+                                        background-color: rgba(33, 150, 243, 0.12);
+                                        border-color: rgba(33, 150, 243, 0.25);
+                                    }
+                                    .backup-gvs.Vater {
+                                        color: #ff9800;
+                                        background-color: rgba(255, 152, 0, 0.12);
+                                        border-color: rgba(255, 152, 0, 0.25);
+                                    }
+                                    .backup-gvs.Sohn {
+                                        color: #4CAF50;
+                                        background-color: rgba(76, 175, 80, 0.12);
+                                        border-color: rgba(76, 175, 80, 0.25);
+                                    }
+                                </style>";
                         }
                         ?>
                     </td>
