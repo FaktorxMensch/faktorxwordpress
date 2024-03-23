@@ -95,9 +95,10 @@ function fxwp_display_maintenance_mode_widget()
 			"title"=>"Open project in p2",
 			"type"=>"action",
 			"description"=>"Opens the associated project in p2 for faster access.",
-			"link"=>FXWP_P2_URL.'/project/'.(get_option('fxwp_project')['_id'])??'',
-			"disabled"=>false,
+			"link"=>FXWP_P2_URL.'/project/'.(get_option('fxwp_project')['_id']).'?fxwp=true',
+			"disabled"=> !get_option('fxwp_project')['_id'],
 		],
+    ];
 /*		[
 			"title"=>"Care+ Wiki-Editor",
 			"type"=>"boolean",
@@ -129,7 +130,9 @@ function fxwp_display_maintenance_mode_widget()
 			"link"=>get_admin_url()."index.php?ziegenhagel_console=",
 			"disabled"=>true,
 		]*/
-	];
+//	];
+
+
 /*	if(current_user_can('fxm_admin')) {
 		$buttons[] = [
 			"title"=>"Care+ Maintenance Mode",
