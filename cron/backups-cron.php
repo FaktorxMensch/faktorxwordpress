@@ -5,7 +5,8 @@ if (!defined('ABSPATH')) {
 require_once plugin_dir_path(__FILE__) . '../includes/helpers.php';
 
 if (!wp_next_scheduled('fxwp_backup_task')) {
-    wp_schedule_event(time(), 'hourly', 'fxwp_backup_task');
+//    wp_schedule_event(time(), 'hourly', 'fxwp_backup_task');
+    wp_schedule_event(time(), FXWP_BACKUP_INTERVAL, 'fxwp_backup_task');
 }
 
 add_action('fxwp_backup_task', function () {
@@ -240,6 +241,11 @@ function fxwp_delete_expired_backups()
         }
     }
 
+    // Throw every second daily backup away
+    $daily = array_filter($daily, function ($key) {
+        return $key % 2 == 0;
+    }, ARRAY_FILTER_USE_KEY);
+
     // Keep only the last hourly backup per hour
     $keptHourly = array();
     foreach ($hourly as $file) {
@@ -248,7 +254,7 @@ function fxwp_delete_expired_backups()
         $keptHourly[$hourKey] = $file;
     }
 
-    // Keep only one daily backup per day for the last 7 days
+    // Keep only one daily backup per day for FXWP_BACKUP_DAYS_FATHER days
     $keptDaily = array();
     foreach ($daily as $file) {
         $timestamp = fxwp_get_backup_timestamp($file);
@@ -256,7 +262,7 @@ function fxwp_delete_expired_backups()
         $keptDaily[$dayKey] = $file;
     }
 
-    // Keep only one monthly backup per month for the last 3 months
+    // Keep only one monthly backup per month for FXWP_BACKUP_DAYS_GRANDFATHER days
     $keptMonthly = array();
     foreach ($monthly as $file) {
         $timestamp = fxwp_get_backup_timestamp($file);
