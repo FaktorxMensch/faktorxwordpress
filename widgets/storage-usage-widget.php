@@ -4,11 +4,17 @@ function fxwp_storage_usage_widget()
     $available_space = fxwp_get_available_storage_space();
     $used_space = FXWP_STORAGE_LIMIT - $available_space;
     $used_space = $used_space;
-    $percentage = round($used_space / $available_space * 100);
+    $percentage = round($used_space / FXWP_STORAGE_LIMIT * 100);
 
     echo '<p>' . sprintf(esc_html__('Ihr verfügbarer Speicherplatz beträgt %1$s. Sie haben %2$s belegt, davon sind %3$s für E-Mails reserviert.', 'fxwp'), fxwp_format_file_size($available_space), fxwp_format_file_size($used_space), fxwp_format_file_size(4 * 1024 * 1024 * 1024)) . '</p>';
     echo '<div class="fxwp-storage-usage">';
-    echo '<div class="fxwp-storage-usage-bar" style="width: ' . esc_attr($percentage) . '%"></div>';
+    echo '<div class="fxwp-storage-usage-bar ';
+    if ($percentage > 90) {
+        echo 'fxwp-storage-usage-bar-danger';
+    } elseif ($percentage > 75) {
+        echo 'fxwp-storage-usage-bar-warning';
+    }
+    echo'" style="width: ' . esc_attr($percentage) . '%"></div>';
     echo '<div class="fxwp-storage-usage-text">' . esc_html($percentage) . '%</div>';
     echo '</div>';
 }
@@ -31,6 +37,7 @@ function fxwp_check_uploading_file_exceedes_storage_limit($file)
     return $file;
 }
 
+//ToDo
 // Limit the upload size to the available storage space
 function fxwp_limit_upload_size($size)
 {
@@ -51,7 +58,7 @@ function fxwp_admin_notice_upload_media_storage_limit() {
             echo '<div class="notice notice-error"><p>'.__('You have less than 50MB free storage. Upload is not possible anymore. Please free up some space first! ', 'fxwp').'</p></div>';
         }
         else if (fxwp_get_available_storage_space() < 500 * 1024 * 1024) { //500MB
-            echo '<div class="notice notice-error"><p>'.__('You have less than 500MB free storage. Your upload may cancel if the file is too large. ', 'fxwp').'</p></div>';
+            echo '<div class="notice notice-warning"><p>'.__('You have less than 500MB free storage. Your upload may cancel if the file is too large. ', 'fxwp').'</p></div>';
         }
     }
 }
@@ -70,7 +77,6 @@ function fxwp_disable_upload_button() {
         }
     }
 }
-
 
 function fxwp_get_available_storage_space()
 {
