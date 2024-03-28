@@ -43,18 +43,11 @@ function fxwp_display_maintenance_mode_widget()
         update_option('maintenance_mode', $mode);
     }
 
-    $maintenance_mode = get_option('maintenance_mode', 'none'); // 'none', 'coming_soon', 'maintenance_mode
+//    ToDO: Fix this. Set proper text. Then also change buttons
+    //Some welcome text for customers
+    //echo '<p>Willkommen im Dashboard von <strong>FX Webportal</strong>. Hier findest du alle wichtigen Funktionen und Einstellungen für deine Webseite.</p>';
 
-//    if ($maintenance_mode == 'maintenance_mode') {
-//        // Display maintenance mode content
-//        echo '<p>' . __('Wartungsmodus is enabled. Your website is temporarily unavailable.', 'text-domain') . '</p>';
-//    } else if ($maintenance_mode == 'coming_soon') {
-//        // Display coming soon content
-//        echo '<p>' . __('Coming Soon. Our website is under construction.', 'text-domain') . '</p>';
-//    } else {
-//        // Display default content
-//        echo '<p>' . __('Maintenance mode is disabled.', 'text-domain') . '</p>';
-//    }
+    $maintenance_mode = get_option('maintenance_mode', 'none'); // 'none', 'coming_soon', 'maintenance_mode
 
     // have a form to set maintenance mode to 'coming_soon' or 'maintenance_mode' or 'none' via select with auto submit
 

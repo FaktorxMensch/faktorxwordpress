@@ -7,7 +7,7 @@ div#wpadminbar {
     width: 34px;
     background:none;
     min-width: 0;
-    background: #1D4ED8;
+    background: #1963F5;
     border-radius: 20px;
     overflow: hidden;
     margin:10px;
@@ -19,11 +19,11 @@ div#wpadminbar:hover .quicklinks {
     margin-bottom:120px;
     border-radius: 20px;
     overflow: hidden;
-    background: #1D4ED8;
+    background: #1963F5;
 }
 
 div#wpadminbar .quicklinks li:hover a {
-    background: #3B82F6 !important;
+    background: #0A46BD !important;
     color: #fff !important;
 }
 

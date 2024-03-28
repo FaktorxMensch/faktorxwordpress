@@ -261,6 +261,10 @@ function fxwp_register_styles()
 {
     wp_register_style('fxwp', plugin_dir_url(__FILE__) . 'admin/css/fxwp.css', array(), '1.0.0', 'all');
     wp_enqueue_style('fxwp');
+    wp_admin_css_color( 'fxm1', __( 'FxM' ),
+        plugin_dir_url(__FILE__) . 'admin/css/admin-scheme.css',
+        array( '#1d2327', '#fff', '#f59700' , '#0a46bd')
+    );
 }
 
 /* adminbar frontend */
@@ -271,6 +275,7 @@ if (!function_exists('fxm_adminbar')) {
 	}
 }
 add_action('wp_enqueue_scripts', "fxm_adminbar");
+
 
 //Add fxm role to allow us to have special capabilities
 function fxwp_add_role()

@@ -140,14 +140,14 @@ p.error-message {
     top: 0;
     left: 0;
     bottom: 0;
-    background-color: #007cba;
+    background-color: #094FDB;
 }
 
 .fxwp-storage-usage-bar-danger {
-    background-color: #dc3232;
+    background-color: #F20530;
 }
 .fxwp-storage-usage-bar-warning {
-    background-color: #e89900;
+    background-color: #F59700;
 }
 
 .fxwp-storage-usage-text {
