@@ -3,7 +3,7 @@ function fxwp_plans_widget()
 {
     $plans = get_option('fxwp_plans', array());
 
-    if (empty($plans)) {
+    if (empty($plans) || $plans == new stdClass()){
         echo '<p>Keine Pläne gefunden.</p>';
     } else {
         echo '<table class="wp-list-table widefat fixed">';
