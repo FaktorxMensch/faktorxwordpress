@@ -8,7 +8,7 @@ function fxwp_register_maintenance_mode_widget()
 
     wp_add_dashboard_widget(
         'fxwp_maintenance_mode_widget', // Widget ID
-        'Maintenance Mode', // Widget title
+        'Übersicht', // Widget title
         'fxwp_display_maintenance_mode_widget' // Display callback function
     );
 }

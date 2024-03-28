@@ -45,7 +45,7 @@ function fxwp_description_widget()
 
     if ($description === false || isset($_GET['fxwp_website_description_edit'])) {
         echo '<img src="' . plugins_url('../assets/img/banner.jpeg', __FILE__) . '" style="width:calc( 100% + 24px );margin:-12px">';
-        echo '<img src="https://faktorxmensch.com/image/brand/logo_dark.svg" style="background:#000;padding:3px 0;position:absolute;top:2px;width:100px;z-index:31">';
+        echo '<img src="https://faktorxmensch.com/image/brand/logo_dark.svg" style="background:#000;padding:3px 0;position:absolute;top:2px;right:12px;width:100px;z-index:31">';
         echo '<form style="margin-top:20px" method="POST" action="">';
         echo '<h2>Konfiguration für Inhaltserstellung</h2><p class="alert">Bitte charakterisieren Sie Ihr Unternehmen im Detail. Diese Information wird als Basis zur Generierung von Inhalten genutzt. Es ist besonders wichtig, die spezifischen Inhalte Ihrer Webseite zu beschreiben, insbesondere jene, die Sie in Ihrem Blog darstellen oder für PR-Aktivitäten nutzen möchten.</p>';
 

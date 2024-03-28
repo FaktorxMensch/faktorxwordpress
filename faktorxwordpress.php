@@ -2,12 +2,16 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 1.6.9
+ * Version: 1.7.0
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
- * Change Log: Changing default backup interval from hourly to twicedaily and only keeping every second FXWP_BACKUP_DAYS_FATHER v1.6.8: Storage usage widget: Color on space nearly full. Fix for dashboard showing wrong percentage v1.6.7: Changing p2 url if directly opening project v1.6.6: Adding colored labels to backup page for better overview about backup age v1.6.5 Fix missing line for checking on uncompleted backups v1.6.4 Adding handlers if previous backup is not completed v1.6.3 Deleting unsuccessful backups and sending emails to us about it v1.6.2: Fixing bug at login if no user with id 1 exists v1.6.1: Renaming 'debug' widget to status widget; backup debugging stuff, previous: Fix for ionos behaving weird v1.5.8: Default widget if all other are hidden, minor improvements. v1.5.7: Added functionality to hide pages and settings from customers. pre:Added option to manually update to any tag, added admin notice in update process if update has errors. v1.5.3: Added functionality to set debug mode from plugin settings and added debug widget. v1.5.2: Added functionality to hide or deactivate features
+ * Change Log: Many minor changes v1.6.9: Changing default backup interval from hourly to twicedaily and only keeping every second FXWP_BACKUP_DAYS_FATHER v1.6.8: Storage usage widget: Color on space nearly full. Fix for dashboard showing wrong percentage v1.6.7: Changing p2 url if directly opening project v1.6.6: Adding colored labels to backup page for better overview about backup age v1.6.5 Fix missing line for checking on uncompleted backups v1.6.4 Adding handlers if previous backup is not completed v1.6.3 Deleting unsuccessful backups and sending emails to us about it v1.6.2: Fixing bug at login if no user with id 1 exists v1.6.1: Renaming 'debug' widget to status widget; backup debugging stuff, previous: Fix for ionos behaving weird v1.5.8: Default widget if all other are hidden, minor improvements. v1.5.7: Added functionality to hide pages and settings from customers. pre:Added option to manually update to any tag, added admin notice in update process if update has errors. v1.5.3: Added functionality to set debug mode from plugin settings and added debug widget. v1.5.2: Added functionality to hide or deactivate features
  */
+
+// ToDo: Built a wp option which reflects backup frequency. If not set, use the option from the config file. If set, use the option from the wp option
+// ToDo: Copy backups to s3 after creation. Only copy the first grandfather backup of the month to s3
+// ToDo: If storage is at 95% or more, send an email to us
 
 // Prevent direct file access
 if (!defined('ABSPATH')) exit;
@@ -69,6 +73,7 @@ function fxwp_activation()
         update_option('fxwp_customer', $response['customer']);
         update_option('fxwp_project', $response['project']);
         update_option('fxwp_view_options', "erweitert");
+        update_option('fxwp_plans', arrayToObject($response['plans']));
     } else {
         // show info
         update_option('fxwp_api_key', '');

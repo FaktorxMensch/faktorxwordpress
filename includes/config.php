@@ -10,13 +10,16 @@ define('FXWP_VERSION', $plugin_data['Version']);
 define('FXWP_PLUGIN_DIR', plugin_dir_path(__DIR__ ));
 
 // check if we are in a local environment
-//if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) {  //|| strpos($_SERVER['HTTP_HOST'], '.local') !== false) { //
-//    define('FXWP_LOCAL_ENV', true);
+if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '.local') !== false) {
+    define('FXWP_LOCAL_ENV', true);
 //    define('FXWP_API_URL', 'http://localhost:3000/api/fxwp');
-//} else {
+} else {
     define('FXWP_LOCAL_ENV', false);
-    define('FXWP_API_URL', 'https://cors.faktorxmensch.com/api/fxwp');
-//}
+}
+
+// API URL
+define('FXWP_API_URL', 'https://cors.faktorxmensch.com/api/fxwp');
+// P2 URL
 define('FXWP_P2_URL', 'https://p2.faktorxmensch.com');
 
 // Server Settings

@@ -79,7 +79,7 @@ function fxwp_remove_dashboards()
             }
         }
 //		Add a custom dashboard widget to say hello to customers
-	    		wp_add_dashboard_widget('fxm_dashboard_widget', 'Vielen Dank!', 'fxwp_dashboard_widget_function');
+        wp_add_dashboard_widget('fxm_dashboard_widget', 'Vielen Dank!', 'fxwp_dashboard_widget_function');
     }
     if (current_user_can('fxm_admin') && fxwp_check_deactivated_features('fxwp_deact_dashboards')) {
         fxwp_show_deactivated_feature_warning('fxwp_deact_dashboards');
@@ -91,4 +91,16 @@ function fxwp_dashboard_widget_function(): void {
 	echo '<p>Danke für dein Vertrauen in Faktor&times;Mensch ❤️</p>';
 	echo '<p>Bei Fragen oder Problemen melde dich einfach bei uns!</p>';
 
+}
+
+function arrayToObject($array) {
+    if (!is_array($array)) {
+        return $array;
+    }
+
+    $object = new stdClass();
+    foreach ($array as $key => $value) {
+        $object->$key = arrayToObject($value); // Recursive call for nested arrays
+    }
+    return $object;
 }
