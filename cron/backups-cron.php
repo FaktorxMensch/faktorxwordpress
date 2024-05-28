@@ -141,7 +141,7 @@ function fxwp_create_backup()
     );
 
     foreach ($files as $name => $file) {
-        // Skip directories (they would be added automatically) and skip wp-config.php and skip everythign under wp-content/fxwp-backups
+        // Skip directories (they would be added automatically) and skip wp-config.php and skip everything under wp-content/fxwp-backups
         if (!$file->isDir() && strpos($name, '/wp-content/uploads/') === false && strpos($name, '/wp-config.php') === false && strpos($name, '/wp-content/fxwp-backups/') === false) {
             // Get real and relative path for current file
             $filePath = $file->getRealPath();
@@ -154,18 +154,6 @@ function fxwp_create_backup()
 
     // Zip archive will be created only after closing object
     $zip->close();
-
-
-
-/* This was a try to fix ionos issue with our backup method. Maybe we can build a solutuion for this in the future but the script stopped already at $zip->close();  so this did not do anything */
-
-////	Check if the zip archive has random numbers after if (for an unknown reason). If so, rename it to the correct name. Use $backupFile as the search pattern in the current directory and be sure to not rename the file if it is $backupFile.zip
-//	$currentBackupFiles = glob($backupDir . $backupFile . '*');
-//	foreach ($currentBackupFiles as $file) {
-//		if (strpos($file, ".zip") === false && $file !== $backupFile) {
-//			rename($file, $backupFile);
-//		}
-//	}
 
 }
 
