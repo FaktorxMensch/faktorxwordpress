@@ -50,11 +50,16 @@ function fxwp_change_debug_status($old_value , $new_value, $option) {
 
 		if (strpos($line, "That's all, stop editing!") !== false) {
 			$stopEditingReached = true;
+            if($startEditingIndex === null) {
+                $finalLines[] = "\n";
+                $startEditingIndex = count( $finalLines );
+            }
 		}
 		if (strpos($line, "Add any custom values between this line and") !== false) {
 			$startEditingIndex = count( $finalLines )+1;
 		}
 
+        // Check if the line contains a debugging option and we are not in a conditional block
 		if (!$stopEditingReached && !$inConditionalBlock) {
 			foreach ($debugging_options_description as $key => $value) {
 				if (strpos($value, 'define') !== false || strpos($value, 'ini_set') !== false) {
@@ -79,9 +84,20 @@ function fxwp_change_debug_status($old_value , $new_value, $option) {
 			}
 		}
 
+        // IMPORTANT NOTICE: If the conditional block is missing, all the debug options are set anywhere.
+        // But if the block exists, the options are not added inside but after the block and they overwrite the existing options.
+
+        // Don't add the line if it should be removed
 		if (!$shouldRemoveLine) {
 			$finalLines[] = $line;
 		}
+        //If line should be removed and $startEditingIndex is not set, delete the empty line before the line to be removed
+        elseif($shouldRemoveLine && $startEditingIndex === null) {
+            $popped_line = array_pop($finalLines);
+            if ("\n" !== $popped_line) {
+                $finalLines[] = $popped_line;
+            }
+        }
 	}
 
 	// Making sure that the essential configuration is present
