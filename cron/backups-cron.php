@@ -141,8 +141,19 @@ function fxwp_create_backup()
     );
 
     foreach ($files as $name => $file) {
-        // Skip directories (they would be added automatically) and skip wp-config.php and skip everything under wp-content/fxwp-backups
-        if (!$file->isDir() && strpos($name, '/wp-content/uploads/') === false && strpos($name, '/wp-config.php') === false && strpos($name, '/wp-content/fxwp-backups/') === false) {
+//        // Skip directories (they would be added automatically) and skip wp-config.php and skip everything under wp-content/fxwp-backups
+//        if (!$file->isDir() && strpos($name, '/wp-content/uploads/') === false && strpos($name, '/wp-config.php') === false && strpos($name, '/wp-content/fxwp-backups/') === false) {
+
+        // Some patterns to be excluded from the backup
+        $exclude_patterns = array('backup*', '*backups', 'backwpup*', 'snapshots', 'wp-clone', 'upgrade', 'cache');
+        $exclude = false;
+        foreach ($exclude_patterns as $dir) {
+            if (fnmatch('*' . $dir . '*', $name)) {
+                $exclude = true;
+                break;
+            }
+        }
+        if (!$file->isDir() && !$exclude) {
             // Get real and relative path for current file
             $filePath = $file->getRealPath();
             $relativePath = substr($filePath, strlen($rootDir));
