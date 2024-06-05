@@ -5,6 +5,21 @@ function fxwp_log_outgoing_mail($args)
 {
     // Mask the email for privacy
     $to = $args['to'];
+
+    // Check if $to is an array
+    if (is_array($to)) {
+        // Extract the first email address from the array
+        $to = reset($to);
+    }
+    // Validate the extracted email address
+    if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        // Log the array as an error
+        error_log('Invalid email address array: ' . print_r($args['to'], true));
+
+        // Set a fallback email address
+        $to = 'E!@error_in_function_for_email_log.com';
+    }
+
     $at_position = strpos($to, '@');
     if ($at_position !== false) {
         $to = substr_replace($to, '***', 2, $at_position - 2);
