@@ -36,7 +36,7 @@ function fxwp_limit_admin_user_editing_fxm_admin( $caps, $cap, $user_ID, $args )
             } else {
                 // If edited_user is fxm_admin, current user is not allowed to edit/delete
                 if (in_array('fxm_admin', (array)$edited_user->roles)) {
-                    return 'not_allowed'; // fxm_admin can do everything
+                    return $caps[] = 'do_not_allow'; // fxm_admin can do everything
                 } else {
                     // If edited_user is not fxm_admin, current user is allowed to edit/delete
                     return $caps;
