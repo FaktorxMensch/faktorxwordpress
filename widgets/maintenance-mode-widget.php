@@ -88,7 +88,7 @@ function fxwp_display_maintenance_mode_widget()
 			"title"=>"Open project in p2",
 			"type"=>"action",
 			"description"=>"Opens the associated project in p2 for faster access.",
-			"link"=>FXWP_P2_URL.'/project/'.(get_option('fxwp_project')['_id']).'?fxwp=true',
+			"link"=>FXWP_P2_URL.'/project/'.(get_option('fxwp_project')['_id'] ?? "").'?fxwp=true',
 			"disabled"=> !get_option('fxwp_project')['_id'],
 		],
     ];

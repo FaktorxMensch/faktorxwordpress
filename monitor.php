@@ -30,6 +30,11 @@ if (isset($_POST['invoices']) && is_array($_POST['invoices']))
 if (isset($_POST['plans']) && is_array($_POST['plans']))
     update_option('fxwp_plans', $_POST['plans']);
 
+//if project id is not set, set is
+if (get_option('fxwp_project')['_id'] == null && $_POST['project_id'] != null) {
+    update_option('fxwp_project', ['_id' => $_POST['project_id']]);
+}
+
 // do self healthcheck by calling /
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, get_site_url());
