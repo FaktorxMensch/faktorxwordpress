@@ -15,7 +15,10 @@ if (!isset($_POST['api_key'])) {
     $_POST['api_key'] = $request->api_key;
     $_POST['invoices'] = $request->invoices;
     $_POST['plans'] = $request->plans;
+    $_POST['project_id'] = $request->project_id;
     $_POST['upgrade_user_arr'] = $request->upgrade_user_arr;
+
+    error_log("POSTDATA: " . print_r($postdata, true));
 
 }
 if (!isset($_POST['api_key']) || $_POST['api_key'] != get_option('fxwp_api_key')) {
@@ -31,8 +34,10 @@ if (isset($_POST['plans']) && is_array($_POST['plans']))
     update_option('fxwp_plans', $_POST['plans']);
 
 //if project id is not set, set is
-if (get_option('fxwp_project')['_id'] == null && $_POST['project_id'] != null) {
-    update_option('fxwp_project', ['_id' => $_POST['project_id']]);
+if (empty(get_option('fxwp_project')['_id']) && $_POST['project_id'] != null) {
+    $proj_option = get_option('fxwp_project');
+    $proj_option['_id'] = $_POST['project_id'];
+    update_option('fxwp_project', $proj_option);
 }
 
 // do self healthcheck by calling /
