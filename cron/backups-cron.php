@@ -309,6 +309,13 @@ function fxwp_delete_expired_backups()
         $site_url = get_site_url();
         $subject = 'Unsuccessful backups on '. $site_url;
         $message = 'The following backups were not successful and have been deleted: '.$unsuccessfulBackups;
+
+        if (is_array($keptBackups) && !empty($keptBackups)) {
+            $keptBackupsString = implode(", ", $keptBackups);
+        } else {
+            $keptBackupsString = 'No backups kept';
+        }
+        $message .='<br><br>Kept backups: '.implode(", ", $keptBackups);
         $headers = array('Content-Type: text/html; charset=UTF-8');
         wp_mail($to, $subject, $message, $headers);
     }
