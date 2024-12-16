@@ -15,11 +15,11 @@ add_action('fxwp_backup_task', function () {
     }
 
     // Check if the last backup was not completed.
-    $completed = get_option('fxwp_backup_expected_completion', 1); // Default to 1 to assume previous success if not set
+    $completed = get_option('fxwp_backup_expected_completion', null); // Default to 1 to assume previous success if not set
 
-    if ($completed == 0) {
-        // Last backup was interrupted.
-        $message = "The previous backup attempt was not completed successfully.";
+    if ($completed === 0) {  // Use strict comparison
+        // Last backup was interrupted
+        $message = "The previous backup attempt was not completed successfully on site: " . get_site_url();
         $headers = array('Content-Type: text/html; charset=UTF-8');
         wp_mail(FXWP_ERROR_EMAIL, 'Backup not completed on ' . get_site_url(), $message, $headers);
     }
@@ -27,14 +27,21 @@ add_action('fxwp_backup_task', function () {
     // Reset the expected completion status
     update_option('fxwp_backup_expected_completion', 0);
 
-    // Attempt to set the maximum execution time to 180 seconds.
-    // Note: This might not work on all server configurations.
-    set_time_limit(180);
-    //fix max_execution_time if .user.ini exists
-    fxwp_fix_execution_time();
-    fxwp_create_backup();
-    fxwp_delete_expired_backups();
-    update_option('fxwp_backup_expected_completion', 1); // Mark as completed successfully
+    try {
+        // Attempt to set the maximum execution time to 180 seconds.
+        // Note: This might not work on all server configurations.
+        set_time_limit(180);
+        //fix max_execution_time if .user.ini exists
+        fxwp_fix_execution_time();
+        fxwp_create_backup();
+        fxwp_delete_expired_backups();
+        update_option('fxwp_backup_expected_completion', 1); // Mark as completed successfully
+    } catch (Exception $e) {
+        // Leave the completion status as 0 if there's an error
+        $message = "Backup process failed with error: " . $e->getMessage();
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+        wp_mail(FXWP_ERROR_EMAIL, 'Backup failed on ' . get_site_url(), $message, $headers);
+    }
 });
 
 
