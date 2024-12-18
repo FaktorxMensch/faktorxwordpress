@@ -14,7 +14,7 @@ function fxwp_debug_log_widget() {
 	$logEntries = explode( "\n", $log );
 	$logEntries = array_reverse( $logEntries );
 	$logEntries = array_slice( $logEntries, 0, 100 );
-	$levelColor = array("Notice" => "#00a0d2", "Warning" => "#ffb900", "Fatal error" => "#ff3333", "Parse error" => "#ff8b4d", "" => "unset");
+	$levelColor = array("Notice" => "#00a0d2", "Warning" => "#ffb900", "Fatal error" => "#ff3333", "Parse error" => "#ff8b4d",  "Deprecated" => "#9B59B6", "" => "unset");
 	//Split each line into [date], [level], [message]. Make sure to have exact regex, line looks like [24-Jan-2024 09:13:33 UTC] PHP Notice:  Function map_meta_cap was called incorrectly. The post type shop_order is not registered, so it may not be reliable to check the capability edit_post against a post of that type. Please see Debugging in WordPress for more information. (This message was added in version 4.4.0.) in /Users/ema/Local Sites/cornelia-tests/app/public/wp-includes/functions.php on line 6031
 	foreach ( $logEntries as $key => $line ) {
 		// Regular expression to match the pattern

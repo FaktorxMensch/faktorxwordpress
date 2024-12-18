@@ -2,11 +2,11 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 1.8.0
+ * Version: 1.8.1
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
- * Change Log: Fixed backup emails not always correct sent. Added handler so wordfence emails are always sent to us v1.7.9 In unsuccessfull backups email show correct backups  v1.7.8: Fix for p2 api key not included and errors therefore v1.7.6-v1.7.7: Fix for disallow normal admin to edit fxm_user had a bug. v1.7.5: Fix for wpforms returning email-address as array and not as single address. v1.7.4: Only increasing version number
+ * Change Log: Minor additions to make the backup more stable and added log color for deprecated1.8.0 Fixed backup emails not always correct sent. Added handler so wordfence emails are always sent to us v1.7.9 In unsuccessfull backups email show correct backups  v1.7.8: Fix for p2 api key not included and errors therefore v1.7.6-v1.7.7: Fix for disallow normal admin to edit fxm_user had a bug. v1.7.5: Fix for wpforms returning email-address as array and not as single address. v1.7.4: Only increasing version number
  */
 
 // ToDo: Built a wp option which reflects backup frequency. If not set, use the option from the config file. If set, use the option from the wp option

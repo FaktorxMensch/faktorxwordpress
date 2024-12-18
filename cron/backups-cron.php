@@ -44,10 +44,29 @@ add_action('fxwp_backup_task', function () {
     }
 });
 
+function fxwp_check_backup_permissions($backupDir) {
 
-function fxwp_create_backup()
+    if (!is_writable($backupDir)) {
+        error_log("Backup directory not writable: $backupDir");
+        throw new Exception("Backup directory not writable");
+    }
+
+    // Test file creation
+    $testFile = $backupDir . 'test.tmp';
+    if (@file_put_contents($testFile, 'test') === false) {
+        error_log("Cannot write to backup directory: $backupDir");
+        throw new Exception("Cannot write to backup directory");
+    }
+    unlink($testFile);
+}
+
+function fxwp_create_backup(): void
 {
     error_log('Creating backup');
+
+    // Increase limits
+    ini_set('memory_limit', '512M');
+    set_time_limit(300); // 5 minutes
 
     // Define the WordPress root directory
     $rootDir = ABSPATH;
@@ -59,6 +78,8 @@ function fxwp_create_backup()
     if (!file_exists($backupDir)) {
         mkdir($backupDir, 0755, true);
     }
+
+    fxwp_check_backup_permissions($backupDir);
 
     // Define the name of the backup file
     $backupFile = $backupDir . 'backup_' . date('Y-m-d_H-i-s') . '.zip';
@@ -137,8 +158,8 @@ function fxwp_create_backup()
     // Create a new zip archive
     $zip = new ZipArchive();
     if ($zip->open($backupFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-		error_log("Failed to create backup file $backupFile");
-        exit("Failed to create backup file $backupFile");
+        error_log("Failed to create backup file $backupFile with error code: " . $zip->getStatusString());
+        throw new Exception("Failed to create backup file $backupFile: " . $zip->getStatusString());
     }
 
     // Create recursive directory iterator
