@@ -74,6 +74,18 @@ function fxwp_create_backup(): void
     // Define the backup directory
     $backupDir = $rootDir . 'wp-content/fxwp-backups/';
 
+/* ------------------- Debugging ------------------- */
+    error_log("Current PHP process user: " . posix_getpwuid(posix_geteuid())['name']);
+    error_log("Backup directory owner: " . posix_getpwuid(fileowner($backupDir))['name']);
+
+    $tempDir = sys_get_temp_dir();
+    error_log("Temp directory: " . $tempDir);
+    error_log("Temp directory writable: " . (is_writable($tempDir) ? 'yes' : 'no'));
+
+    $freeSpace = disk_free_space($backupDir);
+    error_log("Free space in backup directory: " . $freeSpace . " bytes");
+/* ------------------- Debugging end ------------------- */
+
     // Check if the backup directory exists, if not, create it
     if (!file_exists($backupDir)) {
         mkdir($backupDir, 0755, true);
@@ -205,11 +217,27 @@ function fxwp_create_backup(): void
         }
     }
 
-    try {
-        // Zip archive will be created only after closing object
-        $zip->close();
-    } catch (Exception $e) {
-        error_log("Failed to close backup file $backupFile with error: " . $e->getMessage());
+// Before closing the ZIP, add error checking
+    if ($zip->numFiles > 0) {
+        error_log("ZIP contains " . $zip->numFiles . " files before closing");
+    }
+
+// Try to close with error checking
+    $closeResult = $zip->close();
+    if ($closeResult !== true) {
+        error_log("ZIP close failed with status: " . $zip->getStatusString());
+        // Try to force proper permissions before closing
+        @chmod($backupFile, 0666);
+        $closeResult = $zip->close();
+        if ($closeResult !== true) {
+            throw new Exception("Failed to close ZIP file after permission adjustment");
+        }
+    }
+
+// Verify file exists and is readable
+    if (!file_exists($backupFile)) {
+        error_log("Backup file does not exist after ZIP close: " . $backupFile);
+        throw new Exception("Backup file not created");
     }
 
 }
