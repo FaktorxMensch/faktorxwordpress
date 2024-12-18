@@ -94,12 +94,16 @@ function fxwp_create_backup(): void
 
     // if mysqldump failed
     if ($returnValue !== 0) {
+        error_log("mysqldump failed with error code: $returnValue");
+        error_log("Trying to dump the database using PHP");
 	    // fall back to PHP
 	    $mysqli = new mysqli( DB_HOST, DB_USER, DB_PASSWORD, DB_NAME );
 
 	    if ( $mysqli->connect_error ) {
-		    die( 'Connect Error (' . $mysqli->connect_errno . ') '
-		         . $mysqli->connect_error );
+            error_log("Failed to connect to the database: " . $mysqli->connect_error);
+            throw new Exception("Failed to connect to the database: " . $mysqli->connect_error);
+//		    die( 'Connect Error (' . $mysqli->connect_errno . ') '
+//		         . $mysqli->connect_error );
 	    }
 
 	    $tables = array();
@@ -152,7 +156,13 @@ function fxwp_create_backup(): void
 
 	    $sql .= 'SET FOREIGN_KEY_CHECKS=1;';
 
+        // Write the SQL dump to a file
 	    file_put_contents( $dumpFile, $sql );
+    }
+    // Check if the dump file was created
+    if (!file_exists($dumpFile)) {
+        error_log("Failed to create database dump file $dumpFile");
+        throw new Exception("Failed to create database dump file $dumpFile");
     }
 
     // Create a new zip archive
@@ -187,12 +197,20 @@ function fxwp_create_backup(): void
             $relativePath = substr($filePath, strlen($rootDir));
 
             // Add current file to archive
-            $zip->addFile($filePath, $relativePath);
+            try {
+                $zip->addFile($filePath, $relativePath);
+            } catch (Exception $e) {
+                error_log("Failed to add file $filePath to backup file $backupFile with error: " . $e->getMessage());
+            }
         }
     }
 
-    // Zip archive will be created only after closing object
-    $zip->close();
+    try {
+        // Zip archive will be created only after closing object
+        $zip->close();
+    } catch (Exception $e) {
+        error_log("Failed to close backup file $backupFile with error: " . $e->getMessage());
+    }
 
 }
 
