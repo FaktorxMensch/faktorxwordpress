@@ -24,7 +24,7 @@ if (!function_exists('fxm_do_this_hourly')) {
 
         $plugin_data = get_plugin_data(FXWP_PLUGIN_DIR . '/faktorxwordpress.php');
         $current_version = $plugin_data['Version'];
-        $github_api_url = 'https://api.github.com/repos/ziegenhagel/faktorxwordpress/releases/latest';
+        $github_api_url = 'https://api.github.com/repos/FaktorxMensch/faktorxwordpress/releases/latest';
 
         $response = wp_remote_get($github_api_url);
 
@@ -71,9 +71,9 @@ function fxm_plugin_updater($latest_version_git, $debug_update = null)
 
     // Step 1: Download the latest plugin ZIP file from GitHub.
 	if ($debug_update === true) {
-		$zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/refs/tags/' . $latest_version_git . '.zip';
+		$zip_url = 'https://github.com/FaktorxMensch/faktorxwordpress/archive/refs/tags/' . $latest_version_git . '.zip';
 	} else {
-		$zip_url = 'https://github.com/ziegenhagel/faktorxwordpress/archive/' . $latest_version_git . '.zip';
+		$zip_url = 'https://github.com/FaktorxMensch/faktorxwordpress/archive/' . $latest_version_git . '.zip';
 	}
 	$temp_file = download_url($zip_url);
 
