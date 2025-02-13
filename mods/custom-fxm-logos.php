@@ -5,8 +5,8 @@ function wphelp_change_admin_logo() {
 	echo '
 <style type="text/css">
 #wpadminbar #wp-admin-bar-wp-logo > a {
-background-image: url(' . plugins_url("assets/logo--rounded-light.svg", FXWP_PLUGIN_DIR.basename( FXWP_PLUGIN_DIR )).') !important;
-background-position: center -2px;
+background-image: url(' . plugins_url("assets/logo--rounded-light.svg", FXWP_PLUGIN_DIR . basename(FXWP_PLUGIN_DIR)) . ') !important;
+background-position: -2px -2px;
 background-size: 110%;
 color:rgba(0, 0, 0, 0);
 }
@@ -14,8 +14,9 @@ color:rgba(0, 0, 0, 0);
 content: none;
 }
 
-#wpadminbar #wp-admin-bar-wp-logo.hover > .ab-item .ab-icon {
-background-position: 0 0;
+#wpadminbar #wp-admin-bar-wp-logo > a:hover {
+background-size: 110% !important;
+background-position: -2px -2px !important;
 }
 </style>
 ';
