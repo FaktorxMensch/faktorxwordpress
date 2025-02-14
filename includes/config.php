@@ -23,7 +23,12 @@ define('FXWP_API_URL', 'https://cors.faktorxmensch.com/api/fxwp');
 define('FXWP_P2_URL', 'https://p2.faktorxmensch.com');
 
 // Server Settings
-define('FXWP_STORAGE_LIMIT', 20 * 1024 * 1024 * 1024); // 20GB
+// use option to store setting, have the option default to 20 GB
+define('FXWP_STORAGE_LIMIT', get_option('fxwp_storage_limit', 20 * 1024 * 1024 * 1024));
+// set the option if not set
+if (!get_option('fxwp_storage_limit')) {
+    update_option('fxwp_storage_limit', 20 * 1024 * 1024 * 1024);
+}
 
 // GVS Intervalle
 // wir wollen die letzten 24 stunden, dann von jedem tag der letzten woche, dann von jedem monat der letzten 2 monate
