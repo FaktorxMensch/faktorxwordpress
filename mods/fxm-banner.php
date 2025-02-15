@@ -15,6 +15,11 @@ function faktor_mensch_admin_banner()
     if (!isset($screen->id) || 'dashboard' !== $screen->id) {
         return;
     }
+    // if is fxm admin, hide
+    if (current_user_can('fxm_admin')) {
+        return;
+    }
+
     // Hier den Pfad zum gewünschten Hintergrundbild eintragen:
     $background_image_url = plugin_dir_url(__FILE__) . '../assets/img/banner.jpeg';
     ?>
