@@ -80,6 +80,29 @@ function fxwp_settings_page()
             $restricted_features = get_object_vars(json_decode($restricted_features));
         }
     }
+
+    /* eine liste mit den wp options verwalteten daten anzeigen, die man einstellen kann, darunter der datentyp des feldes, titel beschreibung (optional), default wert. das ganze in kategorien unterteilt */
+    /* aktuell enthält sie nur fxwp_storage_limitfxwp_storage_limit und fxm_customer_update_dashboardfxm_customer_update_dashboard */
+    $fxm_options = array(
+        // kategorie "Weitere Einstellungen"
+        array(
+            'title' => 'Weitere Einstellungen',
+            'options' => array(
+                'fxwp_storage_limit' => array(
+                    'type' => 'filesize',
+                    'title' => 'Speicherlimit',
+                    'description' => 'Das Speicherlimit, das auf der Webseite verwendet werden kann.',
+                    'default' => 20 * 1024 * 1024 * 1024, // 20GB
+                ),
+                'fxm_customer_update_dashboard' => array(
+                    'type' => 'checkbox',
+                    'title' => 'Kunden Update Dashboard',
+                    'description' => 'Wenn true, wird eine Unterseite für Kund:innen angezeigt, die selbst Updates machen wollen.',
+                    'default' => false,
+                ),
+            ),
+        ),
+    );
     ?>
     <div class="wrap">
         <h1><?php echo esc_html__('Faktor &times; WordPress Einstellungen', 'fxwp'); ?></h1>
@@ -225,24 +248,43 @@ function fxwp_settings_page()
                 <!-- print get_option for fxwp_customer and fxwp_project -->
                 <!-- only if current user is fxm_admin -->
                 <?php if (current_user_can("fxm_admin")) { ?>
-                    <tr>
+
+                    <tr class="jsondata">
                         <th scope="row"><?php echo esc_html__('Kunde', 'fxwp'); ?></th>
                         <td>
                             <pre class="scroll-box"><?php print_r(get_option('fxwp_customer')); ?></pre>
                         </td>
                     </tr>
 
-                    <tr>
+                    <tr class="jsondata">
                         <th scope="row"><?php echo esc_html__('Projekt', 'fxwp'); ?></th>
                         <td>
                             <pre class="scroll-box"><?php print_r(get_option('fxwp_project')); ?></pre>
                         </td>
                     </tr>
 
-                    <tr>
+                    <tr class="jsondata">
                         <th scope="row"><?php echo esc_html__('Pläne', 'fxwp'); ?></th>
-                        <td>
+                        <td colspan="2">
                             <pre class="scroll-box"><?php print_r(get_option('fxwp_plans')); ?></pre>
+                        </td>
+                    </tr>
+
+                    <!-- .jsondata per deafult ausblenden und mit einem button einblenden können via js -->
+                    <script>
+                        document.querySelectorAll('.jsondata').forEach((el) => {
+                            el.style.display = 'none';
+                        });
+                    </script>
+
+                    <tr>
+                        <td colspan="2">
+                            <a
+                                    class="button button-secondary"
+                                    onclick="document.querySelectorAll('.jsondata').forEach((el) => {el.style.display = 'block';})">
+                                P2 Daten anzeigen
+                            </a>
+                            <p class="description"> <?php echo esc_html__('Die Daten anzeigen, die aus P2 geladen werden.'); ?></p>
                         </td>
                     </tr>
 
@@ -267,6 +309,94 @@ function fxwp_settings_page()
             </table>
             <?php submit_button(); ?>
         </form>
+
+
+        <?php
+        // fxm_format_bytes
+        function fxm_format_bytes($bytes, $precision = 2)
+        {
+            $units = array('B', 'KB', 'MB', 'GB', 'TB');
+
+            $bytes = max($bytes, 0);
+            $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+            $pow = min($pow, count($units) - 1);
+
+            $bytes /= (1 << (10 * $pow));
+
+            return round($bytes, $precision) . $units[$pow];
+        }
+
+        ?>
+
+        <!-- OPTIONS -->
+        <div class="option-categories">
+            <?php foreach ($fxm_options as $category) { ?>
+                <h3><?php echo esc_html($category['title']); ?></h3>
+                <table class="form-table">
+                    <?php foreach ($category['options'] as $option => $data) { ?>
+                        <tr>
+                            <th scope="row"><?php echo esc_html($data['title']); ?></th>
+                            <td>
+                                <?php
+                                switch ($data['type']) {
+                                    case 'number':
+                                        ?>
+                                        <input type="number" name="<?php echo esc_attr($option); ?>"
+                                               value="<?php echo esc_attr(get_option($option, $data['default'])); ?>"/>
+                                        <?php
+                                        break;
+                                    case 'filesize':
+                                        /* soll unterstützen dass man MB, GB und TB eingeben kann, und das umgerechnet wird. ausserdem soll in dem feld direkt angegeben sein in einem guten format. falls man gar nichts meint sind einfach nur byte gemeint  */
+                                        $value = get_option($option, $data['default']);
+                                        $value = fxm_format_bytes($value);
+                                        ?>
+                                        <input type="text" name="<?php echo esc_attr($option); ?>"
+                                               value="<?php echo esc_attr($value); ?>"/>
+                                        <?php
+                                        break;
+                                    case 'checkbox':
+                                        ?>
+                                        <label>
+                                            <input type="checkbox" name="<?php echo esc_attr($option); ?>"
+                                                   value="true" <?php checked(get_option($option, $data['default']), 'true'); ?>/>
+                                            <?php echo esc_html($data['description']); ?>
+                                        </label>
+                                        <?php
+                                        break;
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <!-- hier ein script dass die vorherige variable speichert falls sich der wert ändert, hier kurz loading hinschreibt solange bis success true oder false von der serverantwort kommt, und dann gespeichert anzeigt oder fehler message per alert anzeigt. wir schicken es an diese seite, und verarbeiten das in einer funktion ganz oben  -->
+                                <a class="save">Speichern</a>
+                                <script>
+                                    document.querySelector('.save').addEventListener('click', () => {
+                                        // get the value
+                                        let value = document.querySelector('input[name="<?php echo esc_attr($option); ?>"]').value;
+                                        // send the value to the server
+                                        fetch('options.php', {
+                                            method: 'POST',
+                                            body: new FormData({
+                                                '<?php echo esc_attr($option); ?>': value
+                                            })
+                                        }).then((response) => {
+                                            console.log(response);
+                                            if (response.ok) {
+                                                alert('Erfolgreich gespeichert');
+                                            } else {
+                                                alert('Fehler beim Speichern');
+                                            }
+                                        });
+                                    });
+                                </script>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </table>
+            <?php } ?>
+        </div>
+        <!-- END OPTIONS -->
+
 
         <div class="flex">
             <form method="post" action="" class="inline">
@@ -335,7 +465,6 @@ function fxwp_settings_page()
             transform: rotate(180deg);
         }
     </style>
-
     <script>
         document.addEventListener('formdata', (e) => {
             let deactivated_features_list = {}
