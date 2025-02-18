@@ -171,16 +171,6 @@ function fxwp_plugin_menu()
         );
     }
 
-    // image optimizer
-    add_submenu_page(
-        'fxwp', // Parent slug
-        'Image Optimizer', // Page title
-        'Image Optimizer', // Menu title
-        'administrator', // Capability
-        'fxwp-image-optimizer', // Menu slug
-        'fxwp_image_optimizer_page' // Function
-    );
-
     // plugin installer
     add_submenu_page(
         'fxwp', // Parent slug
