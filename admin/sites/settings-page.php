@@ -89,88 +89,6 @@ function fxwp_settings_page()
             do_settings_sections('fxwp_settings_group');
             ?>
             <table class="form-table">
-                <!-- Favicon -->
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Favicon auswählen', 'fxwp'); ?></th>
-                    <td>
-                        <p><?php echo esc_html__('Wählen Sie Ihr Favicon aus der Medienbibliothek.', 'fxwp'); ?></p>
-                        <select name="fxwp_favicon">
-                            <option value=""><?php echo esc_html__('Kein Favicon ausgewählt', 'fxwp'); ?></option>
-                            <?php
-                            $args = array(
-                                'post_type' => 'attachment',
-                                'post_mime_type' => 'image',
-                                'post_status' => 'inherit',
-                                'posts_per_page' => -1,
-                            );
-                            $favicon_id = get_option('fxwp_favicon');
-                            $attachments = get_posts($args);
-                            foreach ($attachments as $attachment) {
-                                // post title or filename lowercase should contain 'favicon' or 'ico' or 'logo'
-                                if (strpos(strtolower($attachment->post_title), 'ico') === false && strpos(strtolower($attachment->post_title), 'logo') === false) {
-                                    continue;
-                                }
-
-                                $selected = '';
-                                if ($favicon_id && $attachment->ID === intval($favicon_id)) {
-                                    $selected = 'selected';
-                                }
-                                echo '<option value="' . esc_attr($attachment->ID) . '" ' . $selected . '>' . esc_html($attachment->post_title) . '</option>';
-                            }
-                            ?>
-                        </select>
-                    </td>
-                    <td>
-                        <?php
-                        $favicon_id = get_option('fxwp_favicon');
-                        if ($favicon_id) {
-                            $favicon_url = wp_get_attachment_url($favicon_id);
-                            echo '<img src="' . esc_url($favicon_url) . '" alt="Favicon" width="22" height="22">';
-                        }
-                        ?>
-                    </td>
-                </tr>
-
-                <!-- Logo -->
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Logo auswählen', 'fxwp'); ?></th>
-                    <td>
-                        <p><?php echo esc_html__('Wählen Sie Ihr Logo aus der Medienbibliothek.', 'fxwp'); ?></p>
-                        <select name="fxwp_logo">
-                            <option value=""><?php echo esc_html__('Kein Logo ausgewählt', 'fxwp'); ?></option>
-                            <?php
-                            $args = array(
-                                'post_type' => 'attachment',
-                                'post_mime_type' => 'image',
-                                'post_status' => 'inherit',
-                                'posts_per_page' => -1,
-                            );
-                            $logo_id = get_option('fxwp_logo');
-                            $attachments = get_posts($args);
-                            foreach ($attachments as $attachment) {
-                                // post title or filename lowercase should contain 'favicon' or 'ico' or 'logo'
-                                if (strpos(strtolower($attachment->post_title), 'ico') === false && strpos(strtolower($attachment->post_title), 'logo') === false) {
-                                    continue;
-                                }
-
-                                $selected = '';
-                                if ($logo_id && $attachment->ID === intval($favicon_id)) {
-                                    $selected = 'selected';
-                                }
-                                echo '<option value="' . esc_attr($attachment->ID) . '" ' . $selected . '>' . esc_html($attachment->post_title) . '</option>';
-                            }
-                            ?>
-                        </select>
-                    </td>
-                    <td>
-                        <?php
-                        if ($logo_id) {
-                            $logo_url = wp_get_attachment_url($logo_id);
-                            echo '<img src="' . esc_url($logo_url) . '" alt="Favicon" width="22" height="22">';
-                        }
-                        ?>
-                    </td>
-                </tr>
 
                 <!-- 404 page -->
                 <tr>
@@ -198,28 +116,6 @@ function fxwp_settings_page()
                         </select>
                     </td>
                 </tr>
-
-                <!-- Google Fonts if current user is fxm_admin -->
-                <?php if (current_user_can('fxm_admin')) { ?>
-                    <tr>
-                        <th scope="row">
-                            <?php echo esc_html__('Google Fonts entfernen', 'fxwp'); ?>
-                        </th>
-                        <td>
-                            <p><?php echo esc_html__('Sollen die Google Fonts entfernt werden?', 'fxwp'); ?></p>
-                            <select name="fxwp_google_fonts_remove">
-                                <option value="nein" <?php selected($google_fonts_remove, 'nein'); ?>>Nein</option>
-                                <option value="einfach" <?php selected($google_fonts_remove, 'einfach'); ?>>Ja, einfach
-                                </option>
-                                <option value="aggresiv" <?php selected($google_fonts_remove, 'aggresiv'); ?>>Ja,
-                                    aggresiv
-                                </option>
-                            </select>
-                            <p style="font-size: 0.8em;margin-bottom: 10px;"><?php echo esc_html__('"Ja, einfach" erfordert die Plugin Installation via "Install Helper"', 'fxwp'); ?></p>
-
-                        </td>
-                    </tr>
-                <?php } ?>
 
                 <!-- View options if current user is fxm_admin -->
                 <?php if (current_user_can("fxm_admin")) { ?>
@@ -381,7 +277,7 @@ function fxwp_settings_page()
                     <tr>
                         <td colspan="2">
                             <p class="description">
-                                <?php echo esc_html__('Hinweis: In lokalen Instanzen (Servername endet auf .local) kann eine local.php erstellt werden, die direkt ausgeführt wird, z. B. um sich automatisch fxm_admin-Rechte zu geben.', 'fxwp'); ?>
+                                <?php echo esc_html__('Hinweis: In lokalen Umgebung kann eine local.php erstellt werden, die direkt ausgeführt wird, z. B. um sich automatisch fxm_admin-Rechte zu geben.', 'fxwp'); ?>
                             </p>
                             <!-- und noch der hinweis dass in der options.php fxwp_storage_limit gesetzt und erhöht werden kann um mehr als 20GB speicher auf der webseite zu haben -->
                             <p class="description">

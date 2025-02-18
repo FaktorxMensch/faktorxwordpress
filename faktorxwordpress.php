@@ -337,6 +337,6 @@ function fxwp_add_user_to_role()
 add_action('wp_login', 'fxwp_add_user_to_role');
 
 /* if there is a file local.php and we are on a local installation (the host ends with .local), include it */
-if (file_exists(plugin_dir_path(__FILE__) . 'local.php') && strpos($_SERVER['HTTP_HOST'], '.local') !== false) {
+if (defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV) {
     include plugin_dir_path(__FILE__) . 'local.php';
 }
