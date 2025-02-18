@@ -9,8 +9,8 @@ function fxwp_settings_page()
     }
 
     // if fxwp_self_update is set
-    if(isset($_GET['fxwp_self_update']) && $_GET['fxwp_self_update'] == 'true') {
-	    // do hourly which does the update
+    if (isset($_GET['fxwp_self_update']) && $_GET['fxwp_self_update'] == 'true') {
+        // do hourly which does the update
         fxm_do_this_hourly();
 
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Das Plugin wurde erfolgreich aktualisiert.', 'fxwp') . '</p></div>';
@@ -20,7 +20,7 @@ function fxwp_settings_page()
     $api_key = get_option('fxwp_api_key');
     $google_fonts_remove = get_option('fxwp_google_fonts_remove');
 
-    if(current_user_can("fxm_admin")) {
+    if (current_user_can("fxm_admin")) {
         // Deactivated features description
         $deactivated_features_description = array(
             'fxwp_deact_ai' => 'KI Funktionen deaktivieren',
@@ -29,29 +29,29 @@ function fxwp_settings_page()
             'fxwp_deact_email_log' => 'E-Mail Log für Kundis ausblenden',
             'fxwp_deact_shortcodes' => 'Shortcodes für Kundis ausblenden',
             'fxwp_deact_dashboards' => 'Alle Dashboards für Kundis ausblenden',
-	        'fxwp_deact_debug_log_widget' => 'Debug Log Widget ausblenden',
+            'fxwp_deact_debug_log_widget' => 'Debug Log Widget ausblenden',
             'fxwp_deact_customer_settings' => 'Plugin Settings für Kundis komplett ausblenden',
             'fxwp_deact_hide_plugin' => 'Plugin vor Kundis komplett verstecken',
         );
-	    // Restricted features description
-	    $restricted_features_description = array(
-		    'fxwp_restr_pages'                => 'Seiten',
-		    'fxwp_restr_posts'           => 'Blogposts',
-		    'fxwp_restr_uploads'       => 'Mediendateien',
-		    'fxwp_restr_themes'         => 'Themes',
-		    'fxwp_restr_updates-submenu'         => 'Updates Submenu von Dashboard',
-		    'fxwp_restr_elememtor-templates'         => 'Elementor Templates',
-		    'fxwp_restr_wpcf7'         => 'Contact Form 7',
-		    'fxwp_restr_new-button'         => 'Admin Bar New Button',
-		    'fxwp_restr_updates-indicator'         => 'Admin Bar Updates Indicator',
-		    'fxwp_restr_my-account'         => 'Admin Bar Account',
-		    'fxwp_restr_admin_plugins'        => 'Plugins',
-		    'fxwp_restr_admin_users'        => 'Benutzer',
-		    'fxwp_restr_admin_tools'  => 'Tools',
-		    'fxwp_restr_admin_settings' => 'WP Einstellungen',
-		    'fxwp_restr_admin_elementor'       => 'Elementor Einstellungen',
-		    'fxwp_restr_admin_eael'       => 'Essential Addons for Elementor Einstellungen',
-	    );
+        // Restricted features description
+        $restricted_features_description = array(
+            'fxwp_restr_pages' => 'Seiten',
+            'fxwp_restr_posts' => 'Blogposts',
+            'fxwp_restr_uploads' => 'Mediendateien',
+            'fxwp_restr_themes' => 'Themes',
+            'fxwp_restr_updates-submenu' => 'Updates Submenu von Dashboard',
+            'fxwp_restr_elememtor-templates' => 'Elementor Templates',
+            'fxwp_restr_wpcf7' => 'Contact Form 7',
+            'fxwp_restr_new-button' => 'Admin Bar New Button',
+            'fxwp_restr_updates-indicator' => 'Admin Bar Updates Indicator',
+            'fxwp_restr_my-account' => 'Admin Bar Account',
+            'fxwp_restr_admin_plugins' => 'Plugins',
+            'fxwp_restr_admin_users' => 'Benutzer',
+            'fxwp_restr_admin_tools' => 'Tools',
+            'fxwp_restr_admin_settings' => 'WP Einstellungen',
+            'fxwp_restr_admin_elementor' => 'Elementor Einstellungen',
+            'fxwp_restr_admin_eael' => 'Essential Addons for Elementor Einstellungen',
+        );
         //Get debugging options description from mods/debug-mod.php
         global $debugging_options_description;
 
@@ -67,18 +67,18 @@ function fxwp_settings_page()
         $debugging_options = get_option('fxwp_debugging_options');
         // if debugging options are empty, fill it with false
         if (empty($debugging_options)) {
-	        $debugging_options = array_fill_keys(array_keys($debugging_options_description), false);
+            $debugging_options = array_fill_keys(array_keys($debugging_options_description), false);
         } else {
-	        $debugging_options = get_object_vars(json_decode($debugging_options));
+            $debugging_options = get_object_vars(json_decode($debugging_options));
         }
-	    // Get deactivated features
-	    $restricted_features = get_option( 'fxwp_restricted_features' );
-	    // if deactivated features is empty, fill it with false
-	    if ( empty( $restricted_features ) ) {
-		    $restricted_features = array_fill_keys( array_keys( $restricted_features_description ), false );
-	    } else {
-		    $restricted_features = get_object_vars( json_decode( $restricted_features ) );
-	    }
+        // Get deactivated features
+        $restricted_features = get_option('fxwp_restricted_features');
+        // if deactivated features is empty, fill it with false
+        if (empty($restricted_features)) {
+            $restricted_features = array_fill_keys(array_keys($restricted_features_description), false);
+        } else {
+            $restricted_features = get_object_vars(json_decode($restricted_features));
+        }
     }
     ?>
     <div class="wrap">
@@ -200,7 +200,7 @@ function fxwp_settings_page()
                 </tr>
 
                 <!-- Google Fonts if current user is fxm_admin -->
-                <?php if(current_user_can('fxm_admin')) { ?>
+                <?php if (current_user_can('fxm_admin')) { ?>
                     <tr>
                         <th scope="row">
                             <?php echo esc_html__('Google Fonts entfernen', 'fxwp'); ?>
@@ -211,7 +211,8 @@ function fxwp_settings_page()
                                 <option value="nein" <?php selected($google_fonts_remove, 'nein'); ?>>Nein</option>
                                 <option value="einfach" <?php selected($google_fonts_remove, 'einfach'); ?>>Ja, einfach
                                 </option>
-                                <option value="aggresiv" <?php selected($google_fonts_remove, 'aggresiv'); ?>>Ja, aggresiv
+                                <option value="aggresiv" <?php selected($google_fonts_remove, 'aggresiv'); ?>>Ja,
+                                    aggresiv
                                 </option>
                             </select>
                             <p style="font-size: 0.8em;margin-bottom: 10px;"><?php echo esc_html__('"Ja, einfach" erfordert die Plugin Installation via "Install Helper"', 'fxwp'); ?></p>
@@ -221,7 +222,7 @@ function fxwp_settings_page()
                 <?php } ?>
 
                 <!-- View options if current user is fxm_admin -->
-                <?php if(current_user_can("fxm_admin")) { ?>
+                <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Ansichtsoptionen', 'fxwp'); ?></th>
                         <td>
@@ -260,7 +261,7 @@ function fxwp_settings_page()
                 <?php } ?>
 
                 <!-- local env? if current user can fxm_admin -->
-                <?php if(current_user_can("fxm_admin")) { ?>
+                <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Lokale Umgebung', 'fxwp'); ?></th>
                         <td>
@@ -278,69 +279,69 @@ function fxwp_settings_page()
                 <?php } ?>
 
                 <!-- deactivate features if current user can fxm_admin -->
-                <?php if(current_user_can("fxm_admin")) { ?>
+                <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Funktionen de-/aktivieren', 'fxwp'); ?></th>
                         <td>
-                           <ul class="checkbox-list" id="deactivated_features_list">
-                               <?php
+                            <ul class="checkbox-list" id="deactivated_features_list">
+                                <?php
                                 foreach ($deactivated_features_description as $option => $label) {
-                                echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
-                                if ($deactivated_features[$option]) {
-                                    echo " checked value='true'";
-                                } else {
-                                    echo " value='false'";
-                                }
-                                echo "/><label for='{$option}'>{$label}</label></li>";
-                               } ?>
-                           </ul>
+                                    echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
+                                    if ($deactivated_features[$option]) {
+                                        echo " checked value='true'";
+                                    } else {
+                                        echo " value='false'";
+                                    }
+                                    echo "/><label for='{$option}'>{$label}</label></li>";
+                                } ?>
+                            </ul>
                             <p style="color: #E88813"><?php echo __('Achtung: Entfernte Haken aktivieren Features nicht direkt wieder! (zb Auto Update muss manuell noch gestaret werden)', 'fxwp'); ?></p>
                         </td>
                     </tr>
                 <?php } ?>
 
                 <!-- restrict features if current user can fxm_admin -->
-	            <?php if(current_user_can("fxm_admin")) { ?>
+                <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Menüseiten ausblenden', 'fxwp'); ?></th>
                         <td>
                             <ul class="checkbox-list" id="restricted_features_list">
-					            <?php
-					            foreach ($restricted_features_description as $option => $label) {
-						            echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
-						            if ($restricted_features[$option]) {
-							            echo " checked value='true'";
-						            } else {
-							            echo " value='false'";
-						            }
-						            echo "/><label for='{$option}'>{$label}</label></li>";
-					            } ?>
+                                <?php
+                                foreach ($restricted_features_description as $option => $label) {
+                                    echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
+                                    if ($restricted_features[$option]) {
+                                        echo " checked value='true'";
+                                    } else {
+                                        echo " value='false'";
+                                    }
+                                    echo "/><label for='{$option}'>{$label}</label></li>";
+                                } ?>
                             </ul>
                         </td>
                     </tr>
-	            <?php } ?>
+                <?php } ?>
 
                 <!-- change debugging mode -->
-	            <?php if (current_user_can("fxm_admin")) { ?>
+                <?php if (current_user_can("fxm_admin")) { ?>
                     <tr id="fxwp-debugging-options">
                         <th scope="row"><?php echo esc_html__('Debugging de-/aktivieren', 'fxwp'); ?></th>
                         <td>
                             <ul class="checkbox-list" id="deactivated_features_list">
-			                    <?php
-			                    foreach ($debugging_options_description as $option => $label) {
-				                    echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
-				                    if ($debugging_options[$option]) {
-					                    echo " checked value='true'";
-				                    } else {
-					                    echo " value='false'";
-				                    }
-				                    echo "/><label for='{$option}'><code>{$label}</code></label></li>";
-			                    } ?>
+                                <?php
+                                foreach ($debugging_options_description as $option => $label) {
+                                    echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
+                                    if ($debugging_options[$option]) {
+                                        echo " checked value='true'";
+                                    } else {
+                                        echo " value='false'";
+                                    }
+                                    echo "/><label for='{$option}'><code>{$label}</code></label></li>";
+                                } ?>
                             </ul>
                         </td>
                     </tr>
                     <script>
-<!--                        Flash this area if url contains #fxwp-debugging -->
+                        <!--                        Flash this area if url contains #fxwp-debugging -->
                         if (window.location.hash === '#fxwp-debugging') {
                             //Instead of making background red, show red border
                             document.getElementById('fxwp-debugging').style.border = '5px solid #E88813';
@@ -350,7 +351,7 @@ function fxwp_settings_page()
                             }, 500);
                         }
                     </script>
-	            <?php } ?>
+                <?php } ?>
 
                 <!-- print get_option for fxwp_customer and fxwp_project -->
                 <!-- only if current user is fxm_admin -->
@@ -369,8 +370,21 @@ function fxwp_settings_page()
                         <th scope="row"><?php echo esc_html__('Pläne', 'fxwp'); ?></th>
                         <td><p><?php print_r(get_option('fxwp_plans')); ?></p></td>
                     </tr>
-                <?php } ?>
 
+                    <!-- Hinweis für lokale Instanzen -->
+                    <tr>
+                        <td colspan="2">
+                            <p class="description">
+                                <?php echo esc_html__('Hinweis: In lokalen Instanzen (Servername endet auf .local) kann eine local.php erstellt werden, die direkt ausgeführt wird, z. B. um sich automatisch fxm_admin-Rechte zu geben.', 'fxwp'); ?>
+                            </p>
+                            <!-- und noch der hinweis dass in der options.php fxwp_storage_limit gesetzt und erhöht werden kann um mehr als 20GB speicher auf der webseite zu haben -->
+                            <p class="description">
+                                <?php echo esc_html__('Hinweis: In der options.php kann fxwp_storage_limit gesetzt und erhöht werden, um mehr als 20GB Speicher auf der Webseite zu haben.', 'fxwp'); ?>
+                            </p>
+                        </td>
+                    </tr>
+
+                <?php } ?>
             </table>
             <?php submit_button(); ?>
         </form>
@@ -382,19 +396,20 @@ function fxwp_settings_page()
                 <?php echo esc_html__('Prüfen auf Updates', 'fxwp'); ?>
             </a>
         </form>
-	    <?php if (current_user_can("fxm_admin")) { ?>
+        <?php if (current_user_can("fxm_admin")) { ?>
             <svg class="inline"
                  height="1.5em"
                  xmlns="http://www.w3.org/2000/svg"
                  viewBox="0 0 24 24"
                  onclick="document.querySelector('svg.inline').classList.toggle('flip');document.querySelector('.tag-update').classList.toggle('inline');"
-                 >
+            >
                 <title>chevron-left</title>
-                <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
+                <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/>
             </svg>
             <form method="post" action="index.php?fxwp_sync=1" class="tag-update">
                 <input type="text" name="fxwp_self_update_tag" placeholder="Tag" required style="width:60px"/>
-                <input type="submit" class="button button-primary" value="<?php echo esc_html__('manuell installieren', 'fxwp'); ?>" />
+                <input type="submit" class="button button-primary"
+                       value="<?php echo esc_html__('manuell installieren', 'fxwp'); ?>"/>
             </form>
         <?php } ?>
     </div>
@@ -402,13 +417,16 @@ function fxwp_settings_page()
         form.inline {
             display: inline;
         }
+
         .inline svg {
             display: inline;
             margin-bottom: -5px;
         }
+
         .tag-update {
             display: none;
         }
+
         .flip {
             -webkit-transform: rotate(180deg);
             -ms-transform: rotate(45deg);
@@ -417,36 +435,36 @@ function fxwp_settings_page()
     </style>
 
     <script>
-    document.addEventListener('formdata', (e) => {
-        let deactivated_features_list = {}
-        document.getElementById('deactivated_features_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
-            deactivated_features_list[el.id] = el.checked
-        })
-        // If fxwp plugin should be completely hidden, hide menu items as well
-        if (deactivated_features_list['fxwp_deact_hide_plugin']) {
-            deactivated_features_list['fxwp_deact_customer_settings'] = true
-            deactivated_features_list['fxwp_deact_dashboards'] = true
-        }
-        e.formData.append('fxwp_deactivated_features', JSON.stringify(deactivated_features_list))
+        document.addEventListener('formdata', (e) => {
+            let deactivated_features_list = {}
+            document.getElementById('deactivated_features_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
+                deactivated_features_list[el.id] = el.checked
+            })
+            // If fxwp plugin should be completely hidden, hide menu items as well
+            if (deactivated_features_list['fxwp_deact_hide_plugin']) {
+                deactivated_features_list['fxwp_deact_customer_settings'] = true
+                deactivated_features_list['fxwp_deact_dashboards'] = true
+            }
+            e.formData.append('fxwp_deactivated_features', JSON.stringify(deactivated_features_list))
 
-        let restricted_features_list = {}
-        document.getElementById('restricted_features_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
-            restricted_features_list[el.id] = el.checked
-        })
-        // // If fxwp plugin should be completely hidden, hide menu items as well
-        // if (restricted_features_list['fxwp_deact_hide_plugin']) {
-        //     restricted_features_list['fxwp_deact_customer_settings'] = true
-        //     restricted_features_list['fxwp_deact_dashboards'] = true
-        // }
-        e.formData.append('fxwp_restricted_features', JSON.stringify(restricted_features_list))
+            let restricted_features_list = {}
+            document.getElementById('restricted_features_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
+                restricted_features_list[el.id] = el.checked
+            })
+            // // If fxwp plugin should be completely hidden, hide menu items as well
+            // if (restricted_features_list['fxwp_deact_hide_plugin']) {
+            //     restricted_features_list['fxwp_deact_customer_settings'] = true
+            //     restricted_features_list['fxwp_deact_dashboards'] = true
+            // }
+            e.formData.append('fxwp_restricted_features', JSON.stringify(restricted_features_list))
 
-        let debugging_options_list = {}
-        document.getElementById('fxwp-debugging-options').querySelectorAll('input[type="checkbox"]').forEach((el) => {
-            debugging_options_list[el.id] = el.checked
-        })
-        e.formData.append('fxwp_debugging_options', JSON.stringify(debugging_options_list))
-        console.log(e.formData)
-    });
+            let debugging_options_list = {}
+            document.getElementById('fxwp-debugging-options').querySelectorAll('input[type="checkbox"]').forEach((el) => {
+                debugging_options_list[el.id] = el.checked
+            })
+            e.formData.append('fxwp_debugging_options', JSON.stringify(debugging_options_list))
+            console.log(e.formData)
+        });
     </script>
     <?php
 }
@@ -454,12 +472,12 @@ function fxwp_settings_page()
 function fxwp_register_settings()
 {
     if (current_user_can("fxm_admin")) {
-	    register_setting( 'fxwp_settings_group', 'fxwp_api_key' );
-	    register_setting( 'fxwp_settings_group', 'fxwp_google_fonts_remove' );
-	    register_setting( 'fxwp_settings_group', 'fxwp_view_option', array( 'default' => 'erweitert' ) );
-	    register_setting( 'fxwp_settings_group', 'fxwp_deactivated_features');
-	    register_setting( 'fxwp_settings_group', 'fxwp_debugging_options');
-	    register_setting( 'fxwp_settings_group', 'fxwp_restricted_features');
+        register_setting('fxwp_settings_group', 'fxwp_api_key');
+        register_setting('fxwp_settings_group', 'fxwp_google_fonts_remove');
+        register_setting('fxwp_settings_group', 'fxwp_view_option', array('default' => 'erweitert'));
+        register_setting('fxwp_settings_group', 'fxwp_deactivated_features');
+        register_setting('fxwp_settings_group', 'fxwp_debugging_options');
+        register_setting('fxwp_settings_group', 'fxwp_restricted_features');
 
 
     }
