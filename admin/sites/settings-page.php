@@ -42,6 +42,7 @@ function fxwp_settings_page()
 		    'fxwp_restr_updates-submenu'         => 'Updates Submenu von Dashboard',
 		    'fxwp_restr_elememtor-templates'         => 'Elementor Templates',
 		    'fxwp_restr_wpcf7'         => 'Contact Form 7',
+            'fxwp_restr_yoast'       => 'Yoast',
 		    'fxwp_restr_new-button'         => 'Admin Bar New Button',
 		    'fxwp_restr_updates-indicator'         => 'Admin Bar Updates Indicator',
 		    'fxwp_restr_my-account'         => 'Admin Bar Account',
