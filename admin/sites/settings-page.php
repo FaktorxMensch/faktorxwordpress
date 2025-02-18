@@ -90,33 +90,6 @@ function fxwp_settings_page()
             ?>
             <table class="form-table">
 
-                <!-- 404 page -->
-                <tr>
-                    <th scope="row"><?php echo esc_html__('404 Seite auswählen', 'fxwp'); ?></th>
-                    <td>
-                        <p><?php echo esc_html__('Wählen Sie die Seite, die als 404-Seite angezeigt werden soll.', 'fxwp'); ?></p>
-                        <select name="fxwp_404_page">
-                            <option value=""><?php echo esc_html__('Keine 404-Seite ausgewählt', 'fxwp'); ?></option>
-                            <?php
-                            $args = array(
-                                'post_type' => 'page',
-                                'post_status' => 'publish',
-                                'posts_per_page' => -1,
-                            );
-                            $pages = get_posts($args);
-                            $selected_404_page_id = get_option('fxwp_404_page');
-                            foreach ($pages as $page) {
-                                $selected = '';
-                                if ($selected_404_page_id && $page->ID === intval($selected_404_page_id)) {
-                                    $selected = 'selected';
-                                }
-                                echo '<option value="' . esc_attr($page->ID) . '" ' . $selected . '>' . esc_html($page->post_title) . '</option>';
-                            }
-                            ?>
-                        </select>
-                    </td>
-                </tr>
-
                 <!-- View options if current user is fxm_admin -->
                 <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
