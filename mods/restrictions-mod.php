@@ -41,8 +41,6 @@ function fxwp_restrict_pages(): void
                 case 'fxwp_restr_wpcf7':
                     remove_menu_page('wpcf7'); // Contact Forms 7
                     break;
-                case 'fxwp_restr_yoast':
-                    remove_menu_page('wpseo_dashboard'); // Yoast SEO
                 case 'fxwp_restr_admin_plugins':
                     remove_menu_page('plugins.php'); // Plugins
                     break;
