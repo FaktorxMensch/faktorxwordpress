@@ -107,6 +107,8 @@ function fxwp_plugin_list_installer_page()
         'fxwp_install_complianz_gdpr' => 'Complianz GDPR plugin installieren',
     );
 
+    $defaul_checked = array('fxwp_install_theme', 'fxwp_install_first_collection', 'fxwp_create_homepage', 'fxwp_create_privacy_policy', 'fxwp_create_imprint', 'fxwp_create_contact_page', 'fxwp_create_menus', 'fxwp_install_seo_plugin');
+
     // Definieren Sie Ihre Plugin-Sammlungen
     $plugin_collections = array(
         'Standard' => array(
@@ -140,10 +142,6 @@ function fxwp_plugin_list_installer_page()
             ),
             array(
                 'name' => 'wp-super-cache',
-                'options' => array(),
-            ),
-            array(
-                'name' => 'autoptimize',
                 'options' => array(),
             ),
         ),
@@ -245,7 +243,11 @@ function fxwp_plugin_list_installer_page()
     echo '<form method="post">';
     echo '<ul class="checkbox-list">';
     foreach ($site_setup_options as $option => $label) {
-        echo "<li><input checked value='true' type='checkbox' name='{$option}' id='{$option}'/><label for='{$option}'>{$label}</label></li>";
+        echo "<li><input ";
+        if (in_array($option, $defaul_checked)) {
+            echo "checked ";
+        }
+        echo " value='true' type='checkbox' name='{$option}' id='{$option}'/><label for='{$option}'>{$label}</label></li>";
     }
     echo '</ul>';
     // have a form with post that sets POST fxwp_install_theme to true
