@@ -335,3 +335,5 @@ function fxwp_add_user_to_role()
 }
 
 add_action('wp_login', 'fxwp_add_user_to_role');
+
+/* if theres a file .LOCAL in the plugin directory,
