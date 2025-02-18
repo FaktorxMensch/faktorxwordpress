@@ -5,7 +5,7 @@ function fxwp_render_view_option()
     // Admins
     echo '<style>
         #wp-admin-bar-comments,
-        #menu-comments, .hide_simple,#dashboard_activity, #dashboard_right_now, #dashboard_site_health,#dashboard_primary, #contextual-help-link-wrap ,.wp-menu-name>.update-plugins,.rm-menu-new.update-plugins
+        #menu-comments, .hide_simple,#dashboard_activity, #dashboard_right_now, #dashboard_site_health,#dashboard_primary, #contextual-help-link-wrap ,.wp-menu-name>.update-plugins:not(.important),.rm-menu-new.update-plugins
         {
             display:none !important;
         }

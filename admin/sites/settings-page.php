@@ -381,6 +381,10 @@ function fxwp_settings_page()
                             <p class="description">
                                 <?php echo esc_html__('Hinweis: In der options.php kann fxwp_storage_limit gesetzt und erhöht werden, um mehr als 20GB Speicher auf der Webseite zu haben.', 'fxwp'); ?>
                             </p>
+                            <!-- informiere, dass fxm_customer_update_dashboard eine unterseite für kund:innen anzeigt, die selbst updates machen wollen -->
+                            <p class="description">
+                                <?php echo esc_html__('Hinweis: fxm_customer_update_dashboard zeigt eine Unterseite für Kund:innen an, die selbst Updates machen wollen.', 'fxwp'); ?>
+                            </p>
                         </td>
                     </tr>
 
