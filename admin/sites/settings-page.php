@@ -383,7 +383,7 @@ function fxwp_settings_page()
                             </p>
                             <!-- informiere, dass fxm_customer_update_dashboard eine unterseite für kund:innen anzeigt, die selbst updates machen wollen -->
                             <p class="description">
-                                <?php echo esc_html__('Hinweis: fxm_customer_update_dashboard zeigt eine Unterseite für Kund:innen an, die selbst Updates machen wollen.', 'fxwp'); ?>
+                                <?php echo esc_html__('Hinweis: In der options.php kann fxm_customer_update_dashboard gesetzt werden, um eine Unterseite für Kund:innen anzuzeigen, die selbst Updates machen wollen.', 'fxwp'); ?>
                             </p>
                         </td>
                     </tr>
