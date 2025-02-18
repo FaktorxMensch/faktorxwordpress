@@ -358,17 +358,23 @@ function fxwp_settings_page()
                 <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Kunde', 'fxwp'); ?></th>
-                        <td><p><?php print_r(get_option('fxwp_customer')); ?></p></td>
+                        <td>
+                            <pre class="scroll-box"><?php print_r(get_option('fxwp_customer')); ?></pre>
+                        </td>
                     </tr>
 
                     <tr>
                         <th scope="row"><?php echo esc_html__('Projekt', 'fxwp'); ?></th>
-                        <td><p><?php print_r(get_option('fxwp_project')); ?></p></td>
+                        <td>
+                            <pre class="scroll-box"><?php print_r(get_option('fxwp_project')); ?></pre>
+                        </td>
                     </tr>
 
                     <tr>
                         <th scope="row"><?php echo esc_html__('Pläne', 'fxwp'); ?></th>
-                        <td><p><?php print_r(get_option('fxwp_plans')); ?></p></td>
+                        <td>
+                            <pre class="scroll-box"><?php print_r(get_option('fxwp_plans')); ?></pre>
+                        </td>
                     </tr>
 
                     <!-- Hinweis für lokale Instanzen -->
@@ -420,6 +426,14 @@ function fxwp_settings_page()
         </div>
     </div>
     <style>
+        .scroll-box {
+            max-height: 200px;
+            overflow: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: calc(100vw - 400px);
+        }
+
         .flex {
             display: flex;
             height: 2em;
