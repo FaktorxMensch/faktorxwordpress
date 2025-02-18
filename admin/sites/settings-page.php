@@ -73,8 +73,8 @@ function fxwp_settings_page()
         }
         // Get deactivated features
         $restricted_features = get_option('fxwp_restricted_features');
-        // if deactivated features is empty, fill it with false
-        if (empty($restricted_features)) {
+        // if deactivated features is empty or shorter than 5 chars, fill it with false
+        if (empty($restricted_features) || strlen($restricted_features) < 5) {
             $restricted_features = array_fill_keys(array_keys($restricted_features_description), false);
         } else {
             $restricted_features = get_object_vars(json_decode($restricted_features));
