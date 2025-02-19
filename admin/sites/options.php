@@ -71,6 +71,7 @@ function fxwp_run_test_action_callback()
 /**
  * Konfigurationsarray für das Panel.
  * Hier werden auch Options (mit fxwp_-Präfix) und Action-Einträge definiert.
+ * Zusätzlich wurden Beispieloptionen für die neuen Typen alert, code und json eingefügt.
  */
 global $fx_plugin_config;
 $fx_plugin_config = array(
@@ -179,6 +180,33 @@ $fx_plugin_config = array(
                             'description' => 'Führt eine Test-Aktion aus.',
                             'callback' => 'fxwp_run_test_action_callback'
                         ),
+                        // Beispiel Alert-Eintrag
+                        'fxwp_sample_alert' => array(
+                            'type' => 'alert',
+                            'title' => 'Sample Alert',
+                            'description' => 'Dies ist ein Alert. Unterstützt Farbvarianten (z. B. danger, success, primary).',
+                            'default' => 'Achtung! Dies ist eine Warnung.',
+                            'alertType' => 'danger', // Mögliche Werte: primary, success, danger etc.
+                            'icon' => 'dashicons dashicons-warning'
+                        ),
+                        // Beispiel Code-Eintrag (nur lesbar, mit Copy-Icon)
+                        'fxwp_sample_code' => array(
+                            'type' => 'code',
+                            'title' => 'Sample Code',
+                            'description' => 'Zeige Beispielcode an.',
+                            'default' => "<?php echo 'Hello World!'; ?>",
+                            'readonly' => true,
+                            'icon' => 'dashicons dashicons-editor-code'
+                        ),
+                        // Beispiel JSON-Eintrag (nur lesbar, mit Copy-Icon)
+                        'fxwp_sample_json' => array(
+                            'type' => 'json',
+                            'title' => 'Sample JSON',
+                            'description' => 'JSON-Inhalt (nur lesbar).',
+                            'default' => '{"foo": "bar", "baz": 123}',
+                            'readonly' => true,
+                            'icon' => 'dashicons dashicons-media-code'
+                        ),
                     ),
                 ),
             ),
@@ -212,7 +240,7 @@ function fx_plugin_localize_config()
     global $fx_plugin_config;
     ?>
     <script>
-        var fxPluginConfig = <?php echo json_encode($fx_plugin_config); ?>;
+        var fxPluginConfig = <?php echo json_encode($fx_plugin_config, JSON_UNESCAPED_SLASHES); ?>;
     </script>
     <?php
 }
@@ -222,7 +250,7 @@ add_action('admin_head', 'fx_plugin_localize_config');
 /**
  * Die Panel-Seite – aufgerufen via fxwp_panel_page() in der Admin-Navigation.
  */
-function fxwp_panel_page()
+function fxwp_options_page()
 {
     ?>
     <div id="fx-plugin-panel">
@@ -241,7 +269,11 @@ function fxwp_panel_page()
                     <h2 class="fx-section-header">{{ section.title }}</h2>
                     <div class="fx-options">
                         <div v-for="(option, key) in section.options" :key="key" class="fx-option">
-                            <label :for="key" class="fx-option-label">{{ option.title }}</label>
+                            <label :for="key" class="fx-option-label">
+                                <!-- Zeige Dashicon, falls definiert -->
+                                <i v-if="option.icon" :class="option.icon"></i>
+                                {{ option.title }}
+                            </label>
 
                             <!-- Text -->
                             <template v-if="option.type === 'text'">
@@ -261,7 +293,7 @@ function fxwp_panel_page()
                                     </option>
                                 </select>
                             </template>
-                            <!-- Checkbox (custom styled mit Haken) -->
+                            <!-- Checkbox (custom styled) -->
                             <template v-else-if="option.type === 'checkbox'">
                                 <div class="custom-checkbox">
                                     <input type="checkbox" :id="key" v-model="option.value"
@@ -269,7 +301,7 @@ function fxwp_panel_page()
                                     <label :for="key"></label>
                                 </div>
                             </template>
-                            <!-- Radio (vertikal untereinander) -->
+                            <!-- Radio -->
                             <template v-else-if="option.type === 'radio'">
                                 <div class="custom-radio">
                                     <div v-for="(choice, idx) in option.choices" :key="idx" class="custom-radio-item">
@@ -279,14 +311,39 @@ function fxwp_panel_page()
                                     </div>
                                 </div>
                             </template>
-                            <!-- Filesize: Anzeige als Textfeld, unterstützt "25GB", "1500MB" etc. -->
+                            <!-- Filesize -->
                             <template v-else-if="option.type === 'filesize'">
                                 <input type="text" :id="key" :value="formatFilesize(option.value)"
                                        @change="updateFilesize(key, $event.target.value)">
                             </template>
-                            <!-- Action: Button zum Ausführen einer Funktion -->
+                            <!-- Action -->
                             <template v-else-if="option.type === 'action'">
                                 <button class="action-button" @click="executeAction(key)">{{ option.title }}</button>
+                            </template>
+                            <!-- Alert -->
+                            <template v-else-if="option.type === 'alert'">
+                                <div :class="['fx-alert', 'alert-' + (option.alertType || 'primary')]">
+                                    <i v-if="option.icon" :class="option.icon"></i>
+                                    {{ option.value }}
+                                    <button class="close-alert" @click="option.value = ''">&times;</button>
+                                </div>
+                            </template>
+                            <!-- Code (nur lesbar, mit Copy-Icon in der Ecke) -->
+                            <template v-else-if="option.type === 'code'">
+                                <div class="fx-code-container">
+                                    <pre class="fx-code"><code>{{ option.value }}</code></pre>
+                                    <i class="dashicons dashicons-editor-code fx-code-copy"
+                                       @click="copyToClipboard(option.value)"></i>
+                                </div>
+                            </template>
+                            <!-- JSON (nur lesbar, mit Copy-Icon in der Ecke) -->
+                            <template v-else-if="option.type === 'json'">
+                                <div class="fx-json-container">
+                                    <textarea :id="key" class="fx-json-editor" v-model="option.value"
+                                              readonly></textarea>
+                                    <i class="dashicons dashicons-admin-page fx-json-copy"
+                                       @click="copyToClipboard(option.value)"></i>
+                                </div>
                             </template>
 
                             <p class="fx-option-description">{{ option.description }}</p>
@@ -295,8 +352,11 @@ function fxwp_panel_page()
                 </div>
             </div>
         </main>
-        <div v-if="snackbar.show" class="snackbar" :class="snackbar.type">
-            {{ snackbar.message }}
+        <!-- Multiple Snackbars -->
+        <div class="snackbars">
+            <div v-for="(sb, index) in snackbars" :key="index" class="snackbar" :class="sb.type">
+                {{ sb.message }}
+            </div>
         </div>
     </div>
 
@@ -312,7 +372,7 @@ function fxwp_panel_page()
         /* Sidebar */
         .fx-sidebar {
             width: 220px;
-            background: #2d2d2d;
+            background: #1D2327;
             padding: 20px;
             margin-top: 20px;
             border-radius: 1em;
@@ -347,12 +407,12 @@ function fxwp_panel_page()
         }
 
         .fx-sidebar .active a {
-            background: #444;
+            background: #2271B1;
         }
 
-        .fx-sidebar a:hover,
-        .fx-sidebar a:focus {
-            background: #444;
+        .fx-sidebar li:not(.active):hover a,
+        .fx-sidebar li:not(.active):focus a {
+            color: #72AEE6;
         }
 
         /* Content */
@@ -412,7 +472,8 @@ function fxwp_panel_page()
 
         .fx-option input[type="text"],
         .fx-option input[type="number"],
-        .fx-option select {
+        .fx-option select,
+        .fx-json-editor {
             padding: 10px;
             font-size: 14px;
             border: 1px solid #ccc;
@@ -422,7 +483,8 @@ function fxwp_panel_page()
 
         .fx-option input[type="text"]:focus,
         .fx-option input[type="number"]:focus,
-        .fx-option select:focus {
+        .fx-option select:focus,
+        .fx-json-editor:focus {
             border-color: #0073aa;
             outline: none;
         }
@@ -433,7 +495,7 @@ function fxwp_panel_page()
             margin-top: 5px;
         }
 
-        /* Custom Checkbox mit Haken */
+        /* Custom Checkbox */
         .custom-checkbox {
             position: relative;
             width: 24px;
@@ -481,7 +543,7 @@ function fxwp_panel_page()
             font-size: 16px;
         }
 
-        /* Custom Radio – vertikal untereinander */
+        /* Custom Radio */
         .custom-radio {
             display: block;
         }
@@ -541,22 +603,119 @@ function fxwp_panel_page()
             background: #005880;
         }
 
-        /* Snackbar */
-        .snackbar {
+        /* Snackbars */
+        .snackbars {
             position: fixed;
             bottom: 20px;
             right: 20px;
+            z-index: 9999;
+        }
+
+        .snackbar {
             background: #28a745;
             color: #fff;
             padding: 14px 24px;
             border-radius: 4px;
             font-size: 15px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            z-index: 9999;
+            margin-top: 10px;
         }
 
         .snackbar.error {
             background: #dc3545;
+        }
+
+        /* Alert Box */
+        .fx-alert {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .alert-primary {
+            background: #cce5ff;
+            border: 1px solid #b8daff;
+            color: #004085;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .fx-alert .close-alert {
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: inherit;
+        }
+
+        /* Code Block */
+        .fx-code {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        /* Container für Code-Snippet mit Copy-Icon */
+        .fx-code-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .fx-code-container .fx-code {
+            width: 100%;
+            box-sizing: border-box;
+            padding-right: 30px; /* Platz für das Icon */
+        }
+
+        .fx-code-copy {
+            position: absolute;
+            top: 20px;
+            right: 8px;
+            font-size: 18px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* JSON-Container */
+        .fx-json-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .fx-json-editor {
+            width: 100%;
+            box-sizing: border-box;
+            padding-right: 30px; /* Platz für das Icon */
+        }
+
+        .fx-json-copy {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 18px;
+            color: #0073aa;
+            cursor: pointer;
         }
     </style>
 
@@ -579,12 +738,9 @@ function fxwp_panel_page()
         // Funktion zur Konvertierung von Dateigrößen-Eingaben
         function parseFilesize(input) {
             input = input.trim().toUpperCase();
-            // alle leerzeiche entfernen
             input = input.replace(/\s/g, '');
-            // kommata zu punkten
             input = input.replace(/,/g, '.');
-            // leading 0 vorne hinzu
-            var multiplier = 1; // Standard:
+            var multiplier = 1;
             if (input.endsWith("GB")) {
                 multiplier = 1073741824;
                 input = input.replace("GB", "");
@@ -614,10 +770,9 @@ function fxwp_panel_page()
                 data: {
                     navPages: fxPluginConfig.nav_pages ? Object.values(fxPluginConfig.nav_pages) : [],
                     currentNav: {title: '', sections: []},
-                    snackbar: {show: false, message: '', type: 'success'}
+                    snackbars: [] // Für mehrere Snackbar-Meldungen
                 },
                 created: function () {
-                    // Persistenter Nav-Punkt über URL
                     var params = new URLSearchParams(window.location.search);
                     var navSlug = params.get('nav');
                     if (navSlug) {
@@ -643,8 +798,6 @@ function fxwp_panel_page()
                     saveOption: function (key, value) {
                         let option = this.findOption(key);
                         if (option && option.type === 'filesize') {
-                            // Falls es sich um eine reine Zahl handelt, wunderbar, ansonsten konvertieren
-                            // erstmal per regex checken, ob es sich um eine riene Zahl handelt
                             if (!/^\d+$/.test(value)) {
                                 value = parseFilesize(value);
                             }
@@ -695,16 +848,23 @@ function fxwp_panel_page()
                         }.bind(this));
                     },
                     showSnackbar: function (message, type) {
-                        this.snackbar.message = message;
-                        this.snackbar.type = type;
-                        this.snackbar.show = true;
+                        this.snackbars.push({message: message, type: type});
                         setTimeout(function () {
-                            this.snackbar.show = false;
+                            this.snackbars.shift();
                         }.bind(this), 3000);
                     },
                     // Wrapper für die Formatierung von Filesize
                     formatFilesize: function (bytes) {
                         return formatFilesize(bytes);
+                    },
+                    copyToClipboard: function (text) {
+                        var textarea = document.createElement("textarea");
+                        textarea.value = text;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(textarea);
+                        this.showSnackbar("Inhalt kopiert", "success");
                     }
                 }
             });

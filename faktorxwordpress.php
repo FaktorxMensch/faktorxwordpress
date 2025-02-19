@@ -194,11 +194,11 @@ function fxwp_plugin_menu()
     // Panel
     add_submenu_page(
         'fxwp', // Parent slug
-        'Panel', // Page title
-        'Panel', // Menu title
+        'Options', // Page title
+        'Options', // Menu title
         'administrator', // Capability
-        'fx_plugin_panel', // Menu slug
-        'fxwp_panel_page' // Function
+        'fxwp-options', // Menu slug
+        'fxwp_options_page' // Function
     );
 
     remove_submenu_page('fxwp', 'fxwp');
