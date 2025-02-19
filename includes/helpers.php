@@ -17,6 +17,10 @@ function fxwp_check_deactivated_features($feature_to_check) :bool {
     if ($deactivated_features === false) {
         return false;
     }
+    // falls json_decode($deactivated_features) nicht klappt fallback
+    if (json_decode($deactivated_features) === null) {
+        return false;
+    }
     $deactivated_features = get_object_vars(json_decode($deactivated_features));
     // find feature_to_check in array keys and return value
     if (array_key_exists($feature_to_check, $deactivated_features)) {
