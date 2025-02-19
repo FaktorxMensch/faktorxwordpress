@@ -56,9 +56,9 @@ function fxwp_settings_page()
         global $debugging_options_description;
 
         // Get deactivated features
-        $deactivated_features = get_option('fxwp_deactivated_features');
-        // if deactivated features is empty, fill it with false
-        if (empty($deactivated_features)) {
+        $deactivated_features = get_option('fxwp_deactivated_features', false);
+        // if deactivated features is empty, fill it with false or if it cannot be json parsed
+        if (empty($deactivated_features) || strlen($deactivated_features) < 5 || json_decode($deactivated_features) === null) {
             $deactivated_features = array_fill_keys(array_keys($deactivated_features_description), false);
         } else {
             $deactivated_features = get_object_vars(json_decode($deactivated_features));
