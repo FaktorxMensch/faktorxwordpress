@@ -184,7 +184,14 @@ function fxwp_options_page()
                             </template>
                             <!-- Action -->
                             <template v-else-if="option.type === 'action'">
-                                <button class="action-button" @click="executeAction(key)">{{ option.title }}</button>
+                                <button class="action-button" :disabled="loadingActions[key]"
+                                        @click="executeAction(key)">
+                                    <span v-if="loadingActions[key]"> <i
+                                                class="dashicons dashicons-update dashicons-spinner"
+                                                style="animation: spin 2s infinite linear;"></i>
+                                    </span>
+                                    {{ option.title }}
+                                </button>
                             </template>
                             <!-- Alert -->
                             <template v-else-if="option.type === 'alert'">
@@ -226,6 +233,15 @@ function fxwp_options_page()
     </div>
 
     <style>
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         /* Grundlayout */
         #fx-plugin-panel {
             display: flex;
@@ -490,11 +506,25 @@ function fxwp_options_page()
             margin-top: 10px;
         }
 
-        .snackbar.error { background: #dc3545; }
-        .snackbar.warning { background: #ffc107; }
-        .snackbar.info { background: #1eb5d8; }
-        .snackbar.success { background: #28a745; }
-        .snackbar.secondary { background: #6c757d; }
+        .snackbar.error {
+            background: #dc3545;
+        }
+
+        .snackbar.warning {
+            background: #ffc107;
+        }
+
+        .snackbar.info {
+            background: #1eb5d8;
+        }
+
+        .snackbar.success {
+            background: #28a745;
+        }
+
+        .snackbar.secondary {
+            background: #6c757d;
+        }
 
         /* Alert Box */
         .fx-alert {
@@ -630,6 +660,7 @@ function fxwp_options_page()
                 data: {
                     navPages: fxPluginConfig.nav_pages ? Object.values(fxPluginConfig.nav_pages) : [],
                     currentNav: {title: '', sections: []},
+                    loadingActions: {},
                     snackbars: [] // Für mehrere Snackbar-Meldungen
                 },
                 created: function () {
@@ -696,10 +727,12 @@ function fxwp_options_page()
                         return found;
                     },
                     executeAction: function (key) {
+                        this.$set(this.loadingActions, key, true); // Button deaktivieren
                         $.post(ajaxurl, {
                             action: 'fx_plugin_execute_action',
                             action_key: key
                         }, function (response) {
+                            this.$set(this.loadingActions, key, false); // Button reaktivieren
 
                             const data = response?.data;
                             const message = data?.message;
