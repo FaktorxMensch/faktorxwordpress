@@ -1,22 +1,4 @@
 <?php
-// write a function that loads with the wp-config (to set defines) from fxwp_get_debugging
-function fxwp_set_debugging() {
-    global $debugging_options_description;
-    // TODO: move here
-
-    $debugging_options = fxwp_get_debugging();
-    // execute all commands (dangerous)
-    foreach ($debugging_options as $key => $value) {
-        if ($value) {
-            eval($debugging_options_description[$key]);
-        }
-    }
-}
-fxwp_set_debugging();
-// on init
-add_action('init', 'fxwp_set_debugging');
-
-
 // Make debug options description array available for settings page
 global $debugging_options_description;
 $debugging_options_description = array(

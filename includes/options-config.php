@@ -78,6 +78,14 @@ $fx_plugin_config = array(
                     'title' => 'Debugging',
                     'density' => 'dense',
                     'options' => array(
+                        // ein hinweis dass diese option gesetzt werden mmüssen und aber erst änderungen übernommen werden wenn man auf in wp-config schreiben klickt
+                        'fxwp_debugging_hint' => array(
+                            'type' => 'alert',
+                            'title' => 'Debugging Optionen',
+                            'alertIcon' => 'dashicons dashicons-warning',
+                            'color' => 'primary',
+                            'text' => 'Bitte beachten Sie, dass die Debugging Optionen erst nach dem Klick auf "In wp-config schreiben" aktiviert werden.',
+                        ),
                         'fxwp_debugging_enable' => array(
                             'type' => 'checkbox',
                             'title' => 'WP_DEBUG aktivieren',
@@ -118,12 +126,13 @@ $fx_plugin_config = array(
                             'title' => 'display_startup_errors aktivieren',
                             'default' => false,
                         ),
-                        // import
-                        'fxwp_debugging_import' => array(
+
+                        // write to wp-config.php
+                        'fxwp_debugging_write' => array(
                             'type' => 'action',
-                            'title' => 'Debugging Optionen importieren',
-                            'description' => 'Importiert Debugging Optionen aus einer älteren Version.',
-                            'callback' => 'fxwp_import_debugging',
+                            'title' => 'Debugging Optionen in wp-config schreiben',
+                            'description' => 'Schreibt Debugging Optionen in die wp-config.php.',
+                            'callback' => 'fxwp_write_debugging',
                         ),
                     ),
                 ),
@@ -608,7 +617,7 @@ function fxwp_import_restricted_features()
 	'fxwp_debugging_display_ini_startup' => "ini_set('display_startup_errors', '1');",
 );
 */
-function fxwp_import_debugging()
+function fxwp_write_debugging()
 {
     $debugging_options_description = array(
         'fxwp_debugging_enable' => "define( 'WP_DEBUG', true );",
@@ -621,14 +630,81 @@ function fxwp_import_debugging()
         'fxwp_debugging_display_ini_startup' => "ini_set('display_startup_errors', '1');",
     );
 
-    $alt = get_option("fxwp_debugging_options", "{}");
-    $alt = json_decode($alt, true);
+    $filePath = ABSPATH . 'wp-config.php';
+    $fileContents = file($filePath);
+    $finalLines = array();
 
-    // die jetz alle als ecthe wp_options
-    foreach ($debugging_options_description as $key => $description) {
-        // vom alten hole
-        update_option($key, boolval($alt[$key]));
+    // Entferne vorhandene Debugging-Blöcke, die mit unseren Markern versehen sind
+    $inExistingBlock = false;
+    foreach ($fileContents as $line) {
+        if (strpos($line, "// Faktor×WordPress Debugging Options") !== false) {
+            $inExistingBlock = true;
+            continue;
+        }
+        if ($inExistingBlock) {
+            if (strpos($line, "// End of Faktor×WordPress Debugging Options") !== false) {
+                $inExistingBlock = false;
+            }
+            continue;
+        }
+        $finalLines[] = $line;
     }
+
+    // Entferne einzelne Debugging-Optionen, falls sie bereits außerhalb eines Blocks existieren
+    foreach ($finalLines as $index => $line) {
+        foreach ($debugging_options_description as $key => $value) {
+            if (strpos($line, $value) !== false) {
+                unset($finalLines[$index]);
+                break;
+            }
+        }
+    }
+    $finalLines = array_values($finalLines);
+
+    // Bestimme die Einfügeposition: bevorzugt nach der Zeile mit /**#@-*/
+    $insertionIndex = null;
+    foreach ($finalLines as $index => $line) {
+        if (strpos($line, '/**#@-*/') !== false) {
+            $insertionIndex = $index + 1;
+            break;
+        }
+    }
+    // Falls nicht gefunden, dann nach der Zeile mit $table_prefix einfügen
+    if ($insertionIndex === null) {
+        foreach ($finalLines as $index => $line) {
+            if (strpos($line, '$table_prefix') !== false) {
+                $insertionIndex = $index + 1;
+                break;
+            }
+        }
+    }
+    // Falls auch das nicht gefunden wird, am Ende der Datei einfügen
+    if ($insertionIndex === null) {
+        $insertionIndex = count($finalLines);
+    }
+
+    // Erstelle den neuen Debugging-Block
+    $debugBlock = array();
+    $debugBlock[] = "// Faktor×WordPress Debugging Options\n";
+    $debugBlock[] = "// ------------------------------\n";
+    foreach ($debugging_options_description as $key => $value) {
+        if (get_option($key)) {
+            $debugBlock[] = $value . "\n";
+        }
+    }
+    $debugBlock[] = "// ------------------------------\n";
+    $debugBlock[] = "// End of Faktor×WordPress Debugging Options\n";
+
+    // Füge den Debugging-Block an der festgelegten Position ein
+    array_splice($finalLines, $insertionIndex, 0, $debugBlock);
+
+    // Schreibe die modifizierten Inhalte zurück in die wp-config.php
+    if (!file_put_contents($filePath, implode('', $finalLines))) {
+        error_log("Konnte wp-config.php nicht sichern");
+        return;
+    }
+
+    return array("message" => "Debugging Optionen erfolgreich in wp-config.php geschrieben.", "color" => "info");
 }
 
 
