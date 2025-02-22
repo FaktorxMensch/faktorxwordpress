@@ -158,20 +158,7 @@ function fxwp_settings_page()
                 <?php if (current_user_can("fxm_admin")) { ?>
                     <tr id="fxwp-debugging-options">
                         <th scope="row"><?php echo esc_html__('Debugging de-/aktivieren', 'fxwp'); ?></th>
-                        <td>
-                            <ul class="checkbox-list" id="deactivated_features_list">
-                                <?php
-                                foreach ($debugging_options_description as $option => $label) {
-                                    echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
-                                    if ($debugging_options[$option]) {
-                                        echo " checked value='true'";
-                                    } else {
-                                        echo " value='false'";
-                                    }
-                                    echo "/><label for='{$option}'><code>{$label}</code></label></li>";
-                                } ?>
-                            </ul>
-                        </td>
+                        <td>Wurde zu Options gemoved.</td>
                     </tr>
                     <script>
                         <!--                        Flash this area if url contains #fxwp-debugging -->
