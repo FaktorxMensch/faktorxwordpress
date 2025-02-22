@@ -62,7 +62,7 @@ $fx_plugin_config = array(
                             'type' => 'alert',
                             'alertIcon' => 'dashicons dashicons-admin-site',
                             'title' => 'Lokale Instanz',
-                            'color' => fxwp_is_local_instance() ? 'warning' : 'info',
+//                            'color' => fxwp_is_local_instance() ? 'warning' : 'info',
                             'text' => fxwp_is_local_instance() ? 'Es handelt sich um eine lokale Instanz.' : 'Es handelt sich um eine online Instanz.',
                         ),
                         'fxwp_restricted' => array(

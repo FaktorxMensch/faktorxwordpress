@@ -200,7 +200,7 @@ function fxwp_options_page()
                             </template>
                             <!-- Alert -->
                             <template v-else-if="option.type === 'alert'">
-                                <div :class="['fx-alert', 'alert-' + (option.color || 'primary')]">
+                                <div :class="['fx-alert', 'alert-' + (option.color || 'secondary')]">
                                     <i v-if="option.alertIcon" :class="option.alertIcon"></i>
                                     {{ option.text }}
                                 </div>
@@ -567,6 +567,7 @@ function fxwp_options_page()
         .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
         .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
         .alert-warning { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; }
+        .alert-secondary { background: none; border: 1px solid #d6d8dbaa; color: #383d41; }
 
         /* Code Block */
         .fx-code {
