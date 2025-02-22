@@ -13,21 +13,9 @@ function fxwp_show_log($log)
  */
 function fxwp_check_deactivated_features($feature_to_check) :bool {
     // Get disabled features
-    $deactivated_features = get_option('fxwp_deactivated_features');
-    if ($deactivated_features === false) {
-        return false;
-    }
-    // falls json_decode($deactivated_features) nicht klappt fallback
-    if (json_decode($deactivated_features) === null) {
-        return false;
-    }
-    $deactivated_features = get_object_vars(json_decode($deactivated_features));
-    // find feature_to_check in array keys and return value
-    if (array_key_exists($feature_to_check, $deactivated_features)) {
-        return $deactivated_features[$feature_to_check];
-    } else {
-        return false;
-    }
+    $disabled_features = fxwp_get_deact();
+    // Check if feature is disabled
+    return isset($disabled_features[$feature_to_check]) && $disabled_features[$feature_to_check] == true;
 }
 
 /** Show warning to fxm_admins if features are deactivated through plugin settings

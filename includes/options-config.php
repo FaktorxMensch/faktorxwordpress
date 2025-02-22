@@ -137,6 +137,155 @@ $fx_plugin_config = array(
                 ),
             ),
         ),
+        // Seite für  Restirioncts
+        'restrictions' => array(
+            'title' => 'Beschränkungen',
+            'icon' => 'dashicons dashicons-shield',
+            'slug' => 'restrictions',
+            'active_callback' => function () {
+                return true;
+            },
+            'sections' => array(
+                // Section für deaktivierte Funktionen
+                'deactivated_features' => array(
+                    'title' => 'Deaktivierte Funktionen',
+                    'options' => array(
+                        'fxwp_deact_ai' => array(
+                            'type' => 'checkbox',
+                            'title' => 'KI Funktionen deaktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_deact_backups' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Backups deaktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_deact_autoupdates' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Automatische Updates deaktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_deact_email_log' => array(
+                            'type' => 'checkbox',
+                            'title' => 'E‑Mail Log für Kundis ausblenden',
+                            'default' => false,
+                        ),
+                        'fxwp_deact_shortcodes' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Shortcodes für Kundis ausblenden',
+                            'default' => false,
+                        ),
+                        'fxwp_deact_dashboards' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Alle Dashboards für Kundis ausblenden',
+                            'default' => false,
+                        ),
+                        'fxwp_deact_debug_log_widget' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Debug Log Widget ausblenden',
+                            'default' => false,
+                        ),
+                        'fxwp_deact_customer_settings' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Plugin Settings für Kundis komplett ausblenden',
+                            'default' => false,
+                        ),
+                        'fxwp_deact_hide_plugin' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Plugin vor Kundis komplett verstecken',
+                            'default' => false,
+                        ),
+                    ),
+                ),
+                // Section für eingeschränkte Funktionen
+                'restricted_features' => array(
+                    'title' => 'Eingeschränkte Funktionen',
+                    'options' => array(
+                        'fxwp_restr_pages' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Seiten',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_posts' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Blogposts',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_uploads' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Mediendateien',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_themes' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Themes',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_updates-submenu' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Updates Submenu von Dashboard',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_elememtor-templates' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Elementor Templates',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_wpcf7' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Contact Form 7',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_new-button' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Admin Bar New Button',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_updates-indicator' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Admin Bar Updates Indicator',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_my-account' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Admin Bar Account',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_admin_plugins' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Plugins',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_admin_users' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Benutzer',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_admin_tools' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Tools',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_admin_settings' => array(
+                            'type' => 'checkbox',
+                            'title' => 'WP Einstellungen',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_admin_elementor' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Elementor Einstellungen',
+                            'default' => false,
+                        ),
+                        'fxwp_restr_admin_eael' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Essential Addons for Elementor Einstellungen',
+                            'default' => false,
+                        ),
+                    ),
+                ),
+            ),
+        ),
+
         // Seite für Updates (durch kunden)
         'p2_updates' => array(
             'title' => 'Updates',
@@ -245,4 +394,39 @@ export default defineEventHandler(async (event) => {
         }
     }
 
+}
+
+function fxwp_get_restr()
+{
+    // return like an array of fxwp_restr_posts, ... (only includes elements that are set tot true
+    // we need to gather all get_options (in the above config array we see whichc there are), get tem live from there
+    global $fx_plugin_config;
+    $options = $fx_plugin_config['nav_pages']['restrictions']['sections']['restricted_features']['options'];
+
+    if (!$options) return;
+
+    $restr = array();
+    foreach ($options as $key => $option) {
+        if (get_option($key)) {
+            $restr[$key] = get_option($key);
+        }
+    }
+    return $restr;
+}
+
+// for the other section as well
+function  fxwp_get_deact()
+{
+    global $fx_plugin_config;
+    $options = $fx_plugin_config['nav_pages']['restrictions']['sections']['deactivated_features']['options'];
+
+    if (!$options) return;
+
+    $deact = array();
+    foreach ($options as $key => $option) {
+        if (get_option($key)) {
+            $deact[$key] = get_option($key);
+        }
+    }
+    return $deact;
 }

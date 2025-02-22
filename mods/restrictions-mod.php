@@ -7,12 +7,9 @@ function fxwp_restrict_pages(): void
         return;
     }
 
-    $restricted_features = get_option('fxwp_restricted_features');
-
-    if (empty($restricted_features)) {
+    $restricted_features = fxwp_get_restr();
+    if (!$restricted_features) {
         return;
-    } else {
-        $restricted_features = get_object_vars(json_decode($restricted_features));
     }
 
     foreach ($restricted_features as $option => $value) {
@@ -74,12 +71,10 @@ function fxwp_restrict_admin_bar($wp_admin_bar): void
         return;
     }
 
-    $restricted_features = get_option('fxwp_restricted_features');
 
-    if (empty($restricted_features)) {
+    $restricted_features = fxwp_get_restr();
+    if (!$restricted_features) {
         return;
-    } else {
-        $restricted_features = get_object_vars(json_decode($restricted_features));
     }
 
     foreach ($restricted_features as $option => $value) {
