@@ -131,11 +131,15 @@ function fxwp_options_page()
         <main class="fx-content">
             <h1 class="fx-header">{{ currentNav.title }}</h1>
             <div class="fx-sections">
-                <div v-for="(section, sIndex) in currentNav.sections" :key="sIndex" class="fx-section">
+                <div v-for="(section, sIndex) in currentNav.sections" :key="sIndex"
+                     :class="['fx-section-density-' + (section.density || 'normal')]"
+                     class="fx-section">
                     <h2 class="fx-section-header">{{ section.title }}</h2>
                     <div class="fx-options">
                         <div v-for="(option, key) in section.options" :key="key" class="fx-option">
-                            <label :for="key" class="fx-option-label">
+                            <label :for="key" class="fx-option-label"
+                                   v-if="option.title"
+                            >
                                 <!-- Zeige Dashicon, falls definiert -->
                                 <i v-if="option.icon" :class="option.icon"></i>
                                 {{ option.title }}
@@ -219,7 +223,7 @@ function fxwp_options_page()
                                 </div>
                             </template>
 
-                            <p class="fx-option-description">{{ option.description }}</p>
+                            <p class="fx-option-description" v-if="option.description">{{ option.description }}</p>
                         </div>
                     </div>
                 </div>
@@ -332,6 +336,12 @@ function fxwp_options_page()
             border-radius: 4px;
             border: 1px solid #e1e1e1;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .fx-section-density-dense {
+            .fx-option-label{
+                display: none;
+            }
         }
 
         .fx-section-header {

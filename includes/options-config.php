@@ -149,6 +149,7 @@ $fx_plugin_config = array(
                 // Section für deaktivierte Funktionen
                 'deactivated_features' => array(
                     'title' => 'Deaktivierte Funktionen',
+                    'density' => 'dense',
                     'options' => array(
                         'fxwp_deact_ai' => array(
                             'type' => 'checkbox',
@@ -199,6 +200,7 @@ $fx_plugin_config = array(
                 ),
                 // Section für eingeschränkte Funktionen
                 'restricted_features' => array(
+                    'density' => 'dense',
                     'title' => 'Eingeschränkte Funktionen',
                     'options' => array(
                         'fxwp_restr_pages' => array(
