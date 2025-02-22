@@ -67,13 +67,14 @@ function fxwp_settings_page()
         }
         */
         // Get debugging options
-        $debugging_options = get_option('fxwp_debugging_options');
+//        $debugging_options = get_option('fxwp_debugging_options');
+        $debugging_options = fxwp_get_debugging();
         // if debugging options are empty, fill it with false
-        if (empty($debugging_options)) {
-            $debugging_options = array_fill_keys(array_keys($debugging_options_description), false);
-        } else {
-            $debugging_options = get_object_vars(json_decode($debugging_options));
-        }
+//        if (empty($debugging_options)) {
+//            $debugging_options = array_fill_keys(array_keys($debugging_options_description), false);
+//        } else {
+//            $debugging_options = get_object_vars(json_decode($debugging_options));
+//        }
         // Get deactivated features
         $restricted_features = fxwp_get_restr();
         // if deactivated features is empty or shorter than 5 chars, fill it with false
@@ -115,7 +116,7 @@ function fxwp_settings_page()
                 <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Ansichtsoptionen', 'fxwp'); ?></th>
-                        <td >Wurde zu Options gemoved.</td>
+                        <td>Wurde zu Options gemoved.</td>
                     </tr>
                 <?php } ?>
 

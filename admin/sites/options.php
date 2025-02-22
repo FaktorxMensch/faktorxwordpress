@@ -130,6 +130,7 @@ function fxwp_options_page()
         </aside>
         <main class="fx-content">
             <h1 class="fx-header">{{ currentNav.title }}</h1>
+            <pre><?php echo WP_DEBUG_LOG ? file_get_contents(WP_CONTENT_DIR . '/debug.log') : 'Debug-Log ist deaktiviert'; ?></pre>
             <div class="fx-sections">
                 <div v-for="(section, sIndex) in currentNav.sections" :key="sIndex"
                      :class="['fx-section-density-' + (section.density || 'normal')]"

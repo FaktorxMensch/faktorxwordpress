@@ -73,6 +73,60 @@ $fx_plugin_config = array(
                         ),
                     ),
                 ),
+
+                'debugging' => array(
+                    'title' => 'Debugging',
+                    'density' => 'dense',
+                    'options' => array(
+                        'fxwp_debugging_enable' => array(
+                            'type' => 'checkbox',
+                            'title' => 'WP_DEBUG aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_log' => array(
+                            'type' => 'checkbox',
+                            'title' => 'WP_DEBUG_LOG aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_display' => array(
+                            'type' => 'checkbox',
+                            'title' => 'WP_DEBUG_DISPLAY aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_scripts' => array(
+                            'type' => 'checkbox',
+                            'title' => 'SCRIPT_DEBUG aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_savequeries' => array(
+                            'type' => 'checkbox',
+                            'title' => 'SAVEQUERIES aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_errorreporting' => array(
+                            'type' => 'checkbox',
+                            'title' => 'error_reporting(E_ALL) aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_display_ini' => array(
+                            'type' => 'checkbox',
+                            'title' => 'display_errors aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_display_ini_startup' => array(
+                            'type' => 'checkbox',
+                            'title' => 'display_startup_errors aktivieren',
+                            'default' => false,
+                        ),
+                        // import
+                        'fxwp_debugging_import' => array(
+                            'type' => 'action',
+                            'title' => 'Debugging Optionen importieren',
+                            'description' => 'Importiert Debugging Optionen aus einer älteren Version.',
+                            'callback' => 'fxwp_import_debugging',
+                        ),
+                    ),
+                ),
             ),
         ),
         // NEU: Seite zum Anzeigen der P2 JSON-Daten
@@ -471,6 +525,23 @@ function fxwp_get_deact()
     return $deact;
 }
 
+// fxwp_debugging
+function fxwp_get_debugging()
+{
+    global $fx_plugin_config;
+    $options = $fx_plugin_config['nav_pages']['p2_connection']['sections']['debugging']['options'];
+
+    if (!$options) return;
+
+    $debugging = array();
+    foreach ($options as $key => $option) {
+        if (get_option($key)) {
+            $debugging[$key] = get_option($key);
+        }
+    }
+    return $debugging;
+}
+
 function fxwp_import_deactivated_features()
 {
     $deactivated_features_description = array(
@@ -525,6 +596,41 @@ function fxwp_import_restricted_features()
         update_option($key, $alt[$key]);
     }
 }
+
+/*$debugging_options_description = array(
+	'fxwp_debugging_enable' => "define( 'WP_DEBUG', true );",
+	'fxwp_debugging_log' => "define( 'WP_DEBUG_LOG', true );",
+	'fxwp_debugging_display' => "define( 'WP_DEBUG_DISPLAY', true );",
+	'fxwp_debugging_scripts' => "define( 'SCRIPT_DEBUG', true );",
+	'fxwp_debugging_savequeries' => "define( 'SAVEQUERIES', true );",
+	'fxwp_debugging_errorreporting' => "error_reporting(E_ALL);",
+	'fxwp_debugging_display_ini' => "ini_set('display_errors',1);",
+	'fxwp_debugging_display_ini_startup' => "ini_set('display_startup_errors', '1');",
+);
+*/
+function fxwp_import_debugging()
+{
+    $debugging_options_description = array(
+        'fxwp_debugging_enable' => "define( 'WP_DEBUG', true );",
+        'fxwp_debugging_log' => "define( 'WP_DEBUG_LOG', true );",
+        'fxwp_debugging_display' => "define( 'WP_DEBUG_DISPLAY', true );",
+        'fxwp_debugging_scripts' => "define( 'SCRIPT_DEBUG', true );",
+        'fxwp_debugging_savequeries' => "define( 'SAVEQUERIES', true );",
+        'fxwp_debugging_errorreporting' => "error_reporting(E_ALL);",
+        'fxwp_debugging_display_ini' => "ini_set('display_errors',1);",
+        'fxwp_debugging_display_ini_startup' => "ini_set('display_startup_errors', '1');",
+    );
+
+    $alt = get_option("fxwp_debugging_options", "{}");
+    $alt = json_decode($alt, true);
+
+    // die jetz alle als ecthe wp_options
+    foreach ($debugging_options_description as $key => $description) {
+        // vom alten hole
+        update_option($key, boolval($alt[$key]));
+    }
+}
+
 
 function fxwp_is_local_instance()
 {
