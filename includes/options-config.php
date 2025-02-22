@@ -126,8 +126,6 @@ $fx_plugin_config = array(
                             'title' => 'display_startup_errors aktivieren',
                             'default' => false,
                         ),
-
-                        // write to wp-config.php
                         'fxwp_debugging_write' => array(
                             'type' => 'action',
                             'title' => 'Debugging Optionen in wp-config schreiben',
@@ -617,6 +615,7 @@ function fxwp_import_restricted_features()
 	'fxwp_debugging_display_ini_startup' => "ini_set('display_startup_errors', '1');",
 );
 */
+
 function fxwp_write_debugging()
 {
     $debugging_options_description = array(
@@ -705,6 +704,7 @@ function fxwp_write_debugging()
     }
 
     return array("message" => "Debugging Optionen erfolgreich in wp-config.php geschrieben.", "color" => "info");
+
 }
 
 
