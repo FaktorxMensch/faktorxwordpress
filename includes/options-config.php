@@ -46,9 +46,9 @@
 global $fx_plugin_config;
 $fx_plugin_config = array(
     'nav_pages' => array(
-// Nav-Seite: P2 Connection
+        // Seite: P2 Connection – hier werden die bisher getrennten Optionen zusammengefasst.
         'p2_connection' => array(
-            'title' => 'P2 Connection',
+            'title' => 'Hosting',
             'icon' => 'dashicons dashicons-networking',
             'slug' => 'p2_connection',
             'active_callback' => function () {
@@ -58,127 +58,106 @@ $fx_plugin_config = array(
                 'connection_settings' => array(
                     'title' => 'Connection Settings',
                     'options' => array(
-                        'fxwp_storage_limit' => array(
+                        // Zusammengefasste Option (bisher fxwp_storage_limit und fxwp_restricted_test)
+                        'fxwp_restricted' => array(
                             'type' => 'filesize',
                             'title' => 'Speicherlimit',
                             'description' => 'Gib das Speicherlimit in GB, MB oder KB ein. Intern wird in Bytes gespeichert.',
                             'default' => 20 * 1024 * 1024 * 1024, // 20 GB
                         ),
-                        'fxwp_restricted_test' => array(
-                            'type' => 'checkbox',
-                            'title' => 'Eingeschränkte Features',
-                            'description' => 'Aktiviert eingeschränkte Funktionen.',
-                            'default' => false,
-                        ),
                     ),
                 ),
             ),
         ),
-// Nav-Seite: WP Options
-        'wp_options' => array(
-            'title' => 'WP Options',
-            'icon' => 'dashicons dashicons-admin-generic',
-            'slug' => 'wp_options',
+        // NEU: Seite zum Anzeigen der P2 JSON-Daten
+        'p2_data' => array(
+            'title' => 'P2 Integration',
+            'icon' => 'dashicons dashicons-media-code',
+            'slug' => 'p2_data',
             'active_callback' => function () {
                 return true;
             },
             'sections' => array(
-                'general_options' => array(
-                    'title' => 'General Options',
+                'p2_json_display' => array(
+                    'title' => 'P2 JSON Daten',
                     'options' => array(
-                        'fxwp_dummy_number' => array(
-                            'type' => 'number',
-                            'title' => 'Dummy Number',
-                            'description' => 'Eine Zahl als Beispiel.',
-                            'default' => 10,
+                        'fxwp_customer_json' => array(
+                            'type' => 'json',
+                            'title' => 'Kunde JSON',
+                            'description' => 'Anzeige der Kundendaten (P2).',
+                            'default' => json_encode(get_option('fxwp_customer', array())),
+                            'readonly' => true,
+                        ),
+                        'fxwp_project_json' => array(
+                            'type' => 'json',
+                            'title' => 'Projekt JSON',
+                            'description' => 'Anzeige der Projektdaten (P2).',
+                            'default' => json_encode(get_option('fxwp_project', array())),
+                            'readonly' => true,
+                        ),
+                        'fxwp_plans_json' => array(
+                            'type' => 'json',
+                            'title' => 'Pläne JSON',
+                            'description' => 'Anzeige der Plandaten (P2).',
+                            'default' => json_encode(get_option('fxwp_plans', array())),
+                            'readonly' => true,
                         ),
                     ),
                 ),
-                'more_options' => array(
-                    'title' => 'More Options',
+                'license_management' => array(
+                    'title' => 'Faktor×WP Lizenz',
                     'options' => array(
-                        'fxwp_dummy_text' => array(
+                        'fxwp_api_key' => array(
                             'type' => 'text',
-                            'title' => 'Dummy Text',
-                            'description' => 'Ein einfacher Textwert.',
-                            'default' => 'Beispieltext',
+                            'title' => 'Lizenz Schlüssel',
+                            'description' => 'Bitte geben Sie Ihren Lizenz Schlüssel ein.',
+                            'default' => '',
                         ),
-                        'fxwp_dummy_radio' => array(
-                            'type' => 'radio',
-                            'title' => 'Dummy Radio',
-                            'description' => 'Wähle eine Option.',
-                            'default' => 'option1',
-                            'choices' => array(
-                                array('value' => 'option1', 'label' => 'Option 1'),
-                                array('value' => 'option2', 'label' => 'Option 2'),
-                            ),
+                        'fxwp_api_key_renew' => array(
+                            'type' => 'action',
+                            'title' => 'Lizenz erneuern',
+                            'description' => 'Erneuert den API-Schlüssel.',
+                            'callback' => 'fxwp_run_api_key_renew',
                         ),
-                        'fxwp_dummy_select' => array(
-                            'type' => 'select',
-                            'title' => 'Dummy Select',
-                            'description' => 'Wähle aus der Liste.',
-                            'default' => 'a',
-                            'choices' => array(
-                                array('value' => 'a', 'label' => 'Auswahl A'),
-                                array('value' => 'b', 'label' => 'Auswahl B'),
-                                array('value' => 'c', 'label' => 'Auswahl C'),
-                            ),
+                        'fxwp_api_key_uninstall' => array(
+                            'type' => 'action',
+                            'title' => 'Lizenz deinstallieren',
+                            'description' => 'Deinstalliert den Lizenz Schlüssel per Knopfdruck.',
+                            'callback' => 'fxwp_run_api_key_uninstall',
                         ),
                     ),
                 ),
             ),
         ),
-// Nav-Seite: Debugging
-        'debugging' => array(
-            'title' => 'Debugging',
-            'icon' => 'dashicons dashicons-admin-tools',
-            'slug' => 'debugging',
+        // Seite für Updates (durch kunden)
+        'p2_updates' => array(
+            'title' => 'Updates',
+            'icon' => 'dashicons dashicons-update',
+            'slug' => 'p2_updates',
             'active_callback' => function () {
-                return current_user_can('manage_options');
+                return true;
             },
             'sections' => array(
-                'debug_settings' => array(
-                    'title' => 'Debug Settings',
+                'update_settings' => array(
+                    'title' => 'Update Einstellungen',
                     'options' => array(
-                        'fxwp_dummy_debug' => array(
+                        'fxm_customer_update_dashboard' => array(
                             'type' => 'checkbox',
-                            'title' => 'Dummy Debug Option',
-                            'description' => 'Aktiviert die Debug-Option.',
+                            'title' => 'Kunden Update Dashboard anzeigen',
+                            'description' => 'Ermöglicht Kund:innen manuelles Update in einer einfachen Ansicht.',
                             'default' => false,
                         ),
-// Action-Eintrag
-                        'fxwp_run_test_action' => array(
-                            'type' => 'action',
-                            'title' => 'Test Aktion',
-                            'description' => 'Führt eine Test-Aktion aus.',
-                            'callback' => 'fxwp_run_test_action_callback'
+                        'cud_notify_enabled' => array(
+                            'type' => 'checkbox',
+                            'title' => 'E‑Mail Benachrichtigung aktivieren',
+                            'description' => 'Aktiviert die E‑Mail Benachrichtigung bei verfügbaren Updates.',
+                            'default' => false,
                         ),
-// Beispiel Alert-Eintrag
-                        'fxwp_sample_alert' => array(
-                            'type' => 'alert',
-                            'title' => 'Sample Alert',
-                            'description' => 'Dies ist ein Alert. Unterstützt Farbvarianten (z. B. danger, success, primary).',
-                            'default' => 'Achtung! Dies ist eine Warnung.',
-                            'alertType' => 'danger', // Mögliche Werte: primary, success, danger etc.
-                            'icon' => 'dashicons dashicons-warning'
-                        ),
-// Beispiel Code-Eintrag (nur lesbar, mit Copy-Icon)
-                        'fxwp_sample_code' => array(
-                            'type' => 'code',
-                            'title' => 'Sample Code',
-                            'description' => 'Zeige Beispielcode an.',
-                            'default' => "<?php echo 'Hello World!'; ?>",
-                            'readonly' => true,
-                            'icon' => 'dashicons dashicons-editor-code'
-                        ),
-// Beispiel JSON-Eintrag (nur lesbar, mit Copy-Icon)
-                        'fxwp_sample_json' => array(
-                            'type' => 'json',
-                            'title' => 'Sample JSON',
-                            'description' => 'JSON-Inhalt (nur lesbar).',
-                            'default' => '{"foo": "bar", "baz": 123}',
-                            'readonly' => true,
-                            'icon' => 'dashicons dashicons-media-code'
+                        'cud_notify_email' => array(
+                            'type' => 'text',
+                            'title' => 'E‑Mail Adresse',
+                            'description' => 'Geben Sie die E‑Mail-Adresse ein, an die Benachrichtigungen gesendet werden sollen.',
+                            'default' => '',
                         ),
                     ),
                 ),
