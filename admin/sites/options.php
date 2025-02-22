@@ -161,10 +161,11 @@ function fxwp_options_page()
                             </template>
                             <!-- Checkbox (custom styled) -->
                             <template v-else-if="option.type === 'checkbox'">
-                                <div class="custom-checkbox">
+                                <div class="custom-checkbox-inline">
                                     <input type="checkbox" :id="key" v-model="option.value"
                                            @change="saveOption(key, option.value)">
-                                    <label :for="key"></label>
+                                    <label class="custom-checkbox-box" :for="key"></label>
+                                    <span class="custom-checkbox-label"> <i v-if="option.icon" :class="option.icon"></i> {{ option.title }} </span>
                                 </div>
                             </template>
                             <!-- Radio -->
@@ -381,13 +382,16 @@ function fxwp_options_page()
         }
 
         /* Custom Checkbox */
-        .custom-checkbox {
+        /* Container: Checkbox und Text nebeneinander */
+        .custom-checkbox-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
             position: relative;
-            width: 24px;
-            height: 24px;
         }
 
-        .custom-checkbox input[type="checkbox"] {
+        /* Verstecktes Original-Checkbox-Input */
+        .custom-checkbox-inline input[type="checkbox"] {
             opacity: 0;
             position: absolute;
             width: 24px;
@@ -396,36 +400,46 @@ function fxwp_options_page()
             cursor: pointer;
         }
 
-        .custom-checkbox label {
-            position: absolute;
-            top: 0;
-            left: 0;
+        /* Das visuelle Checkbox-Kästchen */
+        .custom-checkbox-box {
             width: 24px;
             height: 24px;
             background: #fff;
             border: 2px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             transition: background 0.2s, border-color 0.2s;
+            position: relative;
         }
 
-        .custom-checkbox input[type="checkbox"]:checked + label {
+        /* Geänderter Zustand: ausgewählt */
+        .custom-checkbox-inline input[type="checkbox"]:checked + .custom-checkbox-box {
             background: #0073aa;
             border-color: #0073aa;
         }
 
-        .custom-checkbox input[type="checkbox"]:checked + label:after {
+        /* Häkchen im ausgewählten Zustand */
+        .custom-checkbox-inline input[type="checkbox"]:checked + .custom-checkbox-box:after {
             content: "\2713";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: block;
             color: #fff;
             font-size: 16px;
+            text-align: center;
+            width: 100%;
+            margin-top: 7px;
+            height: 100%;
+        }
+
+        /* Textbeschreibung neben dem Kästchen */
+        .custom-checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
         }
 
         /* Custom Radio */
