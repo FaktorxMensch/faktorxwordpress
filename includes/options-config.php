@@ -73,6 +73,69 @@ $fx_plugin_config = array(
                         ),
                     ),
                 ),
+
+                'debugging' => array(
+                    'title' => 'Debugging',
+                    'density' => 'dense',
+                    'options' => array(
+                        // ein hinweis dass diese option gesetzt werden mmüssen und aber erst änderungen übernommen werden wenn man auf in wp-config schreiben klickt
+                        'fxwp_debugging_hint' => array(
+                            'type' => 'alert',
+                            'title' => 'Debugging Optionen',
+                            'alertIcon' => 'dashicons dashicons-warning',
+                            'color' => 'primary',
+                            'text' => 'Bitte beachten Sie, dass die Debugging Optionen erst nach dem Klick auf "In wp-config schreiben" aktiviert werden.',
+                        ),
+                        'fxwp_debugging_enable' => array(
+                            'type' => 'checkbox',
+                            'title' => 'WP_DEBUG aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_log' => array(
+                            'type' => 'checkbox',
+                            'title' => 'WP_DEBUG_LOG aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_display' => array(
+                            'type' => 'checkbox',
+                            'title' => 'WP_DEBUG_DISPLAY aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_scripts' => array(
+                            'type' => 'checkbox',
+                            'title' => 'SCRIPT_DEBUG aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_savequeries' => array(
+                            'type' => 'checkbox',
+                            'title' => 'SAVEQUERIES aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_errorreporting' => array(
+                            'type' => 'checkbox',
+                            'title' => 'error_reporting(E_ALL) aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_display_ini' => array(
+                            'type' => 'checkbox',
+                            'title' => 'display_errors aktivieren',
+                            'default' => false,
+                        ),
+                        'fxwp_debugging_display_ini_startup' => array(
+                            'type' => 'checkbox',
+                            'title' => 'display_startup_errors aktivieren',
+                            'default' => false,
+                        ),
+
+                        // write to wp-config.php
+                        'fxwp_debugging_write' => array(
+                            'type' => 'action',
+                            'title' => 'Debugging Optionen in wp-config schreiben',
+                            'description' => 'Schreibt Debugging Optionen in die wp-config.php.',
+                            'callback' => 'fxwp_write_debugging',
+                        ),
+                    ),
+                ),
             ),
         ),
         // NEU: Seite zum Anzeigen der P2 JSON-Daten
@@ -471,6 +534,23 @@ function fxwp_get_deact()
     return $deact;
 }
 
+// fxwp_debugging
+function fxwp_get_debugging()
+{
+    global $fx_plugin_config;
+    $options = $fx_plugin_config['nav_pages']['p2_connection']['sections']['debugging']['options'];
+
+    if (!$options) return;
+
+    $debugging = array();
+    foreach ($options as $key => $option) {
+        if (get_option($key)) {
+            $debugging[$key] = get_option($key);
+        }
+    }
+    return $debugging;
+}
+
 function fxwp_import_deactivated_features()
 {
     $deactivated_features_description = array(
@@ -525,6 +605,108 @@ function fxwp_import_restricted_features()
         update_option($key, $alt[$key]);
     }
 }
+
+/*$debugging_options_description = array(
+	'fxwp_debugging_enable' => "define( 'WP_DEBUG', true );",
+	'fxwp_debugging_log' => "define( 'WP_DEBUG_LOG', true );",
+	'fxwp_debugging_display' => "define( 'WP_DEBUG_DISPLAY', true );",
+	'fxwp_debugging_scripts' => "define( 'SCRIPT_DEBUG', true );",
+	'fxwp_debugging_savequeries' => "define( 'SAVEQUERIES', true );",
+	'fxwp_debugging_errorreporting' => "error_reporting(E_ALL);",
+	'fxwp_debugging_display_ini' => "ini_set('display_errors',1);",
+	'fxwp_debugging_display_ini_startup' => "ini_set('display_startup_errors', '1');",
+);
+*/
+function fxwp_write_debugging()
+{
+    $debugging_options_description = array(
+        'fxwp_debugging_enable' => "define( 'WP_DEBUG', true );",
+        'fxwp_debugging_log' => "define( 'WP_DEBUG_LOG', true );",
+        'fxwp_debugging_display' => "define( 'WP_DEBUG_DISPLAY', true );",
+        'fxwp_debugging_scripts' => "define( 'SCRIPT_DEBUG', true );",
+        'fxwp_debugging_savequeries' => "define( 'SAVEQUERIES', true );",
+        'fxwp_debugging_errorreporting' => "error_reporting(E_ALL);",
+        'fxwp_debugging_display_ini' => "ini_set('display_errors',1);",
+        'fxwp_debugging_display_ini_startup' => "ini_set('display_startup_errors', '1');",
+    );
+
+    $filePath = ABSPATH . 'wp-config.php';
+    $fileContents = file($filePath);
+    $finalLines = array();
+
+    // Entferne vorhandene Debugging-Blöcke, die mit unseren Markern versehen sind
+    $inExistingBlock = false;
+    foreach ($fileContents as $line) {
+        if (strpos($line, "// Faktor×WordPress Debugging Options") !== false) {
+            $inExistingBlock = true;
+            continue;
+        }
+        if ($inExistingBlock) {
+            if (strpos($line, "// End of Faktor×WordPress Debugging Options") !== false) {
+                $inExistingBlock = false;
+            }
+            continue;
+        }
+        $finalLines[] = $line;
+    }
+
+    // Entferne einzelne Debugging-Optionen, falls sie bereits außerhalb eines Blocks existieren
+    foreach ($finalLines as $index => $line) {
+        foreach ($debugging_options_description as $key => $value) {
+            if (strpos($line, $value) !== false) {
+                unset($finalLines[$index]);
+                break;
+            }
+        }
+    }
+    $finalLines = array_values($finalLines);
+
+    // Bestimme die Einfügeposition: bevorzugt nach der Zeile mit /**#@-*/
+    $insertionIndex = null;
+    foreach ($finalLines as $index => $line) {
+        if (strpos($line, '/**#@-*/') !== false) {
+            $insertionIndex = $index + 1;
+            break;
+        }
+    }
+    // Falls nicht gefunden, dann nach der Zeile mit $table_prefix einfügen
+    if ($insertionIndex === null) {
+        foreach ($finalLines as $index => $line) {
+            if (strpos($line, '$table_prefix') !== false) {
+                $insertionIndex = $index + 1;
+                break;
+            }
+        }
+    }
+    // Falls auch das nicht gefunden wird, am Ende der Datei einfügen
+    if ($insertionIndex === null) {
+        $insertionIndex = count($finalLines);
+    }
+
+    // Erstelle den neuen Debugging-Block
+    $debugBlock = array();
+    $debugBlock[] = "// Faktor×WordPress Debugging Options\n";
+    $debugBlock[] = "// ------------------------------\n";
+    foreach ($debugging_options_description as $key => $value) {
+        if (get_option($key)) {
+            $debugBlock[] = $value . "\n";
+        }
+    }
+    $debugBlock[] = "// ------------------------------\n";
+    $debugBlock[] = "// End of Faktor×WordPress Debugging Options\n";
+
+    // Füge den Debugging-Block an der festgelegten Position ein
+    array_splice($finalLines, $insertionIndex, 0, $debugBlock);
+
+    // Schreibe die modifizierten Inhalte zurück in die wp-config.php
+    if (!file_put_contents($filePath, implode('', $finalLines))) {
+        error_log("Konnte wp-config.php nicht sichern");
+        return;
+    }
+
+    return array("message" => "Debugging Optionen erfolgreich in wp-config.php geschrieben.", "color" => "info");
+}
+
 
 function fxwp_is_local_instance()
 {

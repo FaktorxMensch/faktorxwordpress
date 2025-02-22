@@ -1,16 +1,15 @@
 <?php
-
-//Make debug options description array available for settings page
+// Make debug options description array available for settings page
 global $debugging_options_description;
 $debugging_options_description = array(
-	'fxwp_debugging_enable' => "define( 'WP_DEBUG', true );",
-	'fxwp_debugging_log' => "define( 'WP_DEBUG_LOG', true );",
-	'fxwp_debugging_display' => "define( 'WP_DEBUG_DISPLAY', true );",
-	'fxwp_debugging_scripts' => "define( 'SCRIPT_DEBUG', true );",
-	'fxwp_debugging_savequeries' => "define( 'SAVEQUERIES', true );",
-	'fxwp_debugging_errorreporting' => "error_reporting(E_ALL);",
-	'fxwp_debugging_display_ini' => "ini_set('display_errors',1);",
-	'fxwp_debugging_display_ini_startup' => "ini_set('display_startup_errors', '1');",
+    'fxwp_debugging_enable'            => "if ( ! defined( 'WP_DEBUG' ) ) { define( 'WP_DEBUG', true ); }",
+    'fxwp_debugging_log'               => "if ( ! defined( 'WP_DEBUG_LOG' ) ) { define( 'WP_DEBUG_LOG', true ); }",
+    'fxwp_debugging_display'           => "if ( ! defined( 'WP_DEBUG_DISPLAY' ) ) { define( 'WP_DEBUG_DISPLAY', true ); }",
+    'fxwp_debugging_scripts'           => "if ( ! defined( 'SCRIPT_DEBUG' ) ) { define( 'SCRIPT_DEBUG', true ); }",
+    'fxwp_debugging_savequeries'       => "if ( ! defined( 'SAVEQUERIES' ) ) { define( 'SAVEQUERIES', true ); }",
+    'fxwp_debugging_errorreporting'    => "error_reporting(E_ALL);",
+    'fxwp_debugging_display_ini'       => "ini_set('display_errors', 1);",
+    'fxwp_debugging_display_ini_startup' => "ini_set('display_startup_errors', '1');",
 );
 
 function fxwp_change_debug_status($old_value , $new_value, $option) {
