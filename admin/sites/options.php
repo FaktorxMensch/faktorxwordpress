@@ -119,7 +119,7 @@ function fxwp_options_page()
     ?>
     <div id="fx-plugin-panel">
         <aside class="fx-sidebar">
-            <h2 class="title">Panel</h2>
+            <h2 class="title">Optionen</h2>
             <ul>
                 <li v-for="(nav, index) in navPages" :key="index" :class="{ active: nav === currentNav }">
                     <a href="#" @click.prevent="loadNavPage(nav)">
