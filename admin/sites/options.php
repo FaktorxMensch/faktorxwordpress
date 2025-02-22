@@ -53,7 +53,7 @@ function fx_plugin_execute_action()
     }
     if ($callback && is_callable($callback)) {
         $result = call_user_func($callback);
-        wp_send_json_success(array('message' => $result));
+        wp_send_json_success($result);
     }
     wp_send_json_error(array('message' => 'Aktion fehlgeschlagen'));
 }
@@ -698,18 +698,22 @@ function fxwp_options_page()
                             action: 'fx_plugin_execute_action',
                             action_key: key
                         }, function (response) {
+
+                            const data = response?.data;
+                            const message = data?.message;
+                            const color = data?.color;
+
                             if (response.success) {
                                 // if redirect_url is set, redirect to that URL
-                                const message = response?.data?.message;
-                                if (message?.redirect) {
+                                if (data?.redirect) {
                                     // in new tab
-                                    window.open(message.redirect, '_blank');
+                                    window.open(data.redirect, '_blank');
                                     // return showing snackbar about redirect
                                     return this.showSnackbar("Aktion ausgeführt, öffne in neuem Tab", 'success');
                                 }
-                                this.showSnackbar(response.data.message, 'success');
+                                this.showSnackbar(message, color || 'success');
                             } else {
-                                this.showSnackbar(response.data.message, 'error');
+                                this.showSnackbar(message, 'error');
                             }
                         }.bind(this));
                     },

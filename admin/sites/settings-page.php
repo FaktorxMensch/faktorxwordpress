@@ -3,6 +3,7 @@ function fxwp_settings_page()
 {
     // check if we want fxwp_api_key_renew
     if (isset($_GET['fxwp_api_key_renew']) && $_GET['fxwp_api_key_renew'] == 'true') {
+        // DEPRECATED
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Ihr API-Schlüssel wurde erfolgreich erneuert.', 'fxwp') . '</p></div>';
         fxwp_deactivation();
         fxwp_activation();

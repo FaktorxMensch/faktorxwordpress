@@ -125,6 +125,14 @@ $fx_plugin_config = array(
                             'description' => 'Deinstalliert den Lizenz Schlüssel per Knopfdruck.',
                             'callback' => 'fxwp_run_api_key_uninstall',
                         ),
+                        // checekn action ob die lizenz gültig ist
+                        'fxwp_api_key_check' => array(
+                            'type' => 'action',
+                            'title' => 'Lizenz prüfen',
+                            'description' => 'Prüft ob der Lizenz Schlüssel gültig ist.',
+                            'callback' => 'fxwp_run_api_key_check',
+                        ),
+
                     ),
                 ),
             ),
@@ -188,4 +196,37 @@ function fxwp_run_manual_update_core()
     $update_url = wp_nonce_url(admin_url('update-core.php'), 'upgrade-core');
     // curl it
     return array("redirect" => $update_url);
+}
+
+function fxwp_run_api_key_renew()
+{
+    fxwp_deactivation();
+    fxwp_activation();
+    return array("message" => "Lizenz Schlüssel erneuert.", "color" => "info");
+}
+
+function fxwp_run_api_key_uninstall()
+{
+    fxwp_deactivation();
+    return array("message" => "Lizenz Schlüssel deinstalliert.", "color" => "danger");
+}
+
+function fxwp_run_api_key_check()
+{
+    $api_key = get_option('fxwp_api_key');
+    // code to execute on plugin deactivation
+    $response = wp_remote_post(FXWP_API_URL . '/check');
+
+    if (is_wp_error($response)) {
+        return "Fehler beim Überprüfen des Lizenzschlüssels.";
+    } else {
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        if ($data['success']) {
+            return array("message" => "Lizenz Schlüssel gültig.", "color" => "info");
+        } else {
+            return array("message" => "Lizenz Schlüssel ungültig.", "color" => "error");
+        }
+    }
+
 }
