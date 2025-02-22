@@ -135,6 +135,108 @@ function fxwp_updates_page()
             <p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary"
                                      value="Änderungen speichern"></p>
         </form>
+
+
+        <div class="flex">
+            <form method="post" action="" class="inline">
+                <?php echo esc_html__('Version', 'fxwp'); ?>
+                <?php echo esc_html(FXWP_VERSION); ?>
+                <a href="<?php echo esc_url(admin_url('index.php?fxwp_sync=1')); ?>">
+                    <?php echo esc_html__('Prüfen auf Updates', 'fxwp'); ?>
+                </a>
+            </form>
+            <?php if (current_user_can("fxm_admin")) { ?>
+                <svg class="inline"
+                     height="1.5em"
+                     xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 24 24"
+                     onclick="document.querySelector('svg.inline').classList.toggle('flip');document.querySelector('.tag-update').classList.toggle('inline');"
+                >
+                    <title>chevron-left</title>
+                    <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/>
+                </svg>
+                <form method="post" action="index.php?fxwp_sync=1" class="tag-update">
+                    <input type="text" name="fxwp_self_update_tag" placeholder="Tag" required style="width:60px"/>
+                    <input type="submit" class="button button-primary"
+                           value="<?php echo esc_html__('manuell installieren', 'fxwp'); ?>"/>
+                </form>
+            <?php } ?>
+        </div>
+
+        <style>
+            .scroll-box {
+                max-height: 200px;
+                overflow: auto;
+                border: 1px solid #ccc;
+                padding: 10px;
+                width: calc(100vw - 400px);
+            }
+
+            .flex {
+                display: flex;
+                height: 2em;
+                align-items: center;
+            }
+
+            form.inline {
+                display: inline;
+            }
+
+            svg.inline {
+                opacity: 0.5;
+                transition: all 0.1s;
+            }
+
+            svg.inline:hover {
+                cursor: pointer;
+                -webkit-transform: rotate(180deg);
+                -ms-transform: rotate(45deg);
+                opacity: 1;
+            }
+
+            .tag-update {
+                display: none;
+            }
+
+            .flip {
+                -webkit-transform: rotate(180deg);
+                -ms-transform: rotate(45deg);
+                transform: rotate(180deg);
+            }
+        </style>
+        <script>
+            document.addEventListener('formdata', (e) => {
+                let deactivated_features_list = {}
+                document.getElementById('deactivated_features_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
+                    deactivated_features_list[el.id] = el.checked
+                })
+                // If fxwp plugin should be completely hidden, hide menu items as well
+                if (deactivated_features_list['fxwp_deact_hide_plugin']) {
+                    deactivated_features_list['fxwp_deact_customer_settings'] = true
+                    deactivated_features_list['fxwp_deact_dashboards'] = true
+                }
+                e.formData.append('fxwp_deactivated_features', JSON.stringify(deactivated_features_list))
+
+                let restricted_features_list = {}
+                document.getElementById('restricted_features_list').querySelectorAll('input[type="checkbox"]').forEach((el) => {
+                    restricted_features_list[el.id] = el.checked
+                })
+                // // If fxwp plugin should be completely hidden, hide menu items as well
+                // if (restricted_features_list['fxwp_deact_hide_plugin']) {
+                //     restricted_features_list['fxwp_deact_customer_settings'] = true
+                //     restricted_features_list['fxwp_deact_dashboards'] = true
+                // }
+                e.formData.append('fxwp_restricted_features', JSON.stringify(restricted_features_list))
+
+                let debugging_options_list = {}
+                document.getElementById('fxwp-debugging-options').querySelectorAll('input[type="checkbox"]').forEach((el) => {
+                    debugging_options_list[el.id] = el.checked
+                })
+                e.formData.append('fxwp_debugging_options', JSON.stringify(debugging_options_list))
+                console.log(e.formData)
+            });
+        </script>
+
     </div>
     <?php
 }
