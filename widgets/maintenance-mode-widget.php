@@ -81,7 +81,7 @@ function fxwp_display_maintenance_mode_widget()
 			"title"=>"Change debugging",
 			"type"=>"action",
 			"description"=>"Go to plugin settings to control debugging behaviour.",
-			"link"=>esc_url(admin_url('admin.php?page=fxwp-settings#fxwp-debugging')),
+			"link"=>esc_url(admin_url('admin.php?page=fxwp-options&nav=p2_connection')),
 			"disabled"=>false,
 		],
 		[
