@@ -181,16 +181,6 @@ function fxwp_plugin_menu()
         'fxwp_plugin_list_installer_page' // Function
     );
 
-    // settings
-    add_submenu_page(
-        'fxwp', // Parent slug
-        'Settings', // Page title
-        'Settings', // Menu title
-        'administrator', // Capability
-        'fxwp-settings', // Menu slug
-        'fxwp_settings_page' // Function
-    );
-
     // Panel
     add_submenu_page(
         'fxwp', // Parent slug
