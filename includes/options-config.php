@@ -213,6 +213,14 @@ $fx_plugin_config = array(
                             'title' => 'Plugin vor Kundis komplett verstecken',
                             'default' => false,
                         ),
+                        /* button um deaktivierte funktionen aus alter version zu importieren */
+                        'fxwp_deact_import' => array(
+                            'type' => 'action',
+                            'title' => 'Deaktivierte Funktionen importieren',
+                            'description' => 'Importiert deaktivierte Funktionen aus einer älteren Version.',
+                            'callback' => 'fxwp_import_deactivated_features',
+                        ),
+
                     ),
                 ),
                 // Section für eingeschränkte Funktionen
@@ -299,6 +307,13 @@ $fx_plugin_config = array(
                             'type' => 'checkbox',
                             'title' => 'Essential Addons for Elementor Einstellungen',
                             'default' => false,
+                        ),
+                        // eingeschränkte Funktionen importieren aus alter
+                        'fxwp_restr_import' => array(
+                            'type' => 'action',
+                            'title' => 'Eingeschränkte Funktionen importieren',
+                            'description' => 'Importiert eingeschränkte Funktionen aus einer älteren Version.',
+                            'callback' => 'fxwp_import_restricted_features',
                         ),
                     ),
                 ),
@@ -434,7 +449,7 @@ function fxwp_get_restr()
 }
 
 // for the other section as well
-function  fxwp_get_deact()
+function fxwp_get_deact()
 {
     global $fx_plugin_config;
     $options = $fx_plugin_config['nav_pages']['restrictions']['sections']['deactivated_features']['options'];
@@ -448,4 +463,59 @@ function  fxwp_get_deact()
         }
     }
     return $deact;
+}
+
+function fxwp_import_deactivated_features()
+{
+    $deactivated_features_description = array(
+        'fxwp_deact_ai' => 'KI Funktionen deaktivieren',
+        'fxwp_deact_backups' => 'Backups deaktivieren',
+        'fxwp_deact_autoupdates' => 'Automatische Updates deaktivieren',
+        'fxwp_deact_email_log' => 'E-Mail Log für Kundis ausblenden',
+        'fxwp_deact_shortcodes' => 'Shortcodes für Kundis ausblenden',
+        'fxwp_deact_dashboards' => 'Alle Dashboards für Kundis ausblenden',
+        'fxwp_deact_debug_log_widget' => 'Debug Log Widget ausblenden',
+        'fxwp_deact_customer_settings' => 'Plugin Settings für Kundis komplett ausblenden',
+        'fxwp_deact_hide_plugin' => 'Plugin vor Kundis komplett verstecken',
+    );
+
+    $alt = get_option("fxwp_deactivated_features");
+    $alt = json_decode($alt, true);
+
+    // die jetz alle als ecthe wp_options
+    foreach ($deactivated_features_description as $key => $description) {
+        // vom alten hole
+        update_option($key, $alt[$key]);
+    }
+}
+
+function fxwp_import_restricted_features()
+{
+    $restricted_features_description = array(
+        'fxwp_restr_pages' => 'Seiten',
+        'fxwp_restr_posts' => 'Blogposts',
+        'fxwp_restr_uploads' => 'Mediendateien',
+        'fxwp_restr_themes' => 'Themes',
+        'fxwp_restr_updates-submenu' => 'Updates Submenu von Dashboard',
+        'fxwp_restr_elememtor-templates' => 'Elementor Templates',
+        'fxwp_restr_wpcf7' => 'Contact Form 7',
+        'fxwp_restr_new-button' => 'Admin Bar New Button',
+        'fxwp_restr_updates-indicator' => 'Admin Bar Updates Indicator',
+        'fxwp_restr_my-account' => 'Admin Bar Account',
+        'fxwp_restr_admin_plugins' => 'Plugins',
+        'fxwp_restr_admin_users' => 'Benutzer',
+        'fxwp_restr_admin_tools' => 'Tools',
+        'fxwp_restr_admin_settings' => 'WP Einstellungen',
+        'fxwp_restr_admin_elementor' => 'Elementor Einstellungen',
+        'fxwp_restr_admin_eael' => 'Essential Addons for Elementor Einstellungen',
+    );
+
+    $alt = get_option("fxwp_restricted_features");
+    $alt = json_decode($alt, true);
+
+    // die jetz alle als ecthe wp_options
+    foreach ($restricted_features_description as $key => $description) {
+        // vom alten hole
+        update_option($key, $alt[$key]);
+    }
 }

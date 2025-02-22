@@ -119,21 +119,7 @@ function fxwp_settings_page()
                 <!-- View options if current user is fxm_admin -->
                 <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
-                        <th scope="row"><?php echo esc_html__('Ansichtsoptionen', 'fxwp'); ?></th>
-                        <td>
-                            <p><?php echo esc_html__('Wählen Sie die gewünschte Ansichtsoption aus:', 'fxwp'); ?></p>
-                            <label>
-                                <input type="radio" name="fxwp_view_option"
-                                       value="einfach" <?php checked(get_option('fxwp_view_option', 'einfach'), 'einfach'); ?>>
-                                <?php echo esc_html__('Einfache Ansicht', 'fxwp'); ?>
-                            </label>
-                            <br>
-                            <label>
-                                <input type="radio" name="fxwp_view_option"
-                                       value="erweitert" <?php checked(get_option('fxwp_view_option'), 'erweitert'); ?>>
-                                <?php echo esc_html__('Erweiterte Ansicht', 'fxwp'); ?>
-                            </label>
-                        </td>
+                        <td >Wurde zu Options gemoved.</td>
                     </tr>
                 <?php } ?>
 
@@ -141,17 +127,7 @@ function fxwp_settings_page()
                 <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Faktor&times;WP Lizenz', 'fxwp'); ?></th>
-                        <td>
-                            <p><?php echo esc_html__('Bitte geben Sie Ihren Lizenz Schlüssel ein.', 'fxwp'); ?></p>
-                            <div class="flex">
-                                <input type="text" name="fxwp_api_key" value="<?php echo esc_attr($api_key); ?>"/>
-                                <!-- have a new activation button -->
-                                <?php if ($api_key) { ?>
-                                    <a href="<?php echo esc_url(admin_url('admin.php?page=fxwp-settings&fxwp_api_key_renew=true')); ?>"
-                                       class="button button-secondary"><?php echo esc_html__('Lizenz erneuern', 'fxwp'); ?></a>
-                                <?php } ?>
-                            </div>
-                        </td>
+                        <td>Wurde zu Options gemoved.</td>
                     </tr>
                 <?php } ?>
 
@@ -177,21 +153,7 @@ function fxwp_settings_page()
                 <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Funktionen de-/aktivieren', 'fxwp'); ?></th>
-                        <td>
-                            <ul class="checkbox-list" id="deactivated_features_list">
-                                <?php
-                                foreach ($deactivated_features_description as $option => $label) {
-                                    echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
-                                    if ($deactivated_features[$option]) {
-                                        echo " checked value='true'";
-                                    } else {
-                                        echo " value='false'";
-                                    }
-                                    echo "/><label for='{$option}'>{$label}</label></li>";
-                                } ?>
-                            </ul>
-                            <p style="color: #E88813"><?php echo __('Achtung: Entfernte Haken aktivieren Features nicht direkt wieder! (zb Auto Update muss manuell noch gestaret werden)', 'fxwp'); ?></p>
-                        </td>
+                        <td>Wurde zu Options gemoved.</td>
                     </tr>
                 <?php } ?>
 
@@ -199,20 +161,7 @@ function fxwp_settings_page()
                 <?php if (current_user_can("fxm_admin")) { ?>
                     <tr>
                         <th scope="row"><?php echo esc_html__('Menüseiten ausblenden', 'fxwp'); ?></th>
-                        <td>
-                            <ul class="checkbox-list" id="restricted_features_list">
-                                <?php
-                                foreach ($restricted_features_description as $option => $label) {
-                                    echo "<li><input type='checkbox' name='{$option}' id='{$option}'";
-                                    if ($restricted_features[$option]) {
-                                        echo " checked value='true'";
-                                    } else {
-                                        echo " value='false'";
-                                    }
-                                    echo "/><label for='{$option}'>{$label}</label></li>";
-                                } ?>
-                            </ul>
-                        </td>
+                        <td>Wurde zu Options gemoved.</td>
                     </tr>
                 <?php } ?>
 
@@ -281,32 +230,9 @@ function fxwp_settings_page()
                     </script>
 
                     <tr>
-                        <td colspan="2">
-                            <a
-                                    class="button button-secondary"
-                                    onclick="document.querySelectorAll('.jsondata').forEach((el) => {el.style.display = 'block';})">
-                                P2 Daten anzeigen
-                            </a>
-                            <p class="description"> <?php echo esc_html__('Die Daten anzeigen, die aus P2 geladen werden.'); ?></p>
-                        </td>
+                        <td colspan="2"></td>
                     </tr>
 
-                    <!-- Hinweis für lokale Instanzen -->
-                    <tr>
-                        <td colspan="2">
-                            <p class="description">
-                                <?php echo esc_html__('Hinweis: In lokalen Umgebung kann eine local.php erstellt werden, die direkt ausgeführt wird, z. B. um sich automatisch fxm_admin-Rechte zu geben.', 'fxwp'); ?>
-                            </p>
-                            <!-- und noch der hinweis dass in der options.php fxwp_storage_limit gesetzt und erhöht werden kann um mehr als 20GB speicher auf der webseite zu haben -->
-                            <p class="description">
-                                <?php echo esc_html__('Hinweis: In der options.php kann fxwp_storage_limit gesetzt und erhöht werden, um mehr als 20GB Speicher auf der Webseite zu haben.', 'fxwp'); ?>
-                            </p>
-                            <!-- informiere, dass fxm_customer_update_dashboard eine unterseite für kund:innen anzeigt, die selbst updates machen wollen -->
-                            <p class="description">
-                                <?php echo esc_html__('Hinweis: In der options.php kann fxm_customer_update_dashboard gesetzt werden, um eine Unterseite für Kund:innen anzuzeigen, die selbst Updates machen wollen.', 'fxwp'); ?>
-                            </p>
-                        </td>
-                    </tr>
 
                 <?php } ?>
             </table>
@@ -332,73 +258,6 @@ function fxwp_settings_page()
         ?>
 
         <!-- OPTIONS -->
-        <div class="option-categories">
-            <?php foreach ($fxm_options as $category) { ?>
-                <h3><?php echo esc_html($category['title']); ?></h3>
-                <table class="form-table">
-                    <?php foreach ($category['options'] as $option => $data) { ?>
-                        <tr>
-                            <th scope="row"><?php echo esc_html($data['title']); ?></th>
-                            <td>
-                                <?php
-                                switch ($data['type']) {
-                                    case 'number':
-                                        ?>
-                                        <input type="number" name="<?php echo esc_attr($option); ?>"
-                                               value="<?php echo esc_attr(get_option($option, $data['default'])); ?>"/>
-                                        <?php
-                                        break;
-                                    case 'filesize':
-                                        /* soll unterstützen dass man MB, GB und TB eingeben kann, und das umgerechnet wird. ausserdem soll in dem feld direkt angegeben sein in einem guten format. falls man gar nichts meint sind einfach nur byte gemeint  */
-                                        $value = get_option($option, $data['default']);
-                                        $value = fxm_format_bytes($value);
-                                        ?>
-                                        <input type="text" name="<?php echo esc_attr($option); ?>"
-                                               value="<?php echo esc_attr($value); ?>"/>
-                                        <?php
-                                        break;
-                                    case 'checkbox':
-                                        ?>
-                                        <label>
-                                            <input type="checkbox" name="<?php echo esc_attr($option); ?>"
-                                                   value="true" <?php checked(get_option($option, $data['default']), 'true'); ?>/>
-                                            <?php echo esc_html($data['description']); ?>
-                                        </label>
-                                        <?php
-                                        break;
-                                }
-                                ?>
-                            </td>
-                            <td>
-                                <!-- hier ein script dass die vorherige variable speichert falls sich der wert ändert, hier kurz loading hinschreibt solange bis success true oder false von der serverantwort kommt, und dann gespeichert anzeigt oder fehler message per alert anzeigt. wir schicken es an diese seite, und verarbeiten das in einer funktion ganz oben  -->
-                                <a class="save">Speichern</a>
-                                <script>
-                                    document.querySelector('.save').addEventListener('click', () => {
-                                        // get the value
-                                        let value = document.querySelector('input[name="<?php echo esc_attr($option); ?>"]').value;
-                                        // send the value to the server
-                                        fetch('options.php', {
-                                            method: 'POST',
-                                            body: new FormData({
-                                                '<?php echo esc_attr($option); ?>': value
-                                            })
-                                        }).then((response) => {
-                                            console.log(response);
-                                            if (response.ok) {
-                                                alert('Erfolgreich gespeichert');
-                                            } else {
-                                                alert('Fehler beim Speichern');
-                                            }
-                                        });
-                                    });
-                                </script>
-                            </td>
-                        </tr>
-                    <?php } ?>
-                </table>
-            <?php } ?>
-        </div>
-        <!-- END OPTIONS -->
 
 
         <div class="flex">
