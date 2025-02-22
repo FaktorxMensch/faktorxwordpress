@@ -130,6 +130,7 @@ function fxwp_options_page()
         </aside>
         <main class="fx-content">
             <h1 class="fx-header">{{ currentNav.title }}</h1>
+            <pre><?php echo WP_DEBUG_LOG ? file_get_contents(WP_CONTENT_DIR . '/debug.log') : 'Debug-Log ist deaktiviert'; ?></pre>
             <div class="fx-sections">
                 <div v-for="(section, sIndex) in currentNav.sections" :key="sIndex"
                      :class="['fx-section-density-' + (section.density || 'normal')]"
@@ -200,7 +201,7 @@ function fxwp_options_page()
                             </template>
                             <!-- Alert -->
                             <template v-else-if="option.type === 'alert'">
-                                <div :class="['fx-alert', 'alert-' + (option.color || 'primary')]">
+                                <div :class="['fx-alert', 'alert-' + (option.color || 'secondary')]">
                                     <i v-if="option.alertIcon" :class="option.alertIcon"></i>
                                     {{ option.text }}
                                 </div>
@@ -567,6 +568,7 @@ function fxwp_options_page()
         .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
         .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
         .alert-warning { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; }
+        .alert-default { background: #e2e3e5; border: 1px solid #d6d8db; color: #383d41; }
 
         /* Code Block */
         .fx-code {
