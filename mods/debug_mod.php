@@ -1,4 +1,5 @@
 <?php
+
 // Make debug options description array available for settings page
 global $debugging_options_description;
 $debugging_options_description = array(
