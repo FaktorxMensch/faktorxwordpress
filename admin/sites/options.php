@@ -200,9 +200,9 @@ function fxwp_options_page()
                             </template>
                             <!-- Alert -->
                             <template v-else-if="option.type === 'alert'">
-                                <div :class="['fx-alert', 'alert-' + (option.alertType || 'primary')]">
-                                    <i v-if="option.icon" :class="option.icon"></i>
-                                    {{ option.value }}
+                                <div :class="['fx-alert', 'alert-' + (option.color || 'primary')]">
+                                    <i v-if="option.alertIcon" :class="option.alertIcon"></i>
+                                    {{ option.text }}
                                 </div>
                             </template>
                             <!-- Code (nur lesbar, mit Copy-Icon in der Ecke) -->
@@ -562,23 +562,11 @@ function fxwp_options_page()
             font-size: 14px;
         }
 
-        .alert-primary {
-            background: #cce5ff;
-            border: 1px solid #b8daff;
-            color: #004085;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-
-        .alert-danger {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
+        .alert-primary { background: #cce5ff; border: 1px solid #b8daff; color: #004085; }
+        .alert-info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .alert-warning { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; }
 
         /* Code Block */
         .fx-code {

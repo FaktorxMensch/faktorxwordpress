@@ -56,9 +56,15 @@ $fx_plugin_config = array(
             },
             'sections' => array(
                 'connection_settings' => array(
-                    'title' => 'Connection Settings',
+                    'title' => 'Instanz',
                     'options' => array(
-                        // Zusammengefasste Option (bisher fxwp_storage_limit und fxwp_restricted_test)
+                        'fxwp_local_instance' => array(
+                            'type' => 'alert',
+                            'alertIcon' => 'dashicons dashicons-admin-site',
+                            'title' => 'Lokale Instanz',
+                            'color' => fxwp_is_local_instance() ? 'warning' : 'info',
+                            'text' => fxwp_is_local_instance() ? 'Es handelt sich um eine lokale Instanz.' : 'Es handelt sich um eine online Instanz.',
+                        ),
                         'fxwp_restricted' => array(
                             'type' => 'filesize',
                             'title' => 'Speicherlimit',
@@ -518,4 +524,9 @@ function fxwp_import_restricted_features()
         // vom alten hole
         update_option($key, $alt[$key]);
     }
+}
+
+function fxwp_is_local_instance()
+{
+    return defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV;
 }

@@ -132,15 +132,7 @@ function fxwp_settings_page()
                     <tr>
                         <th scope="row"><?php echo esc_html__('Lokale Umgebung', 'fxwp'); ?></th>
                         <td>
-                            <!-- use FXWP_LOCAL_ENV constant -->
-                            <p><?php
-                                if (defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV) {
-                                    echo esc_html__('Sie befinden sich in einer lokalen Umgebung.', 'fxwp');
-                                } else {
-                                    echo esc_html__('Sie befinden sich nicht in einer lokalen Umgebung.', 'fxwp');
-                                }
-                                ?>
-                            </p>
+                            Wurde zu Options gemoved.
                         </td>
                     </tr>
                 <?php } ?>
