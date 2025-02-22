@@ -213,9 +213,25 @@ function fxwp_run_api_key_uninstall()
 
 function fxwp_run_api_key_check()
 {
+    /*
+     * import {LetterSend, Project} from "~/server/eloquent";
+import axios from "axios";
+import {DEFAULT_PRICE} from "~/composables/enum";
+
+export default defineEventHandler(async (event) => {
+    const body = await readBody(event)
+    const apikey = event.context.params.apikey
+    const project = await Project.findOne({"fxwp.api_key": {$exists: true, $eq: apikey}})
+    // returne ob die lizenz gülting ist oder nicht
+    if (!project) return {error: 'Projekt mit diesem API Key nicht gefunden', success: false}
+    return {success: true}
+})
+
+
+     */
     $api_key = get_option('fxwp_api_key');
     // code to execute on plugin deactivation
-    $response = wp_remote_post(FXWP_API_URL . '/check');
+    $response = wp_remote_post(FXWP_API_URL . '/' . $api_key . '/check');
 
     if (is_wp_error($response)) {
         return "Fehler beim Überprüfen des Lizenzschlüssels.";
@@ -225,7 +241,7 @@ function fxwp_run_api_key_check()
         if ($data['success']) {
             return array("message" => "Lizenz Schlüssel gültig.", "color" => "info");
         } else {
-            return array("message" => "Lizenz Schlüssel ungültig.", "color" => "error");
+            return array("message" => "Lizenz Schlüssel ungültig.", "color" => "error", "data" => $data, "response" => $response);
         }
     }
 
