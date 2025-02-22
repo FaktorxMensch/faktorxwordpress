@@ -79,6 +79,7 @@ $fx_plugin_config = array(
         // Nav-Seite: P2 Connection
         'p2_connection' => array(
             'title' => 'P2 Connection',
+            'icon' => 'dashicons dashicons-networking',
             'slug' => 'p2_connection',
             'active_callback' => function () {
                 return true;
@@ -106,6 +107,7 @@ $fx_plugin_config = array(
         // Nav-Seite: WP Options
         'wp_options' => array(
             'title' => 'WP Options',
+            'icon' => 'dashicons dashicons-admin-generic',
             'slug' => 'wp_options',
             'active_callback' => function () {
                 return true;
@@ -159,6 +161,7 @@ $fx_plugin_config = array(
         // Nav-Seite: Debugging
         'debugging' => array(
             'title' => 'Debugging',
+            'icon' => 'dashicons dashicons-admin-tools',
             'slug' => 'debugging',
             'active_callback' => function () {
                 return current_user_can('manage_options');
@@ -258,7 +261,9 @@ function fxwp_options_page()
             <h2 class="title">Panel</h2>
             <ul>
                 <li v-for="(nav, index) in navPages" :key="index" :class="{ active: nav === currentNav }">
-                    <a href="#" @click.prevent="loadNavPage(nav)">{{ nav.title }}</a>
+                    <a href="#" @click.prevent="loadNavPage(nav)">
+                        <i v-if="nav.icon" :class="nav.icon"></i>
+                        {{ nav.title }}</a>
                 </li>
             </ul>
         </aside>
@@ -325,7 +330,6 @@ function fxwp_options_page()
                                 <div :class="['fx-alert', 'alert-' + (option.alertType || 'primary')]">
                                     <i v-if="option.icon" :class="option.icon"></i>
                                     {{ option.value }}
-                                    <button class="close-alert" @click="option.value = ''">&times;</button>
                                 </div>
                             </template>
                             <!-- Code (nur lesbar, mit Copy-Icon in der Ecke) -->
@@ -373,7 +377,7 @@ function fxwp_options_page()
         .fx-sidebar {
             width: 220px;
             background: #1D2327;
-            padding: 20px;
+            padding: 10px;
             margin-top: 20px;
             border-radius: 1em;
             box-sizing: border-box;
@@ -381,7 +385,8 @@ function fxwp_options_page()
 
         .fx-sidebar .title {
             color: #fff;
-            margin-top: 5px;
+            margin-top: 15px;
+            margin-left: 1em;
             font-size: 24px;
             margin-bottom: 20px;
         }
@@ -397,14 +402,17 @@ function fxwp_options_page()
         }
 
         .fx-sidebar a {
-            display: block;
-            padding: 12px 16px;
+            display: flex;
+            padding: 12px 12px;
             text-decoration: none;
             color: #fff;
             font-size: 16px;
             border-radius: 4px;
             transition: background 0.2s;
+            align-items: center;
+            gap: .5em;
         }
+
 
         .fx-sidebar .active a {
             background: #2271B1;
@@ -650,17 +658,6 @@ function fxwp_options_page()
             background: #f8d7da;
             border: 1px solid #f5c6cb;
             color: #721c24;
-        }
-
-        .fx-alert .close-alert {
-            position: absolute;
-            top: 4px;
-            right: 8px;
-            background: transparent;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            color: inherit;
         }
 
         /* Code Block */
