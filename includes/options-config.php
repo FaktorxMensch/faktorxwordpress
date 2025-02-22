@@ -146,6 +146,23 @@ $fx_plugin_config = array(
                 return true;
             },
             'sections' => array(
+                // section for fxm restrictions (only fxwp_view_option)
+                'fxm_restrictions' => array(
+                    'title' => 'Faktor×Mensch Beschränkungen',
+                    'options' => array(
+                        'fxwp_view_option' => array(
+                            'type' => 'select',
+                            'title' => 'Ansichtsoption',
+                            'description' => 'Wählen Sie die Ansichtsoption für Faktor×Mensch.',
+                            'default' => 'einfach',
+                            'choices' => array(
+                                'einfach' => 'Einfach',
+                                'erweitert' => 'Erweitert',
+                            ),
+                        ),
+                    ),
+                ),
+
                 // Section für deaktivierte Funktionen
                 'deactivated_features' => array(
                     'title' => 'Deaktivierte Funktionen',

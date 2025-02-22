@@ -158,8 +158,8 @@ function fxwp_options_page()
                             <!-- Select -->
                             <template v-else-if="option.type === 'select'">
                                 <select :id="key" v-model="option.value" @change="saveOption(key, option.value)">
-                                    <option v-for="(choice, idx) in option.choices" :key="idx" :value="choice.value">
-                                        {{ choice.label }}
+                                    <option v-for="(choice, idx) in option.choices" :key="idx" :value="idx">
+                                        {{ choice}}
                                     </option>
                                 </select>
                             </template>
@@ -714,6 +714,8 @@ function fxwp_options_page()
                     },
                     // Speichern bei onchange
                     saveOption: function (key, value) {
+                        console.log('saving option' + key + "=" + value)
+
                         let option = this.findOption(key);
                         if (option && option.type === 'filesize') {
                             if (!/^\d+$/.test(value)) {
