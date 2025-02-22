@@ -137,9 +137,7 @@ function fxwp_options_page()
                     <h2 class="fx-section-header">{{ section.title }}</h2>
                     <div class="fx-options">
                         <div v-for="(option, key) in section.options" :key="key" class="fx-option">
-                            <label :for="key" class="fx-option-label"
-                                   v-if="option.title"
-                            >
+                            <label :for="key" class="fx-option-label" v-if="option.title">
                                 <!-- Zeige Dashicon, falls definiert -->
                                 <i v-if="option.icon" :class="option.icon"></i>
                                 {{ option.title }}
@@ -257,20 +255,19 @@ function fxwp_options_page()
 
         /* Sidebar */
         .fx-sidebar {
-            width: 220px;
+            width: 180px; /* schmaler als zuvor */
             background: #1D2327;
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 1em;
+            padding: 8px;
+            margin-top: 10px;
+            border-radius: 0.5em;
             box-sizing: border-box;
         }
 
         .fx-sidebar .title {
             color: #fff;
-            margin-top: 15px;
-            margin-left: 1em;
-            font-size: 24px;
-            margin-bottom: 20px;
+            margin-top: 10px;
+            margin-left: 0.5em;
+            margin-bottom: 15px;
         }
 
         .fx-sidebar ul {
@@ -280,21 +277,20 @@ function fxwp_options_page()
         }
 
         .fx-sidebar li {
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .fx-sidebar a {
             display: flex;
-            padding: 12px 12px;
+            padding: 8px 8px;
             text-decoration: none;
             color: #fff;
-            font-size: 16px;
+            font-size: 14px;
             border-radius: 4px;
             transition: background 0.2s;
             align-items: center;
-            gap: .5em;
+            gap: 0.3em;
         }
-
 
         .fx-sidebar .active a {
             background: #2271B1;
@@ -308,32 +304,32 @@ function fxwp_options_page()
         /* Content */
         .fx-content {
             flex: 1;
-            padding: 20px;
-            margin: 20px;
+            padding: 10px;
+            margin: 10px;
             background: #f7f7f7;
             border: 1px solid #e1e1e1;
             box-sizing: border-box;
-            border-radius: 1em;
+            border-radius: 0.5em;
             overflow-y: auto;
         }
 
         .fx-header {
-            font-size: 28px;
+            font-size: 22px;
             margin-top: 5px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-bottom: 2px solid #e1e1e1;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         .fx-sections {
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 15px;
         }
 
         .fx-section {
             background: #fff;
-            padding: 20px;
+            padding: 15px;
             border-radius: 4px;
             border: 1px solid #e1e1e1;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -346,8 +342,7 @@ function fxwp_options_page()
         }
 
         .fx-section-header {
-            font-size: 22px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             margin-top: 0;
             color: #2d2d2d;
         }
@@ -355,7 +350,7 @@ function fxwp_options_page()
         .fx-options {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
         }
 
         .fx-option {
@@ -365,15 +360,15 @@ function fxwp_options_page()
 
         .fx-option-label {
             font-weight: 500;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .fx-option input[type="text"],
         .fx-option input[type="number"],
         .fx-option select,
         .fx-json-editor {
-            padding: 10px;
-            font-size: 14px;
+            padding: 8px;
+            font-size: 13px;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
@@ -388,13 +383,12 @@ function fxwp_options_page()
         }
 
         .fx-option-description {
-            font-size: 13px;
+            font-size: 12px;
             color: #777;
-            margin-top: 5px;
+            margin-top: 3px;
         }
 
         /* Custom Checkbox */
-        /* Container: Checkbox und Text nebeneinander */
         .custom-checkbox-inline {
             display: inline-flex;
             align-items: center;
@@ -402,20 +396,18 @@ function fxwp_options_page()
             position: relative;
         }
 
-        /* Verstecktes Original-Checkbox-Input */
         .custom-checkbox-inline input[type="checkbox"] {
             opacity: 0;
             position: absolute;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             margin: 0;
             cursor: pointer;
         }
 
-        /* Das visuelle Checkbox-Kästchen */
         .custom-checkbox-box {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             background: #fff;
             border: 2px solid #ccc;
             border-radius: 4px;
@@ -427,26 +419,23 @@ function fxwp_options_page()
             position: relative;
         }
 
-        /* Geänderter Zustand: ausgewählt */
         .custom-checkbox-inline input[type="checkbox"]:checked + .custom-checkbox-box {
             background: #0073aa;
             border-color: #0073aa;
         }
 
-        /* Häkchen im ausgewählten Zustand */
         .custom-checkbox-inline input[type="checkbox"]:checked + .custom-checkbox-box:after {
             content: "\2713";
             position: absolute;
             display: block;
             color: #fff;
-            font-size: 16px;
+            font-size: 12px;
             text-align: center;
             width: 100%;
-            margin-top: 7px;
+            margin-top: 4px;
             height: 100%;
         }
 
-        /* Textbeschreibung neben dem Kästchen */
         .custom-checkbox-label {
             display: inline-flex;
             align-items: center;
@@ -460,17 +449,17 @@ function fxwp_options_page()
         }
 
         .custom-radio-item {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             position: relative;
-            padding-left: 28px;
+            padding-left: 24px;
             cursor: pointer;
         }
 
         .custom-radio-item input[type="radio"] {
             opacity: 0;
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             margin: 0;
             cursor: pointer;
         }
@@ -483,10 +472,10 @@ function fxwp_options_page()
         .custom-radio-item label:before {
             content: "";
             position: absolute;
-            left: -28px;
+            left: -24px;
             top: 0;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border: 2px solid #ccc;
             border-radius: 50%;
             box-sizing: border-box;
@@ -499,15 +488,15 @@ function fxwp_options_page()
 
         /* Action-Button */
         .action-button {
-            padding: 10px 16px;
+            padding: 8px 12px;
             background: #0073aa;
             border: none;
             color: #fff;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             transition: background 0.2s;
-            width: 25em;
+            width: 25em; /* statt fester Breite */
         }
 
         .action-button:hover,
@@ -526,11 +515,11 @@ function fxwp_options_page()
         .snackbar {
             background: #0073aa;
             color: #fff;
-            padding: 14px 24px;
+            padding: 10px 16px;
             border-radius: 4px;
-            font-size: 15px;
+            font-size: 14px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         .snackbar.error {
@@ -555,29 +544,57 @@ function fxwp_options_page()
 
         /* Alert Box */
         .fx-alert {
-            padding: 12px 16px;
+            padding: 8px 12px;
             border-radius: 4px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             position: relative;
-            font-size: 14px;
+            font-size: 13px;
         }
 
-        .alert-primary { background: #cce5ff; border: 1px solid #b8daff; color: #004085; }
-        .alert-info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
-        .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
-        .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
-        .alert-warning { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; }
-        .alert-secondary { border: 1px solid #d6d8dbaa; color: #383d41; }
+        .alert-primary {
+            background: #cce5ff;
+            border: 1px solid #b8daff;
+            color: #004085;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+
+        .alert-secondary {
+            border: 1px solid #d6d8dbaa;
+            color: #383d41;
+        }
 
         /* Code Block */
         .fx-code {
             background: #272822;
             color: #f8f8f2;
-            padding: 10px;
+            padding: 8px;
             border-radius: 4px;
             overflow-x: auto;
             font-family: monospace;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         /* Container für Code-Snippet mit Copy-Icon */
@@ -590,14 +607,14 @@ function fxwp_options_page()
         .fx-code-container .fx-code {
             width: 100%;
             box-sizing: border-box;
-            padding-right: 30px; /* Platz für das Icon */
+            padding-right: 30px;
         }
 
         .fx-code-copy {
             position: absolute;
-            top: 20px;
+            top: 10px;
             right: 8px;
-            font-size: 18px;
+            font-size: 16px;
             color: #fff;
             cursor: pointer;
         }
@@ -612,14 +629,14 @@ function fxwp_options_page()
         .fx-json-editor {
             width: 100%;
             box-sizing: border-box;
-            padding-right: 30px; /* Platz für das Icon */
+            padding-right: 30px;
         }
 
         .fx-json-copy {
             position: absolute;
-            top: 8px;
+            top: 4px;
             right: 8px;
-            font-size: 18px;
+            font-size: 16px;
             color: #0073aa;
             cursor: pointer;
         }
