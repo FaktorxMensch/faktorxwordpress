@@ -481,7 +481,7 @@ function fxwp_options_page()
         }
 
         .snackbar {
-            background: #28a745;
+            background: #0073aa;
             color: #fff;
             padding: 14px 24px;
             border-radius: 4px;
@@ -490,9 +490,11 @@ function fxwp_options_page()
             margin-top: 10px;
         }
 
-        .snackbar.error {
-            background: #dc3545;
-        }
+        .snackbar.error { background: #dc3545; }
+        .snackbar.warning { background: #ffc107; }
+        .snackbar.info { background: #1eb5d8; }
+        .snackbar.success { background: #28a745; }
+        .snackbar.secondary { background: #6c757d; }
 
         /* Alert Box */
         .fx-alert {
