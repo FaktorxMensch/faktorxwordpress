@@ -319,6 +319,7 @@ function fxwp_options_page()
 
         .fx-header {
             font-size: 28px;
+            margin-top: 5px;
             margin-bottom: 20px;
             border-bottom: 2px solid #e1e1e1;
             padding-bottom: 10px;
@@ -339,7 +340,7 @@ function fxwp_options_page()
         }
 
         .fx-section-density-dense {
-            .fx-option-label{
+            .fx-option-label {
                 display: none;
             }
         }
@@ -347,6 +348,7 @@ function fxwp_options_page()
         .fx-section-header {
             font-size: 22px;
             margin-bottom: 15px;
+            margin-top: 0;
             color: #2d2d2d;
         }
 
