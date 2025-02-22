@@ -139,7 +139,7 @@ $fx_plugin_config = array(
             },
             'sections' => array(
                 'update_settings' => array(
-                    'title' => 'Update Einstellungen',
+                    'title' => 'Updates durch Kund:innen',
                     'options' => array(
                         'fxm_customer_update_dashboard' => array(
                             'type' => 'checkbox',
@@ -161,7 +161,31 @@ $fx_plugin_config = array(
                         ),
                     ),
                 ),
+                'auto_update_section' => array(
+                    'title' => 'Automatische & manuelle Aktualisierungen',
+                    'options' => array(
+                        'fxwp_automatic_updates' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Automatische Updates',
+                            'description' => 'Wenn aktiviert, werden alle Plugins und die WordPress-Kernsoftware automatisch aktualisiert.',
+                            'default' => true,
+                        ),
+                        'fxwp_manual_update_core' => array(
+                            'type' => 'action',
+                            'title' => 'WordPress jetzt aktualisieren',
+                            'description' => 'Führt eine manuelle Aktualisierung der WordPress-Kernsoftware durch.',
+                            'callback' => 'fxwp_run_manual_update_core',
+                        ),
+                    ),
+                ),
+
             ),
         ),
     ),
 );
+function fxwp_run_manual_update_core()
+{
+    $update_url = wp_nonce_url(admin_url('update-core.php'), 'upgrade-core');
+    // curl it
+    return array("redirect" => $update_url);
+}

@@ -699,6 +699,14 @@ function fxwp_options_page()
                             action_key: key
                         }, function (response) {
                             if (response.success) {
+                                // if redirect_url is set, redirect to that URL
+                                const message = response?.data?.message;
+                                if (message?.redirect) {
+                                    // in new tab
+                                    window.open(message.redirect, '_blank');
+                                    // return showing snackbar about redirect
+                                    return this.showSnackbar("Aktion ausgeführt, öffne in neuem Tab", 'success');
+                                }
                                 this.showSnackbar(response.data.message, 'success');
                             } else {
                                 this.showSnackbar(response.data.message, 'error');
