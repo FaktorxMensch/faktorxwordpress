@@ -8,10 +8,21 @@ if (!function_exists('is_plugin_active')) {
     include_once(ABSPATH . 'wp-admin/includes/plugin.php');
 }
 
-class FaktorX_WordFence_Mod {
+class FaktorX_WordFence_Mod
+{
+
+    // check for get_option if the mod is deactivaed
+    private bool $is_active = true;
+
     private string $custom_email = FXWP_ERROR_EMAIL;
 
-    public function __construct() {
+    public function __construct()
+    {
+        // remove option
+        $this->is_active = boolval(get_option('fxwp_wordfence_email_mod_active', true));
+        if (!$this->is_active) {
+            return;
+        }
         add_action('plugins_loaded', array($this, 'init'));
     }
 
@@ -32,6 +43,7 @@ class FaktorX_WordFence_Mod {
     {
         return is_plugin_active('wordfence/wordfence.php');
     }
+
     private function modify_wordfence_email(): void
     {
         if (class_exists('wfConfig')) {

@@ -137,7 +137,7 @@ function fxwp_options_page()
                     <h2 class="fx-section-header">{{ section.title }}</h2>
                     <div class="fx-options">
                         <div v-for="(option, key) in section.options" :key="key" class="fx-option">
-                            <label :for="key" class="fx-option-label" v-if="option.title">
+                            <label :for="key" class="fx-option-label" v-if="option.title && option.type !== 'checkbox'">
                                 <!-- Zeige Dashicon, falls definiert -->
                                 <i v-if="option.icon" :class="option.icon"></i>
                                 {{ option.title }}

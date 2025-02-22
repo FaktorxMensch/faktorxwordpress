@@ -215,23 +215,6 @@ $fx_plugin_config = array(
                 return true;
             },
             'sections' => array(
-                // section for fxm restrictions (only fxwp_view_option)
-                'fxm_restrictions' => array(
-                    'title' => 'Faktor×Mensch Beschränkungen',
-                    'options' => array(
-                        'fxwp_view_option' => array(
-                            'type' => 'select',
-                            'title' => 'Ansichtsoption (in Settings)',
-                            'description' => 'Wählen Sie die Ansichtsoption für Faktor×Mensch.',
-                            'default' => 'einfach',
-                            'choices' => array(
-                                'einfach' => 'Einfach',
-                                'erweitert' => 'Erweitert',
-                            ),
-                        ),
-                    ),
-                ),
-
                 // Section für deaktivierte Funktionen
                 'deactivated_features' => array(
                     'title' => 'Deaktivierte Funktionen',
@@ -383,6 +366,18 @@ $fx_plugin_config = array(
                             'title' => 'Eingeschränkte Funktionen importieren',
                             'description' => 'Importiert eingeschränkte Funktionen aus einer älteren Version.',
                             'callback' => 'fxwp_import_restricted_features',
+                        ),
+                    ),
+                ),
+                // Tiefliegende Plugin Beschränkungen
+                'plugin_restrictions' => array(
+                    'title' => 'Plugin Beschränkungen',
+                    'options' => array(
+                        'fxwp_wordfence_email_mod_active' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Wordfence Mod ist aktiviert',
+                            'description' => 'Aktiviert den Wordfence Mod, damit Kundis nichts an Wordfence E-mails mitbekommen bzw. ändern können.',
+                            'default' => true,
                         ),
                     ),
                 ),
