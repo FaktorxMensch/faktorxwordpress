@@ -507,7 +507,7 @@ function fxwp_options_page()
             cursor: pointer;
             font-size: 14px;
             transition: background 0.2s;
-            width: 20em;
+            width: 25em;
         }
 
         .action-button:hover,
