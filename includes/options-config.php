@@ -48,6 +48,7 @@ $fx_plugin_config = array(
     'nav_pages' => array(
         // Seite: P2 Connection – hier werden die bisher getrennten Optionen zusammengefasst.
         'p2_connection' => array(
+            'order' => 20,
             'title' => 'Hosting',
             'icon' => 'dashicons dashicons-networking',
             'slug' => 'p2_connection',
@@ -141,6 +142,7 @@ $fx_plugin_config = array(
         // NEU: Seite zum Anzeigen der P2 JSON-Daten
         'p2_data' => array(
             'title' => 'P2 Integration',
+            'order' => 20,
             'icon' => 'dashicons dashicons-media-code',
             'slug' => 'p2_data',
             'active_callback' => function () {
@@ -209,6 +211,7 @@ $fx_plugin_config = array(
         // Seite für  Restirioncts
         'restrictions' => array(
             'title' => 'Beschränkungen',
+            'order' => 40,
             'icon' => 'dashicons dashicons-shield',
             'slug' => 'restrictions',
             'active_callback' => function () {
@@ -387,6 +390,7 @@ $fx_plugin_config = array(
         // Seite für Updates (durch kunden)
         'p2_updates' => array(
             'title' => 'Updates',
+            'order' => 40,
             'icon' => 'dashicons dashicons-update',
             'slug' => 'p2_updates',
             'active_callback' => function () {
@@ -438,6 +442,12 @@ $fx_plugin_config = array(
         ),
     ),
 );
+
+// order the pages by order
+uasort($fx_plugin_config['nav_pages'], function ($a, $b) {
+    return $a['order'] <=> $b['order'];
+});
+
 function fxwp_run_manual_update_core()
 {
     $update_url = wp_nonce_url(admin_url('update-core.php'), 'upgrade-core');
