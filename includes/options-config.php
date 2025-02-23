@@ -142,7 +142,7 @@ $fxwp_plugin_config = array(
         // NEU: Seite zum Anzeigen der P2 JSON-Daten
         'p2_data' => array(
             'title' => 'P2 Integration',
-            'order' => 20,
+            'order' => 25,
             'icon' => 'dashicons dashicons-vault',
             'slug' => 'p2_data',
             'active_callback' => function () {
@@ -211,7 +211,7 @@ $fxwp_plugin_config = array(
         // Seite für  Restirioncts
         'restrictions' => array(
             'title' => 'Beschränkungen',
-            'order' => 60,
+            'order' => 20,
             'icon' => 'dashicons dashicons-shield',
             'slug' => 'restrictions',
             'active_callback' => function () {
