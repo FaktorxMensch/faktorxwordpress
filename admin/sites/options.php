@@ -61,14 +61,6 @@ function fx_plugin_execute_action()
 add_action('wp_ajax_fx_plugin_execute_action', 'fx_plugin_execute_action');
 
 /**
- * Dummy Callback für eine Action.
- */
-function fxwp_run_test_action_callback()
-{
-    return "Test-Aktion wurde erfolgreich ausgeführt!";
-}
-
-/**
  * Konfigurationsarray für das Panel.
  * Hier werden auch Options (mit fxwp_-Präfix) und Action-Einträge definiert.
  * Zusätzlich wurden Beispieloptionen für die neuen Typen alert, code und json eingefügt.
