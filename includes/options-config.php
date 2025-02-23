@@ -48,9 +48,9 @@ $fxwp_plugin_config = array(
     'nav_pages' => array(
         // Seite: P2 Connection – hier werden die bisher getrennten Optionen zusammengefasst.
         'p2_connection' => array(
-            'order' => 20,
+            'order' => 30,
             'title' => 'Hosting',
-            'icon' => 'dashicons dashicons-networking',
+            'icon' => 'dashicons dashicons-wordpress-alt',
             'slug' => 'p2_connection',
             'active_callback' => function () {
                 return true;
@@ -82,7 +82,7 @@ $fxwp_plugin_config = array(
                         // ein hinweis dass diese option gesetzt werden mmüssen und aber erst änderungen übernommen werden wenn man auf in wp-config schreiben klickt
                         'fxwp_debugging_hint' => array(
                             'type' => 'alert',
-                            'title' => 'Debugging Optionen',
+                            'title' => 'De  bugging Optionen',
                             'alertIcon' => 'dashicons dashicons-warning',
                             'color' => 'primary',
                             'text' => 'Bitte beachten Sie, dass die Debugging Optionen erst nach dem Klick auf "In wp-config schreiben" aktiviert werden.',
@@ -143,7 +143,7 @@ $fxwp_plugin_config = array(
         'p2_data' => array(
             'title' => 'P2 Integration',
             'order' => 20,
-            'icon' => 'dashicons dashicons-media-code',
+            'icon' => 'dashicons dashicons-vault',
             'slug' => 'p2_data',
             'active_callback' => function () {
                 return true;
@@ -211,7 +211,7 @@ $fxwp_plugin_config = array(
         // Seite für  Restirioncts
         'restrictions' => array(
             'title' => 'Beschränkungen',
-            'order' => 40,
+            'order' => 60,
             'icon' => 'dashicons dashicons-shield',
             'slug' => 'restrictions',
             'active_callback' => function () {
