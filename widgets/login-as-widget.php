@@ -41,7 +41,7 @@ function fxwp_login_as_action()
     // Check the user's permissions.
     if (!current_user_can('fxm_admin')) {
         wp_die('Access denied');
-    }""
+    }
 
     // verify the nonce
     if (!isset($_POST['fxwp_login_as_nonce']) || !wp_verify_nonce($_POST['fxwp_login_as_nonce'], 'fxwp_login_as_action')) {

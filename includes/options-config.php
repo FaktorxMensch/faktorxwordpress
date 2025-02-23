@@ -43,8 +43,8 @@
  *
  */
 
-global $fx_plugin_config;
-$fx_plugin_config = array(
+global $fxwp_plugin_config;
+$fxwp_plugin_config = array(
     'nav_pages' => array(
         // Seite: P2 Connection – hier werden die bisher getrennten Optionen zusammengefasst.
         'p2_connection' => array(
@@ -443,10 +443,20 @@ $fx_plugin_config = array(
     ),
 );
 
-// order the pages by order
-uasort($fx_plugin_config['nav_pages'], function ($a, $b) {
-    return $a['order'] <=> $b['order'];
-});
+
+function fxwp_get_options_config()
+{
+    global $fxwp_plugin_config;
+
+    // Allow other plugins to add/modify the configuration.
+    $fxwp_plugin_config = apply_filters('fxwp_options_config', $fxwp_plugin_config);
+
+    // order the pages by order
+    uasort($fxwp_plugin_config['nav_pages'], function ($a, $b) {
+        return $a['order'] <=> $b['order'];
+    });
+    return $fxwp_plugin_config;
+}
 
 function fxwp_run_manual_update_core()
 {
@@ -508,7 +518,7 @@ function fxwp_get_restr()
 {
     // return like an array of fxwp_restr_posts, ... (only includes elements that are set tot true
     // we need to gather all get_options (in the above config array we see whichc there are), get tem live from there
-    global $fx_plugin_config;
+    $fx_plugin_config = fxwp_get_options_config();
     $options = $fx_plugin_config['nav_pages']['restrictions']['sections']['restricted_features']['options'];
 
     if (!$options) return;
@@ -525,7 +535,7 @@ function fxwp_get_restr()
 // for the other section as well
 function fxwp_get_deact()
 {
-    global $fx_plugin_config;
+    $fx_plugin_config = fxwp_get_options_config();
     $options = $fx_plugin_config['nav_pages']['restrictions']['sections']['deactivated_features']['options'];
 
     if (!$options) return;
@@ -542,7 +552,7 @@ function fxwp_get_deact()
 // fxwp_debugging
 function fxwp_get_debugging()
 {
-    global $fx_plugin_config;
+    $fx_plugin_config = fxwp_get_options_config();
     $options = $fx_plugin_config['nav_pages']['p2_connection']['sections']['debugging']['options'];
 
     if (!$options) return;

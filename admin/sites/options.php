@@ -41,7 +41,7 @@ function fx_plugin_execute_action()
         wp_send_json_error(array('message' => 'Nicht berechtigt'));
     }
     $action_key = sanitize_text_field($_POST['action_key']);
-    global $fx_plugin_config;
+    $fx_plugin_config = fxwp_get_options_config();
     $callback = '';
     foreach ($fx_plugin_config['nav_pages'] as $page) {
         foreach ($page['sections'] as $section) {
@@ -76,7 +76,7 @@ function fxwp_run_test_action_callback()
 
 // options config in current dir under ../../includes
 require_once dirname(__FILE__) . '/../../includes/options-config.php';
-global $fx_plugin_config;
+$fx_plugin_config = fxwp_get_options_config();
 
 // Vor dem Localize – für jede Option den gespeicherten Wert aus der DB laden,
 // sofern vorhanden. Falls der Schlüssel "default" nicht gesetzt ist, wird er initialisiert.
@@ -101,7 +101,7 @@ unset($page, $section, $option);
  */
 function fx_plugin_localize_config()
 {
-    global $fx_plugin_config;
+    $fx_plugin_config = fxwp_get_options_config();
     ?>
     <script>
         var fxPluginConfig = <?php echo json_encode($fx_plugin_config, JSON_UNESCAPED_SLASHES); ?>;
