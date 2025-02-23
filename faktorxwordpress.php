@@ -129,13 +129,14 @@ function fxwp_plugin_menu()
 
     // Panel
     if (current_user_can('fxm_admin')) {
+        // add submenu page and add classes to it and hide by deafult
         add_submenu_page(
             'fxwp', // Parent slug
             'Options', // Page title
             'Options', // Menu title
             'administrator', // Capability
             'fxwp-options', // Menu slug
-            'fxwp_options_page' // Function
+            'fxwp_options_page', // Function
         );
     }
 

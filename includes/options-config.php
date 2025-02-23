@@ -49,7 +49,7 @@ $fxwp_plugin_config = array(
         // Seite: P2 Connection – hier werden die bisher getrennten Optionen zusammengefasst.
         'p2_connection' => array(
             'order' => 30,
-            'title' => 'Hosting',
+            'title' => 'WP Hosting',
             'icon' => 'dashicons dashicons-wordpress-alt',
             'slug' => 'p2_connection',
             'active_callback' => function () {
@@ -389,7 +389,7 @@ $fxwp_plugin_config = array(
 
         // Seite für Updates (durch kunden)
         'p2_updates' => array(
-            'title' => 'Updates',
+            'title' => 'Kundi-Updates',
             'order' => 40,
             'icon' => 'dashicons dashicons-update',
             'slug' => 'p2_updates',
@@ -727,3 +727,36 @@ function fxwp_is_local_instance()
 {
     return defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV;
 }
+/*
+// add each options page acutally as submenu item to the settings menu
+like here
+    if (current_user_can('fxm_admin')) {
+        add_submenu_page(
+            'fxwp', // Parent slug
+            'Options', // Page title
+            'Options', // Menu title
+            'administrator', // Capability
+            'fxwp-options', // Menu slug
+            'fxwp_options_page' // Function
+        );
+    }
+*/
+function fxwp_add_options_pages()
+{
+    $fx_plugin_config = fxwp_get_options_config();
+    foreach ($fx_plugin_config['nav_pages'] as $key => $page) {
+        add_submenu_page(
+            'fxwp', // Parent slug
+            $page['title'], // Page title
+            $page['title'], // Menu title
+            'administrator', // Capability
+        // acutally hard link to /wp-admin/admin.php?page=fxwp-options&nav=p2_data (with the nav being the key of the page)
+            'admin.php?page=fxwp-options&nav=' . $key, // Menu slug
+            'fxwp_options_page' // Function
+        );
+    }
+    // hide a submenu item that matches href=admin.php?page=fxwp-options via css
+    echo '<script>document.addEventListener("DOMContentLoaded", function() {document.querySelector("a[href=\'admin.php?page=fxwp-options\']").style.display = "none";});</script>';
+}
+add_action('admin_menu', 'fxwp_add_options_pages');
+

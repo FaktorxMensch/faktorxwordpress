@@ -740,6 +740,9 @@ function fxwp_options_page()
                         this.currentNav = nav;
                         var newUrl = updateQueryStringParameter(window.location.href, 'nav', nav.slug);
                         window.history.pushState({path: newUrl}, '', newUrl);
+                        // also fake the .wp-submenu wordpress nav to look active (match via href="admin.php?page=fxwp-options&nav=p2_data")
+                        $('.wp-submenu li').removeClass('current');
+                        $('.wp-submenu li a[href="admin.php?page=fxwp-options&nav=' + nav.slug + '"]').parent().addClass('current');
                     },
                     // Speichern bei onchange
                     saveOption: function (key, value) {
