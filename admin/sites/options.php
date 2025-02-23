@@ -89,6 +89,36 @@ foreach ($fx_plugin_config['nav_pages'] as $page_key => &$page) {
 unset($page, $section, $option);
 
 /**
+ * AJAX-Handler zum Abrufen der aktuellen Optionen.
+ */
+function fx_plugin_get_options() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( array( 'message' => 'Nicht berechtigt' ) );
+    }
+
+    // Laden Sie die Basis-Konfiguration
+    $fx_plugin_config = fxwp_get_options_config();
+
+    // Überschreiben Sie die Standardwerte mit den in der Datenbank gespeicherten Werten
+    foreach ( $fx_plugin_config['nav_pages'] as &$page ) {
+        foreach ( $page['sections'] as &$section ) {
+            foreach ( $section['options'] as $option_key => &$option ) {
+                $stored = get_option( $option_key, '___not_set___' );
+                if ( $stored !== '___not_set___' ) {
+                    $option['default'] = $stored;
+                }
+                $option['value'] = $option['default'];
+            }
+        }
+    }
+    unset( $page, $section, $option );
+
+    wp_send_json_success( $fx_plugin_config );
+}
+add_action( 'wp_ajax_fx_plugin_get_options', 'fx_plugin_get_options' );
+
+
+/**
  * Gibt die Konfiguration als JavaScript-Objekt im Head aus.
  */
 function fx_plugin_localize_config()
@@ -753,29 +783,50 @@ function fxwp_options_page()
                         }
                         return found;
                     },
+                    refreshOptions: function () {
+                        $.post(ajaxurl, {
+                            action: 'fx_plugin_get_options'
+                        }, function (response) {
+                            if (response.success) {
+                                // Aktualisieren Sie das Konfigurationsobjekt in Vue
+                                this.navPages = response.data.nav_pages ? Object.values(response.data.nav_pages) : [];
+
+                                // Optional: Falls Sie die aktuell aktive Navigation beibehalten wollen:
+                                const currentSlug = this.currentNav.slug;
+                                const found = this.navPages.find(function (page) {
+                                    return page.slug === currentSlug;
+                                });
+                                if (found) {
+                                    this.currentNav = found;
+                                } else {
+                                    this.currentNav = this.navPages[0];
+                                }
+
+                                this.showSnackbar("Optionen aktualisiert", "success");
+                            } else {
+                                this.showSnackbar(response.data.message, "error");
+                            }
+                        }.bind(this));
+                    },
                     executeAction: function (key) {
-                        this.$set(this.loadingActions, key, true); // Button deaktivieren
+                        this.$set(this.loadingActions, key, true);
                         $.post(ajaxurl, {
                             action: 'fx_plugin_execute_action',
                             action_key: key
                         }, function (response) {
-                            this.$set(this.loadingActions, key, false); // Button reaktivieren
-
-                            const data = response?.data;
-                            const message = data?.message;
-                            const color = data?.color;
+                            this.$set(this.loadingActions, key, false);
 
                             if (response.success) {
-                                // if redirect_url is set, redirect to that URL
-                                if (data?.redirect) {
-                                    // in new tab
-                                    window.open(data.redirect, '_blank');
-                                    // return showing snackbar about redirect
-                                    return this.showSnackbar("Aktion ausgeführt, öffne in neuem Tab", 'success');
+                                if (response.data?.redirect) {
+                                    window.open(response.data.redirect, '_blank');
+                                    this.showSnackbar("Aktion ausgeführt, öffne in neuem Tab", 'success');
+                                } else {
+                                    this.showSnackbar(response.data.message, 'success');
+                                    // Nach erfolgreicher Aktion die Optionen neu laden
+                                    this.refreshOptions();
                                 }
-                                this.showSnackbar(message, color || 'success');
                             } else {
-                                this.showSnackbar(message, 'error');
+                                this.showSnackbar(response.data.message, 'error');
                             }
                         }.bind(this));
                     },
