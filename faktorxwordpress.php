@@ -62,7 +62,7 @@ function fxwp_activation()
             'api_key' => $api_key,
             'plugin_url' => plugin_dir_url(__FILE__), // provide plugin url to API
         ),
-	    //'sslverify' => false,
+        //'sslverify' => false,
     ));
 
     $response = json_decode($response['body'], true);
@@ -81,19 +81,19 @@ function fxwp_activation()
 
     fxwp_create_email_log_table();
 
-	if (!wp_next_scheduled('fxm_hourly_event')) {
-		wp_schedule_event(time(), 'hourly', 'fxm_hourly_event');
-	}
+    if (!wp_next_scheduled('fxm_hourly_event')) {
+        wp_schedule_event(time(), 'hourly', 'fxm_hourly_event');
+    }
 
 }
 
 
 function fxwp_deactivation()
 {
-	if(!current_user_can('fxm_admin')) {
-		error_log("fxwp_deactivation: no fxm_admin");
-		return;
-	}
+    if (!current_user_can('fxm_admin')) {
+        error_log("fxwp_deactivation: no fxm_admin");
+        return;
+    }
     $api_key = get_option('fxwp_api_key');
     // code to execute on plugin deactivation
     $response = wp_remote_post(FXWP_API_URL . '/activate', array(
@@ -111,7 +111,7 @@ function fxwp_plugin_menu()
 {
     if (get_option('fxwp_api_key') === '')
         return;
-	// If we have deactivated the customer settings, we don't want to show the menu unless the user is fxm_admin
+    // If we have deactivated the customer settings, we don't want to show the menu unless the user is fxm_admin
     if (fxwp_check_deactivated_features('fxwp_deact_customer_settings') && !current_user_can('fxm_admin')) {
         return;
     }
@@ -121,11 +121,23 @@ function fxwp_plugin_menu()
         'Faktor&hairsp;&times;WP', // Menu title
         'edit_theme_options', // Capability
         'fxwp', // Menu slug
-        'fxwp_updates_page', // Function
+        'fxwp-options',
         'dashicons-shield', // Icon
         6 // Position
     );
 
+
+    // Panel
+    if (current_user_can('fxm_admin')) {
+        add_submenu_page(
+            'fxwp', // Parent slug
+            'Options', // Page title
+            'Options', // Menu title
+            'administrator', // Capability
+            'fxwp-options', // Menu slug
+            'fxwp_options_page' // Function
+        );
+    }
 
 //    // Custom Fields
 //    add_submenu_page(
@@ -181,15 +193,6 @@ function fxwp_plugin_menu()
         'fxwp_plugin_list_installer_page' // Function
     );
 
-    // Panel
-    add_submenu_page(
-        'fxwp', // Parent slug
-        'Options', // Page title
-        'Options', // Menu title
-        'administrator', // Capability
-        'fxwp-options', // Menu slug
-        'fxwp_options_page' // Function
-    );
 
     remove_submenu_page('fxwp', 'fxwp');
 
@@ -250,18 +253,18 @@ function fxwp_register_styles()
 {
     wp_register_style('fxwp', plugin_dir_url(__FILE__) . 'admin/css/fxwp.css', array(), '1.0.0', 'all');
     wp_enqueue_style('fxwp');
-    wp_admin_css_color( 'fxm1', __( 'FxM' ),
+    wp_admin_css_color('fxm1', __('FxM'),
         plugin_dir_url(__FILE__) . 'admin/css/admin-scheme.css',
-        array( '#1d2327', '#fff', '#f59700' , '#0a46bd')
+        array('#1d2327', '#fff', '#f59700', '#0a46bd')
     );
 }
 
 /* adminbar frontend */
 if (!function_exists('fxm_adminbar')) {
-	function fxm_adminbar()
-	{
-		wp_enqueue_style('adminbar.css', plugins_url('admin/css/adminbar.css', __FILE__), false, '1.0.0', 'all');
-	}
+    function fxm_adminbar()
+    {
+        wp_enqueue_style('adminbar.css', plugins_url('admin/css/adminbar.css', __FILE__), false, '1.0.0', 'all');
+    }
 }
 add_action('wp_enqueue_scripts', "fxm_adminbar");
 

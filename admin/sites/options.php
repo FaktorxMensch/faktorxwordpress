@@ -117,6 +117,7 @@ add_action('admin_head', 'fx_plugin_localize_config');
 function fxwp_options_page()
 {
     ?>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <div id="fx-plugin-panel">
         <aside class="fx-sidebar">
             <h2 class="title">Optionen</h2>
@@ -643,7 +644,6 @@ function fxwp_options_page()
     </style>
 
     <!-- Einbinden von Vue.js und jQuery via CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
