@@ -91,31 +91,33 @@ unset($page, $section, $option);
 /**
  * AJAX-Handler zum Abrufen der aktuellen Optionen.
  */
-function fx_plugin_get_options() {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        wp_send_json_error( array( 'message' => 'Nicht berechtigt' ) );
+function fx_plugin_get_options()
+{
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => 'Nicht berechtigt'));
     }
 
     // Laden Sie die Basis-Konfiguration
     $fx_plugin_config = fxwp_get_options_config();
 
     // Überschreiben Sie die Standardwerte mit den in der Datenbank gespeicherten Werten
-    foreach ( $fx_plugin_config['nav_pages'] as &$page ) {
-        foreach ( $page['sections'] as &$section ) {
-            foreach ( $section['options'] as $option_key => &$option ) {
-                $stored = get_option( $option_key, '___not_set___' );
-                if ( $stored !== '___not_set___' ) {
+    foreach ($fx_plugin_config['nav_pages'] as &$page) {
+        foreach ($page['sections'] as &$section) {
+            foreach ($section['options'] as $option_key => &$option) {
+                $stored = get_option($option_key, '___not_set___');
+                if ($stored !== '___not_set___') {
                     $option['default'] = $stored;
                 }
                 $option['value'] = $option['default'];
             }
         }
     }
-    unset( $page, $section, $option );
+    unset($page, $section, $option);
 
-    wp_send_json_success( $fx_plugin_config );
+    wp_send_json_success($fx_plugin_config);
 }
-add_action( 'wp_ajax_fx_plugin_get_options', 'fx_plugin_get_options' );
+
+add_action('wp_ajax_fx_plugin_get_options', 'fx_plugin_get_options');
 
 
 /**
@@ -141,22 +143,12 @@ function fxwp_options_page()
     ?>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <div id="fx-plugin-panel">
-        <aside class="fx-sidebar">
-            <h2 class="title">Optionen</h2>
-            <ul>
-                <li v-for="(nav, index) in navPages" :key="index" :class="{ active: nav === currentNav }">
-                    <a href="#" @click.prevent="loadNavPage(nav)">
-                        <i v-if="nav.icon" :class="nav.icon"></i>
-                        {{ nav.title }}</a>
-                </li>
-            </ul>
-        </aside>
-        <main class="fx-content">
+        <main class="wrap fx-content">
             <h1 class="fx-header">{{ currentNav.title }}</h1>
             <div class="fx-sections">
                 <div v-for="(section, sIndex) in currentNav.sections" :key="sIndex"
                      :class="['fx-section-density-' + (section.density || 'normal')]"
-                     class="fx-section">
+                     class="postbox fx-section">
                     <h2 class="fx-section-header">{{ section.title }}</h2>
                     <div class="fx-options">
                         <div v-for="(option, key) in section.options" :key="key" class="fx-option">
@@ -271,91 +263,25 @@ function fxwp_options_page()
         /* Grundlayout */
         #fx-plugin-panel {
             display: flex;
-            height: 100%;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             color: #333;
-        }
-
-        /* Sidebar */
-        .fx-sidebar {
-            width: 180px; /* schmaler als zuvor */
-            background: #1D2327;
-            padding: 8px;
-            margin-top: 10px;
-            border-radius: 0.5em;
-            box-sizing: border-box;
-        }
-
-        .fx-sidebar .title {
-            color: #fff;
-            margin-top: 10px;
-            margin-left: 0.5em;
-            margin-bottom: 15px;
-        }
-
-        .fx-sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .fx-sidebar li {
-            margin-bottom: 8px;
-        }
-
-        .fx-sidebar a {
-            display: flex;
-            padding: 8px 8px;
-            text-decoration: none;
-            color: #fff;
-            font-size: 14px;
-            border-radius: 4px;
-            transition: background 0.2s;
-            align-items: center;
-            gap: 0.3em;
-        }
-
-        .fx-sidebar .active a {
-            background: #2271B1;
-        }
-
-        .fx-sidebar li:not(.active):hover a,
-        .fx-sidebar li:not(.active):focus a {
-            color: #72AEE6;
         }
 
         /* Content */
         .fx-content {
             flex: 1;
-            padding: 10px;
-            margin: 10px;
-            background: #f7f7f7;
-            border: 1px solid #e1e1e1;
             box-sizing: border-box;
-            border-radius: 0.5em;
-            overflow-y: auto;
-        }
-
-        .fx-header {
-            font-size: 22px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #e1e1e1;
-            padding-bottom: 8px;
         }
 
         .fx-sections {
             display: flex;
             flex-direction: column;
+            margin-top: 15px;
             gap: 15px;
         }
 
         .fx-section {
-            background: #fff;
             padding: 15px;
-            border-radius: 4px;
-            border: 1px solid #e1e1e1;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .fx-section-density-dense {
@@ -411,6 +337,10 @@ function fxwp_options_page()
             margin-top: 3px;
         }
 
+        .postbox {
+            padding-bottom: 5px;
+        }
+
         /* Custom Checkbox */
         .custom-checkbox-inline {
             display: inline-flex;
@@ -429,8 +359,8 @@ function fxwp_options_page()
         }
 
         .custom-checkbox-box {
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             background: #fff;
             border: 2px solid #ccc;
             border-radius: 4px;
@@ -709,153 +639,173 @@ function fxwp_options_page()
             return (bytes / 1073741824).toFixed(2) + " GB";
         }
 
-        jQuery(document).ready(function ($) {
-            new Vue({
-                el: '#fx-plugin-panel',
-                data: {
-                    navPages: fxPluginConfig.nav_pages ? Object.values(fxPluginConfig.nav_pages) : [],
-                    currentNav: {title: '', sections: []},
-                    loadingActions: {},
-                    snackbars: [] // Für mehrere Snackbar-Meldungen
-                },
-                created: function () {
-                    this.refreshOptions();
-                    var params = new URLSearchParams(window.location.search);
-                    var navSlug = params.get('nav');
-                    if (navSlug) {
-                        var found = this.navPages.find(function (page) {
-                            return page.slug === navSlug;
-                        });
-                        if (found) {
-                            this.loadNavPage(found);
-                        } else {
-                            this.loadNavPage(this.navPages[0]);
-                        }
+        window.vueFxPanel = new Vue({
+            el: '#fx-plugin-panel',
+            data: {
+                navPages: fxPluginConfig.nav_pages ? Object.values(fxPluginConfig.nav_pages) : [],
+                currentNav: {title: '', sections: []},
+                loadingActions: {},
+                snackbars: [] // Für mehrere Snackbar-Meldungen
+            },
+            created: function () {
+                this.refreshOptions();
+                var params = new URLSearchParams(window.location.search);
+                var navSlug = params.get('nav');
+                if (navSlug) {
+                    var found = this.navPages.find(function (page) {
+                        return page.slug === navSlug;
+                    });
+                    if (found) {
+                        this.loadNavPage(found);
                     } else {
                         this.loadNavPage(this.navPages[0]);
                     }
-                },
-                methods: {
-                    loadNavPage: function (nav) {
-                        this.currentNav = nav;
-                        var newUrl = updateQueryStringParameter(window.location.href, 'nav', nav.slug);
-                        window.history.pushState({path: newUrl}, '', newUrl);
-                        // also fake the .wp-submenu wordpress nav to look active (match via href="admin.php?page=fxwp-options&nav=p2_data")
-                        $('.wp-submenu li').removeClass('current');
-                        $('.wp-submenu li a[href="admin.php?page=fxwp-options&nav=' + nav.slug + '"]').parent().addClass('current');
-                    },
-                    // Speichern bei onchange
-                    saveOption: function (key, value) {
-                        console.log('saving option' + key + "=" + value)
-
-                        let option = this.findOption(key);
-                        if (option && option.type === 'filesize') {
-                            if (!/^\d+$/.test(value)) {
-                                value = parseFilesize(value);
-                            }
-                        }
-                        $.post(ajaxurl, {
-                            action: 'fx_plugin_save_option',
-                            option_key: key,
-                            option_value: value
-                        }, function (response) {
-                            if (response.success) {
-                                this.showSnackbar(response.data.message, 'success');
-                            } else {
-                                this.showSnackbar(response.data.message, 'error');
-                            }
-                        }.bind(this));
-                    },
-                    // Für Filesize: Umrechnung und speichern
-                    updateFilesize: function (key, value) {
-                        var newBytes = parseFilesize(value);
-                        let option = this.findOption(key);
-                        if (option) {
-                            option.value = newBytes;
-                            this.saveOption(key, newBytes);
-                        }
-                    },
-                    findOption: function (key) {
-                        let found = null;
-                        if (this.currentNav.sections) {
-                            Object.keys(this.currentNav.sections).forEach(function (sectionKey) {
-                                let section = this.currentNav.sections[sectionKey];
-                                if (section.options && section.options[key]) {
-                                    found = section.options[key];
-                                }
-                            }.bind(this));
-                        }
-                        return found;
-                    },
-                    refreshOptions: function () {
-                        $.post(ajaxurl, {
-                            action: 'fx_plugin_get_options'
-                        }, function (response) {
-                            if (response.success) {
-                                // Aktualisieren Sie das Konfigurationsobjekt in Vue
-                                this.navPages = response.data.nav_pages ? Object.values(response.data.nav_pages) : [];
-
-                                // Optional: Falls Sie die aktuell aktive Navigation beibehalten wollen:
-                                const currentSlug = this.currentNav.slug;
-                                const found = this.navPages.find(function (page) {
-                                    return page.slug === currentSlug;
-                                });
-                                if (found) {
-                                    this.currentNav = found;
-                                } else {
-                                    this.currentNav = this.navPages[0];
-                                }
-
-                                this.showSnackbar("Optionen aktualisiert", "success");
-                            } else {
-                                this.showSnackbar(response.data.message, "error");
-                            }
-                        }.bind(this));
-                    },
-                    executeAction: function (key) {
-                        this.$set(this.loadingActions, key, true);
-                        $.post(ajaxurl, {
-                            action: 'fx_plugin_execute_action',
-                            action_key: key
-                        }, function (response) {
-                            this.$set(this.loadingActions, key, false);
-
-                            if (response.success) {
-                                if (response.data?.redirect) {
-                                    window.open(response.data.redirect, '_blank');
-                                    this.showSnackbar("Aktion ausgeführt, öffne in neuem Tab", 'success');
-                                } else {
-                                    this.showSnackbar(response.data.message, 'success');
-                                    // Nach erfolgreicher Aktion die Optionen neu laden
-                                    this.refreshOptions();
-                                }
-                            } else {
-                                this.showSnackbar(response.data.message, 'error');
-                            }
-                        }.bind(this));
-                    },
-                    showSnackbar: function (message, type) {
-                        this.snackbars.push({message: message, type: type});
-                        setTimeout(function () {
-                            this.snackbars.shift();
-                        }.bind(this), 3000);
-                    },
-                    // Wrapper für die Formatierung von Filesize
-                    formatFilesize: function (bytes) {
-                        return formatFilesize(bytes);
-                    },
-                    copyToClipboard: function (text) {
-                        var textarea = document.createElement("textarea");
-                        textarea.value = text;
-                        document.body.appendChild(textarea);
-                        textarea.select();
-                        document.execCommand("copy");
-                        document.body.removeChild(textarea);
-                        this.showSnackbar("Inhalt kopiert", "success");
-                    }
+                } else {
+                    this.loadNavPage(this.navPages[0]);
                 }
-            });
+            },
+            methods: {
+                loadNavPage: function (nav) {
+                    this.currentNav = nav;
+                    var newUrl = updateQueryStringParameter(window.location.href, 'nav', nav.slug);
+                    window.history.pushState({ path: newUrl }, '', newUrl);
+                    // Update auch das WP-Submenu (aktives Element hervorheben)
+                    jQuery('.wp-submenu li').removeClass('current');
+                    jQuery('.wp-submenu li a[href="admin.php?page=fxwp-options&nav=' + nav.slug + '"]')
+                        .parent().addClass('current');
+                },
+                // Speichern bei onchange
+                saveOption: function (key, value) {
+                    console.log('saving option' + key + "=" + value)
+
+                    let option = this.findOption(key);
+                    if (option && option.type === 'filesize') {
+                        if (!/^\d+$/.test(value)) {
+                            value = parseFilesize(value);
+                        }
+                    }
+                    $.post(ajaxurl, {
+                        action: 'fx_plugin_save_option',
+                        option_key: key,
+                        option_value: value
+                    }, function (response) {
+                        if (response.success) {
+                            this.showSnackbar(response.data.message, 'success');
+                        } else {
+                            this.showSnackbar(response.data.message, 'error');
+                        }
+                    }.bind(this));
+                },
+                // Für Filesize: Umrechnung und speichern
+                updateFilesize: function (key, value) {
+                    var newBytes = parseFilesize(value);
+                    let option = this.findOption(key);
+                    if (option) {
+                        option.value = newBytes;
+                        this.saveOption(key, newBytes);
+                    }
+                },
+                findOption: function (key) {
+                    let found = null;
+                    if (this.currentNav.sections) {
+                        Object.keys(this.currentNav.sections).forEach(function (sectionKey) {
+                            let section = this.currentNav.sections[sectionKey];
+                            if (section.options && section.options[key]) {
+                                found = section.options[key];
+                            }
+                        }.bind(this));
+                    }
+                    return found;
+                },
+                refreshOptions: function () {
+                    $.post(ajaxurl, {
+                        action: 'fx_plugin_get_options'
+                    }, function (response) {
+                        if (response.success) {
+                            // Aktualisieren Sie das Konfigurationsobjekt in Vue
+                            this.navPages = response.data.nav_pages ? Object.values(response.data.nav_pages) : [];
+
+                            // Optional: Falls Sie die aktuell aktive Navigation beibehalten wollen:
+                            const currentSlug = this.currentNav.slug;
+                            const found = this.navPages.find(function (page) {
+                                return page.slug === currentSlug;
+                            });
+                            if (found) {
+                                this.currentNav = found;
+                            } else {
+                                this.currentNav = this.navPages[0];
+                            }
+
+                            this.showSnackbar("Optionen aktualisiert", "success");
+                        } else {
+                            this.showSnackbar(response.data.message, "error");
+                        }
+                    }.bind(this));
+                },
+                executeAction: function (key) {
+                    this.$set(this.loadingActions, key, true);
+                    $.post(ajaxurl, {
+                        action: 'fx_plugin_execute_action',
+                        action_key: key
+                    }, function (response) {
+                        this.$set(this.loadingActions, key, false);
+
+                        if (response.success) {
+                            if (response.data?.redirect) {
+                                window.open(response.data.redirect, '_blank');
+                                this.showSnackbar("Aktion ausgeführt, öffne in neuem Tab", 'success');
+                            } else {
+                                this.showSnackbar(response.data.message, 'success');
+                                // Nach erfolgreicher Aktion die Optionen neu laden
+                                this.refreshOptions();
+                            }
+                        } else {
+                            this.showSnackbar(response.data.message, 'error');
+                        }
+                    }.bind(this));
+                },
+                showSnackbar: function (message, type) {
+                    this.snackbars.push({message: message, type: type});
+                    setTimeout(function () {
+                        this.snackbars.shift();
+                    }.bind(this), 3000);
+                },
+                // Wrapper für die Formatierung von Filesize
+                formatFilesize: function (bytes) {
+                    return formatFilesize(bytes);
+                },
+                copyToClipboard: function (text) {
+                    var textarea = document.createElement("textarea");
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(textarea);
+                    this.showSnackbar("Inhalt kopiert", "success");
+                }
+            }
         });
+
+        jQuery(document).on('click', '.wp-submenu a[href*="admin.php?page=fxwp-options"]', function(e) {
+            e.preventDefault(); // Verhindert den Seitenreload
+            // Extrahiere den 'nav'-Parameter aus der URL
+            var url = new URL(jQuery(this).attr('href'), window.location.origin);
+            var navSlug = url.searchParams.get('nav');
+
+            if (navSlug && window.vueFxPanel) {
+                // Finde in den Vue-Daten die entsprechende Navigation-Seite
+                var navPage = window.vueFxPanel.navPages.find(function(page) {
+                    return page.slug === navSlug;
+                });
+                if (navPage) {
+                    window.vueFxPanel.loadNavPage(navPage);
+                }
+            } else if (window.vueFxPanel) {
+                // Fallback: Falls kein 'nav'-Parameter vorhanden ist, lade die erste Seite
+                window.vueFxPanel.loadNavPage(window.vueFxPanel.navPages[0]);
+            }
+        });
+
     </script>
     <?php
 }
