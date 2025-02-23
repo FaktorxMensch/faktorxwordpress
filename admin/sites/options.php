@@ -719,6 +719,7 @@ function fxwp_options_page()
                     snackbars: [] // Für mehrere Snackbar-Meldungen
                 },
                 created: function () {
+                    this.refreshOptions();
                     var params = new URLSearchParams(window.location.search);
                     var navSlug = params.get('nav');
                     if (navSlug) {
