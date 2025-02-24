@@ -146,7 +146,9 @@ function fxwp_options_page()
         <main class="wrap fx-content" v-for="(currentNav, key) in filteredNavPages">
             <h1 class="fx-header">{{ currentNav.title }}</h1>
             <!-- a search bar to search all options inside fxwp -->
-            <input type="text" v-model="search" v-if="key==0" placeholder="Durchsuche alle Optionen in Faktor&times;WP ..." class="fx-search">
+            <input type="text" v-model="search" v-if="key==0"
+                   autofocus
+                   placeholder="Durchsuche alle Optionen in Faktor&times;WP ..." class="fx-search">
             <div class="fx-sections">
                 <div v-for="(section, sIndex) in currentNav.sections" :key="sIndex"
                      :class="['fx-section-density-' + (section.density || 'normal')]"
@@ -670,32 +672,37 @@ function fxwp_options_page()
             },
 
             computed: {
-                filteredNavPages: function() {
+                filteredNavPages: function () {
                     // Wenn kein Suchbegriff eingegeben wurde, gib nur die aktuell ausgewählte Seite zurück
                     if (!this.search) {
                         return [this.currentNav];
                     }
-
                     const searchTerm = this.search.toLowerCase();
-
-                    return this.navPages
+                    const filteredPages = this.navPages
                         .map(page => {
-                            // Erstelle eine Kopie der Seite
+                            // Erstelle eine flache Kopie der Seite
                             const newPage = Object.assign({}, page);
-                            // Verwende Object.values, um das sections-Objekt in ein Array zu verwandeln
+                            // Verwandle das sections-Objekt in ein Array, um map() nutzen zu können
                             newPage.sections = Object.values(page.sections)
                                 .map(section => {
-                                    // Filtere die Optionen in der Sektion anhand von Titel und Beschreibung
                                     const newOptions = {};
                                     Object.keys(section.options).forEach(key => {
                                         const option = section.options[key];
                                         const title = option.title ? option.title.toLowerCase() : '';
                                         const description = option.description ? option.description.toLowerCase() : '';
-                                        if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                                        // Wir ignorieren in beiden fällen alles ausser zahlen und buchstaben
+                                        const regex = /[^a-z0-9]/g;
+                                        // Treffer, wenn der Suchbegriff als Substring vorkommt
+                                        // oder der Levenshtein-Abstand kleiner oder gleich 2 ist
+                                        if (
+                                            title.replace(regex, '').includes(searchTerm.replace(regex, '')) ||
+                                            description.replace(regex, '').includes(searchTerm.replace(regex, '')) ||
+                                            this.levenshtein(searchTerm, title) <= 2 ||
+                                            this.levenshtein(searchTerm, description) <= 2
+                                        ) {
                                             newOptions[key] = option;
                                         }
                                     });
-                                    // Nur wenn mindestens eine Option passt, soll die Sektion zurückgegeben werden
                                     if (Object.keys(newOptions).length > 0) {
                                         const newSection = Object.assign({}, section);
                                         newSection.options = newOptions;
@@ -704,14 +711,47 @@ function fxwp_options_page()
                                     return null;
                                 })
                                 .filter(section => section !== null);
-
                             return newPage.sections.length > 0 ? newPage : null;
                         })
                         .filter(page => page !== null);
+                    console.log(filteredPages);
+                    if (filteredPages.length === 0) {
+                        return [{title: 'Keine Ergebnisse', sections: []}];
+                    }
+                    return filteredPages;
                 }
             },
 
             methods: {
+                levenshtein: function (a, b) {
+                    if (a.length === 0) return b.length;
+                    if (b.length === 0) return a.length;
+                    const matrix = [];
+                    // Initialisiere die erste Zeile und Spalte
+                    for (let i = 0; i <= b.length; i++) {
+                        matrix[i] = [i];
+                    }
+                    for (let j = 0; j <= a.length; j++) {
+                        matrix[0][j] = j;
+                    }
+                    // Berechne die Matrix
+                    for (let i = 1; i <= b.length; i++) {
+                        for (let j = 1; j <= a.length; j++) {
+                            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                                matrix[i][j] = matrix[i - 1][j - 1];
+                            } else {
+                                matrix[i][j] = Math.min(
+                                    matrix[i - 1][j - 1] + 1, // Substitution
+                                    Math.min(
+                                        matrix[i][j - 1] + 1,   // Insertion
+                                        matrix[i - 1][j] + 1    // Deletion
+                                    )
+                                );
+                            }
+                        }
+                    }
+                    return matrix[b.length][a.length];
+                },
                 loadNavPage: function (nav) {
                     this.currentNav = nav;
                     var newUrl = updateQueryStringParameter(window.location.href, 'nav', nav.slug);
