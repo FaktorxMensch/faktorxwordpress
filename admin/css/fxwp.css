@@ -72,8 +72,6 @@ button, input[type="submit"] {
     max-width: 800px;
     margin-top: 20px;
     padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .collection-box h2 {

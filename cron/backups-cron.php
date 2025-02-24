@@ -44,7 +44,8 @@ add_action('fxwp_backup_task', function () {
     }
 });
 
-function fxwp_check_backup_permissions($backupDir) {
+function fxwp_check_backup_permissions($backupDir)
+{
 
     if (!is_writable($backupDir)) {
         error_log("Backup directory not writable: $backupDir");
@@ -74,7 +75,7 @@ function fxwp_create_backup(): void
     // Define the backup directory
     $backupDir = $rootDir . 'wp-content/fxwp-backups/';
 
-/* ------------------- Debugging ------------------- */
+    /* ------------------- Debugging ------------------- */
     error_log("Current PHP process user: " . posix_getpwuid(posix_geteuid())['name']);
     error_log("Backup directory owner: " . posix_getpwuid(fileowner($backupDir))['name']);
 
@@ -84,7 +85,7 @@ function fxwp_create_backup(): void
 
     $freeSpace = disk_free_space($backupDir);
     error_log("Free space in backup directory: " . $freeSpace . " bytes");
-/* ------------------- Debugging end ------------------- */
+    /* ------------------- Debugging end ------------------- */
 
     // Check if the backup directory exists, if not, create it
     if (!file_exists($backupDir)) {
@@ -108,68 +109,68 @@ function fxwp_create_backup(): void
     if ($returnValue !== 0) {
         error_log("mysqldump failed with error code: $returnValue");
         error_log("Trying to dump the database using PHP");
-	    // fall back to PHP
-	    $mysqli = new mysqli( DB_HOST, DB_USER, DB_PASSWORD, DB_NAME );
+        // fall back to PHP
+        $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
-	    if ( $mysqli->connect_error ) {
+        if ($mysqli->connect_error) {
             error_log("Failed to connect to the database: " . $mysqli->connect_error);
             throw new Exception("Failed to connect to the database: " . $mysqli->connect_error);
 //		    die( 'Connect Error (' . $mysqli->connect_errno . ') '
 //		         . $mysqli->connect_error );
-	    }
+        }
 
-	    $tables = array();
-	    $result = $mysqli->query( 'SHOW TABLES' );
-	    while ( $row = $result->fetch_array( MYSQLI_NUM ) ) {
-		    $tables[] = $row[0];
-	    }
+        $tables = array();
+        $result = $mysqli->query('SHOW TABLES');
+        while ($row = $result->fetch_array(MYSQLI_NUM)) {
+            $tables[] = $row[0];
+        }
 
-	    $sql = 'SET FOREIGN_KEY_CHECKS=0;' . "\n";
-	    foreach ( $tables as $table ) {
-		    $result    = $mysqli->query( 'SELECT * FROM ' . $table );
-		    $numFields = $result->field_count;
-		    $numRows   = $result->num_rows;
-		    $i         = 0;
+        $sql = 'SET FOREIGN_KEY_CHECKS=0;' . "\n";
+        foreach ($tables as $table) {
+            $result = $mysqli->query('SELECT * FROM ' . $table);
+            $numFields = $result->field_count;
+            $numRows = $result->num_rows;
+            $i = 0;
 
-		    $sql  .= 'DROP TABLE IF EXISTS ' . $table . ';';
-		    $row2 = $mysqli->query( 'SHOW CREATE TABLE ' . $table )->fetch_row();
-		    $sql  .= "\n\n" . $row2[1] . ";\n\n";
+            $sql .= 'DROP TABLE IF EXISTS ' . $table . ';';
+            $row2 = $mysqli->query('SHOW CREATE TABLE ' . $table)->fetch_row();
+            $sql .= "\n\n" . $row2[1] . ";\n\n";
 
-		    for ( $j = 0; $j < $numFields; $j ++ ) {
-			    while ( $row = $result->fetch_row() ) {
-				    if ( $i % $numRows == 0 ) {
-					    $sql .= 'INSERT INTO ' . $table . ' VALUES(';
-				    } else {
-					    $sql .= '(';
-				    }
+            for ($j = 0; $j < $numFields; $j++) {
+                while ($row = $result->fetch_row()) {
+                    if ($i % $numRows == 0) {
+                        $sql .= 'INSERT INTO ' . $table . ' VALUES(';
+                    } else {
+                        $sql .= '(';
+                    }
 
-				    for ( $k = 0; $k < $numFields; $k ++ ) {
-					    if ( isset( $row[ $k ] ) ) {
-						    $sql .= '"' . $mysqli->real_escape_string( $row[ $k ] ) . '"';
-					    } else {
-						    $sql .= '""';
-					    }
-					    if ( $k < $numFields - 1 ) {
-						    $sql .= ',';
-					    }
-				    }
+                    for ($k = 0; $k < $numFields; $k++) {
+                        if (isset($row[$k])) {
+                            $sql .= '"' . $mysqli->real_escape_string($row[$k]) . '"';
+                        } else {
+                            $sql .= '""';
+                        }
+                        if ($k < $numFields - 1) {
+                            $sql .= ',';
+                        }
+                    }
 
-				    if ( ( ( $i + 1 ) % $numRows ) == 0 ) {
-					    $sql .= ");";
-				    } else {
-					    $sql .= "),";
-				    }
-				    $i ++;
-			    }
-		    }
-	    }
-	    $sql .= "\n\n\n";
+                    if ((($i + 1) % $numRows) == 0) {
+                        $sql .= ");";
+                    } else {
+                        $sql .= "),";
+                    }
+                    $i++;
+                }
+            }
+        }
+        $sql .= "\n\n\n";
 
 
-	    $sql .= 'SET FOREIGN_KEY_CHECKS=1;';
+        $sql .= 'SET FOREIGN_KEY_CHECKS=1;';
 
         // Write the SQL dump to a file
-	    file_put_contents( $dumpFile, $sql );
+        file_put_contents($dumpFile, $sql);
     }
     // Check if the dump file was created
     if (!file_exists($dumpFile)) {
@@ -350,46 +351,46 @@ function fxwp_delete_expired_backups()
     foreach ($files as $file) {
         if (!in_array($file, $keptBackups)) {
             unlink($file);
-            unlink($file.".sql");
+            unlink($file . ".sql");
         }
     }
 
 
     $unsuccessfulBackups = array();
-	$all_files = glob($backupDir . '*');
+    $all_files = glob($backupDir . '*');
 //	If file is *.sql and no other file with the same name but without the .sql exists, delete it
-	foreach ($all_files as $file) {
+    foreach ($all_files as $file) {
 //        error_log("Found file: ".$file);
-		if (strpos($file, '.sql') !== false) {
-			$filebasename = str_replace('.sql', '', $file);
+        if (strpos($file, '.sql') !== false) {
+            $filebasename = str_replace('.sql', '', $file);
 //            error_log("Checking file: ".$filebasename);
-			if (!in_array($filebasename, $all_files)) {
+            if (!in_array($filebasename, $all_files)) {
                 // Did not find the zip backup file
-                error_log("Did not find the zip backup file: ".$filebasename);
+                error_log("Did not find the zip backup file: " . $filebasename);
                 foreach (glob($filebasename . '*') as $rem_file) {
 //                    error_log("Found file to delete: ".$rem_file);
                     $unsuccessfulBackups[] = $rem_file;
                     unlink($rem_file);
-                    error_log("Deleted file: ".$rem_file);
+                    error_log("Deleted file: " . $rem_file);
                 }
-			}
-		}
-	}
+            }
+        }
+    }
     //if there are any unsuccessful backups, sent email
     if (count($unsuccessfulBackups) > 0) {
         $unsuccessfulBackups = implode(", ", $unsuccessfulBackups);
         $to = FXWP_ERROR_EMAIL;
         //Get site url
         $site_url = get_site_url();
-        $subject = 'Unsuccessful backups on '. $site_url;
-        $message = 'The following backups were not successful and have been deleted: '.$unsuccessfulBackups;
+        $subject = 'Unsuccessful backups on ' . $site_url;
+        $message = 'The following backups were not successful and have been deleted: ' . $unsuccessfulBackups;
 
         if (is_array($keptBackups) && !empty($keptBackups)) {
             $keptBackupsString = implode(", ", $keptBackups);
         } else {
             $keptBackupsString = 'No backups kept';
         }
-        $message .='<br><br>Kept backups: '.implode(", ", $keptBackups);
+        $message .= '<br><br>Kept backups: ' . implode(", ", $keptBackups);
         $headers = array('Content-Type: text/html; charset=UTF-8');
         wp_mail($to, $subject, $message, $headers);
     }

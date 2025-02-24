@@ -114,6 +114,7 @@ function fxwp_plugin_list_installer_page()
         'Standard' => array(
             array(
                 'name' => 'post-types-order',
+                'image' => 'https://ps.w.org/post-types-order/assets/icon-128x128.png?rev=1226428',
                 'options' => array(),
             ),
         ),
@@ -160,6 +161,7 @@ function fxwp_plugin_list_installer_page()
         'Block site builder' => array(
             array(
                 'name' => 'elementor',
+                'image' => 'https://ps.w.org/elementor/assets/icon-256x256.gif?rev=3111597',
                 'options' => array(),
             )
         ),
@@ -194,9 +196,10 @@ function fxwp_plugin_list_installer_page()
         echo "<h2>{$collection_name}</h2>";
         echo "<ul class='plugin-list'>";
         foreach ($plugins as $plugin) {
+            $plugin_image = $plugin['image'] ?? "https://ps.w.org/{$plugin['name']}/assets/icon-128x128.png";
             $plugin = $plugin['name'];
             echo "<li>
-                <img src='https://ps.w.org/{$plugin}/assets/icon-128x128.png'>
+                <img src='$plugin_image'>
                 <div id='plugin-{$plugin}' >
                     <h3>" . str_replace('-', ' ', ucfirst($plugin)) . "</h3>
                     <p><strong>Autor:</strong></p> <p><strong>Downloads:</strong></p> <p><strong>Bewertungen:</strong></p>
@@ -219,7 +222,7 @@ function fxwp_plugin_list_installer_page()
 
     // THEMES
     echo '<h1 style="margin-top:25px">Theme-Installer</h1>';
-    echo '<div class="collection-box">';
+    echo '<div class="collection-box postbox">';
     echo '<h2>Benutzerdefinierte Themes</h2>';
     echo '<ul class="plugin-list"><li>
         <img src="https://faktorxmensch.com/image/brand/logo--square.svg">
@@ -237,8 +240,8 @@ function fxwp_plugin_list_installer_page()
     echo '</div>';
 
     // EINRICHTUNG
-    echo '<h1 style="margin-top:25px">Seiten Einrichtung</h1>';
-    echo '<div class="collection-box">';
+    echo '<h1>Installationshilfe</h1>';
+    echo '<div class="collection-box postbox">';
     echo '<h2>Einrichtung</h2>';
     echo '<form method="post">';
     echo '<ul class="checkbox-list">';

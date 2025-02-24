@@ -24,7 +24,8 @@ function fxwp_mock_backups()
 
 }
 
-function fxwp_get_backup_tag($backup) {
+function fxwp_get_backup_tag($backup)
+{
     //Backup is grandfather if it is older than 30 days
     if (fxwp_get_backup_timestamp($backup) < strtotime('-30 days')) {
         return __('Großvater', 'fxwp');
@@ -83,7 +84,7 @@ function fxwp_backups_page()
     $backups = fxwp_list_backups();
     ?>
     <div class="wrap">
-        <h1><?php _e('Backup Manager', 'fxwp'); ?></h1>
+        <h1><?php _e('Archiv', 'fxwp'); ?></h1>
         <p><?php _e('Create and restore backups of your WordPress site.', 'fxwp'); ?></p>
         <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=create'), 'fxwp_critical'); ?>"
            class="button button-primary"> <?php _e('Neue Sicherung erstellen', 'fxwp'); ?> </a>
@@ -135,7 +136,7 @@ function fxwp_backups_page()
                         // add tag if backup is grandfather, father or son
                         $tag = fxwp_get_backup_tag($backup);
                         if ($tag) {
-                            echo "<span class='backup-gvs ".$tag."'>$tag</span>";
+                            echo "<span class='backup-gvs " . $tag . "'>$tag</span>";
                             echo "<style>
                                     .backup-gvs {
                                         display: inline-block;

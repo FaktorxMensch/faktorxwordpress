@@ -1,3 +1,11 @@
+## v2.1.3 - 2025-02-24
+
+- improve navigation and subpage visuals
+
+## v2.1.2 - 2025-02-24
+
+- Built a wp option which reflects backup frequency. If not set, use the option from the config file. If set, use the option from the wp option
+
 # Changelog
 
 ## v2.1.1 - 2025-02-24

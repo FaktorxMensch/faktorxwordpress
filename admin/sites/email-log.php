@@ -25,7 +25,7 @@ function fxwp_display_email_logs()
     }
 
     $email_logs = $wpdb->get_results("SELECT * FROM $table_name ORDER BY timestamp DESC LIMIT 50");
-    echo '<div class="wrap"><h1>Email Log</h1>';
+    echo '<div class="wrap"><h1>E-Mail-Protokoll</h1>';
 
     if(current_user_can('fxm_admin') && fxwp_check_deactivated_features('fxwp_deact_email_log')) {
         ?>

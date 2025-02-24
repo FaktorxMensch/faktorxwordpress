@@ -2,13 +2,13 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 2.1.1
+ * Version: 2.1.3
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
  */
 
-// ToDo: Built a wp option which reflects backup frequency. If not set, use the option from the config file. If set, use the option from the wp option
+// ToDo:
 // ToDo: Copy backups to s3 after creation. Only copy the first grandfather backup of the month to s3
 // ToDo: If storage is at 95% or more, send an email to us
 
@@ -152,19 +152,20 @@ function fxwp_plugin_menu()
     // upadtes
     add_submenu_page(
         'fxwp', // Parent slug
-        'Updates', // Page title
-        'Updates', // Menu title
+        'System-Updates', // Page title
+        'System-Updates', // Menu title
         'administrator', // Capability
         'fxwp-updates', // Menu slug
         'fxwp_updates_page' // Function
     );
 
+
     // backups
     if (current_user_can('fxm_admin') || !fxwp_check_deactivated_features('fxwp_deact_backups')) {
         add_submenu_page(
             'fxwp', // Parent slug
-            'Backups', // Page title
-            'Backups', // Menu title
+            'Archiv', // Page title
+            'Archiv', // Menu title
             'administrator', // Capability
             'fxwp-backups', // Menu slug
             'fxwp_backups_page' // Function
@@ -175,8 +176,8 @@ function fxwp_plugin_menu()
     if (current_user_can('fxm_admin') || !fxwp_check_deactivated_features('fxwp_deact_email_log')) {
         add_submenu_page(
             'fxwp', // Parent slug
-            'Email Log', // Page title
-            'Email Log', // Menu title
+            'E-Mail-Protokoll', // Page title
+            'E-Mail-Protokoll', // Menu title
             'administrator', // Capability
             'fxwp-email-log', // Menu slug
             'fxwp_display_email_logs' // Function
@@ -186,8 +187,8 @@ function fxwp_plugin_menu()
     // plugin installer
     add_submenu_page(
         'fxwp', // Parent slug
-        'Install Helper', // Page title
-        'Install Helper', // Menu title
+        'Installationshilfe', // Page title
+        'Installationshilfe', // Menu title
         'administrator', // Capability
         'fxwp-plugin-installer', // Menu slug
         'fxwp_plugin_list_installer_page' // Function
