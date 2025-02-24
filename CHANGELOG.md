@@ -1,3 +1,8 @@
+## v2.2.3 - 2025-02-24
+
+change icon and force color theme when in local installation
+
+
 ## v2.2.2 - 2025-02-24
 
 Anzeige der Update-Informationen fix always true bug

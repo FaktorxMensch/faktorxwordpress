@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Faktor &times; WordPress
  * Description: Ein umfassendes Plugin zur Überwachung der Website, SEO-Prüfung, Backups, Updates, Überprüfung von defekten Links, Bildoptimierung, Speicherplatznutzung, Admin-Login, Selbstaktualisierung, Plugin-Installation, Anzeige von Rechnungen und Site-Identifikation.
- * Version: 2.2.2
+ * Version: 2.2.3
  * Author: Faktor Mensch Media UG (haftungsbeschränkt)
  * Author URI: https://faktorxmensch.com
  * Text Domain: fxwp
@@ -332,4 +332,16 @@ add_action('wp_login', 'fxwp_add_user_to_role');
 /* if there is a file local.php and we are on a local installation (the host ends with .local), include it */
 if (defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV) {
     include plugin_dir_path(__FILE__) . 'local.php';
+}
+
+
+// force use of the admin_color_fxm1 color scheme
+function fxwp_force_color_scheme($color_scheme)
+{
+    return 'fxm1';
+}
+
+// if is local instance, force color scheme fxm1
+if (defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV) {
+    add_filter('get_user_option_admin_color', 'fxwp_force_color_scheme');
 }
