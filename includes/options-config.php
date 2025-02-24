@@ -433,12 +433,12 @@ $fxwp_plugin_config = array(
                             'description' => 'Führt eine manuelle Aktualisierung der WordPress-Kernsoftware durch.',
                             'callback' => 'fxwp_run_manual_update_core',
                         ),
-                        'fxwp_backup_storage_warning_percent' => array(
-                            'type' => 'number',
-                            'title' => 'Speicherwarnung bei %',
-                            'description' => 'Gibt an, ab welchem Prozentsatz des Speicherlimits eine Warnung angezeigt wird.',
-                            'default' => 80,
-                        ),
+//                        'fxwp_backup_storage_warning_percent' => array(
+//                            'type' => 'number',
+//                            'title' => 'Speicherwarnung bei %',
+//                            'description' => 'Gibt an, ab welchem Prozentsatz des Speicherlimits eine Warnung angezeigt wird.',
+//                            'default' => 80,
+//                        ),
                     ),
                 ),
 
