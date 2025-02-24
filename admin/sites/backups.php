@@ -24,7 +24,8 @@ function fxwp_mock_backups()
 
 }
 
-function fxwp_get_backup_tag($backup) {
+function fxwp_get_backup_tag($backup)
+{
     //Backup is grandfather if it is older than 30 days
     if (fxwp_get_backup_timestamp($backup) < strtotime('-30 days')) {
         return __('Großvater', 'fxwp');
@@ -135,7 +136,7 @@ function fxwp_backups_page()
                         // add tag if backup is grandfather, father or son
                         $tag = fxwp_get_backup_tag($backup);
                         if ($tag) {
-                            echo "<span class='backup-gvs ".$tag."'>$tag</span>";
+                            echo "<span class='backup-gvs " . $tag . "'>$tag</span>";
                             echo "<style>
                                     .backup-gvs {
                                         display: inline-block;

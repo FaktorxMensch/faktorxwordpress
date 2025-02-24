@@ -32,11 +32,11 @@ if (!get_option('fxwp_storage_limit')) {
 
 // GVS Intervalle
 // wir wollen die letzten 24 stunden, dann von jedem tag der letzten woche, dann von jedem monat der letzten 2 monate
-define('FXWP_BACKUP_INTERVAL', 'twicedaily'); // vs daily
-
-define('FXWP_BACKUP_DAYS_SON', 3); // keep hourly backups for the last X hours
-define('FXWP_BACKUP_DAYS_FATHER', 12); // keep daily backups for the last X days
-define('FXWP_BACKUP_DAYS_GRANDFATHER', 3 * 30); // keep monthly backups for the last X days
+// Replace the existing backup constants with these
+define('FXWP_BACKUP_INTERVAL', get_option('fxwp_backup_interval', 'twicedaily'));
+define('FXWP_BACKUP_DAYS_SON', get_option('fxwp_backup_days_son', 3));
+define('FXWP_BACKUP_DAYS_FATHER', get_option('fxwp_backup_days_father', 12));
+define('FXWP_BACKUP_DAYS_GRANDFATHER', get_option('fxwp_backup_days_grandfather', 90));
 
 
 define('FXWP_THEME_REPO_URI', 'https://github.com/FaktorxMensch/faktorxwordpress-theme/archive/refs/heads/main.zip');

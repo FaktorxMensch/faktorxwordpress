@@ -8,7 +8,7 @@
  * Text Domain: fxwp
  */
 
-// ToDo: Built a wp option which reflects backup frequency. If not set, use the option from the config file. If set, use the option from the wp option
+// ToDo:
 // ToDo: Copy backups to s3 after creation. Only copy the first grandfather backup of the month to s3
 // ToDo: If storage is at 95% or more, send an email to us
 
@@ -164,7 +164,7 @@ function fxwp_plugin_menu()
         add_submenu_page(
             'fxwp', // Parent slug
             'Backups', // Page title
-            'Backups', // Menu title
+            'Backup Manager', // Menu title
             'administrator', // Capability
             'fxwp-backups', // Menu slug
             'fxwp_backups_page' // Function

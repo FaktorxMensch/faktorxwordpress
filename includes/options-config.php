@@ -386,7 +386,6 @@ $fxwp_plugin_config = array(
                 ),
             ),
         ),
-
         // Seite für Updates (durch kunden)
         'p2_updates' => array(
             'title' => 'Kundi-Updates',
@@ -440,6 +439,48 @@ $fxwp_plugin_config = array(
 
             ),
         ),
+        'backup_settings' => array(
+            'title' => 'Sicherung',
+            'order' => 50,
+            'icon' => 'dashicons dashicons-backup',
+            'slug' => 'backup_settings',
+            'sections' => array(
+                'backup_settings' => array(
+                    'title' => 'Backup Einstellungen',
+                    'options' => array(
+                        'fxwp_backup_interval' => array(
+                            'type' => 'select',
+                            'title' => 'Backup Intervall',
+                            'description' => 'Wie oft sollen Backups erstellt werden?',
+                            'default' => 'twicedaily',
+                            'choices' => array(
+                                'hourly' => 'Stündlich',
+                                'twicedaily' => 'Zweimal täglich',
+                                'daily' => 'Täglich'
+                            )
+                        ),
+                        'fxwp_backup_days_son' => array(
+                            'type' => 'number',
+                            'title' => 'Stündliche Backups behalten (Tage)',
+                            'description' => 'Für wie viele Tage sollen stündliche Backups behalten werden?',
+                            'default' => 3
+                        ),
+                        'fxwp_backup_days_father' => array(
+                            'type' => 'number',
+                            'title' => 'Tägliche Backups behalten (Tage)',
+                            'description' => 'Für wie viele Tage sollen tägliche Backups behalten werden?',
+                            'default' => 12
+                        ),
+                        'fxwp_backup_days_grandfather' => array(
+                            'type' => 'number',
+                            'title' => 'Monatliche Backups behalten (Tage)',
+                            'description' => 'Für wie viele Tage sollen monatliche Backups behalten werden?',
+                            'default' => 90
+                        )
+                    )
+                )
+            )
+        ),
     ),
 );
 
@@ -455,6 +496,7 @@ function fxwp_get_options_config()
     uasort($fxwp_plugin_config['nav_pages'], function ($a, $b) {
         return $a['order'] <=> $b['order'];
     });
+
     return $fxwp_plugin_config;
 }
 
@@ -727,6 +769,7 @@ function fxwp_is_local_instance()
 {
     return defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV;
 }
+
 /*
 // add each options page acutally as submenu item to the settings menu
 like here
@@ -750,7 +793,7 @@ function fxwp_add_options_pages()
             $page['title'], // Page title
             $page['title'], // Menu title
             'administrator', // Capability
-        // acutally hard link to /wp-admin/admin.php?page=fxwp-options&nav=p2_data (with the nav being the key of the page)
+            // acutally hard link to /wp-admin/admin.php?page=fxwp-options&nav=p2_data (with the nav being the key of the page)
             'admin.php?page=fxwp-options&nav=' . $key, // Menu slug
             'fxwp_options_page' // Function
         );
@@ -758,5 +801,6 @@ function fxwp_add_options_pages()
     // hide a submenu item that matches href=admin.php?page=fxwp-options via css
     echo '<script>document.addEventListener("DOMContentLoaded", function() {document.querySelector("a[href=\'admin.php?page=fxwp-options\']").style.display = "none";});</script>';
 }
+
 add_action('admin_menu', 'fxwp_add_options_pages');
 
