@@ -1,3 +1,8 @@
+## v2.3.2 - 2025-02-24
+
+füge suche nach keywords hinzu und weitere bschreibungen
+
+
 ## v2.3.1 - 2025-02-24
 
 if its a local instance, have div#wpadminbar be orange && if option fxwp_local_instance_color is true

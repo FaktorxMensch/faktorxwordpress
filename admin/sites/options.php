@@ -725,7 +725,9 @@ function fxwp_options_page()
                                         // Treffer, wenn der bereinigte Text den Suchbegriff enthält
                                         if (
                                             cleanedTitle.includes(cleanedSearch) ||
-                                            cleanedDescription.includes(cleanedSearch)
+                                            cleanedDescription.includes(cleanedSearch) ||
+                                            option.keywords?.some(keyword => keyword.includes(cleanedSearch)) ||
+                                            key.includes(cleanedSearch)
                                         ) {
                                             newOptions[key] = option;
                                         }
