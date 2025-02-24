@@ -88,6 +88,7 @@ function fxwp_display_maintenance_mode_widget()
 			"title"=>"Open project in p2",
 			"type"=>"action",
 			"description"=>"Opens the associated project in p2 for faster access.",
+            "target"=>"_blank",
 			"link"=>FXWP_P2_URL.'/project/'.(get_option('fxwp_project')['_id'] ?? "").'?fxwp=true',
 			"disabled"=> empty(get_option('fxwp_project')['_id']),
 		],
@@ -156,10 +157,10 @@ function fxwp_display_maintenance_mode_widget()
 
 		// display button
 		echo '<div>
-            <a class="button" href="'.$button["link"].'" '.$disable_button.' > 
+            <a class="button" href="' . $button["link"] . '" ' . $disable_button . '  target="' . ($button["target"] ?? "") . '">
             <span style="vertical-align:sub;margin-left:-2px;margin-right:2px" class="dashicons dashicons-plugins-checked"></span>
-            '.$button["title"].' </a>
-            <br><small>'.$button["description"].'</small>
+            ' . $button["title"] . ' </a>
+            <br><small>' . $button["description"] . '</small>
             </div><br>';
 	}
 	echo "</div>";
