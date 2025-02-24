@@ -171,6 +171,19 @@ function fxwp_create_backup(): void
 
         // Write the SQL dump to a file
         file_put_contents($dumpFile, $sql);
+
+        // wenn der speicher zu 95% voll ist, dann schrei eine email an uns
+        $freeSpace = disk_free_space($backupDir);
+        $totalSpace = disk_total_space($backupDir);
+        $usedSpace = $totalSpace - $freeSpace;
+        $percentUsed = ($usedSpace / $totalSpace) * 100;
+        if ($percentUsed > 95) {
+            $to = FXWP_ERROR_EMAIL;
+            $subject = 'Backup storage almost full on ' . get_site_url();
+            $message = 'The backup storage is almost full on ' . get_site_url() . '. Used space: ' . fxwp_format_file_size($usedSpace) . ' of ' . fxwp_format_file_size($totalSpace) . ' (' . number_format($percentUsed, 2) . '%)';
+            $headers = array('Content-Type: text/html; charset=UTF-8');
+            wp_mail($to, $subject, $message, $headers);
+        }
     }
     // Check if the dump file was created
     if (!file_exists($dumpFile)) {

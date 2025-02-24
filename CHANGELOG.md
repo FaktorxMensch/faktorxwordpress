@@ -1,3 +1,7 @@
+## v2.2.0 - 2025-02-24
+
+- Keine Änderungen seit letztem Release
+
 ## v2.1.8 - 2025-02-24
 
 No changes.
