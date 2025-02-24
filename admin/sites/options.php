@@ -143,8 +143,10 @@ function fxwp_options_page()
     ?>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <div id="fx-plugin-panel">
-        <main class="wrap fx-content">
+        <main class="wrap fx-content" v-for="(currentNav, key) in filteredNavPages">
             <h1 class="fx-header">{{ currentNav.title }}</h1>
+            <!-- a search bar to search all options inside fxwp -->
+            <input type="text" v-model="search" v-if="key==0" placeholder="Durchsuche alle Optionen in Faktor&times;WP ..." class="fx-search">
             <div class="fx-sections">
                 <div v-for="(section, sIndex) in currentNav.sections" :key="sIndex"
                      :class="['fx-section-density-' + (section.density || 'normal')]"
@@ -262,15 +264,8 @@ function fxwp_options_page()
 
         /* Grundlayout */
         #fx-plugin-panel {
-            display: flex;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             color: #333;
-        }
-
-        /* Content */
-        .fx-content {
-            flex: 1;
-            box-sizing: border-box;
         }
 
         .fx-sections {
@@ -288,6 +283,14 @@ function fxwp_options_page()
             .fx-option-label {
                 display: none;
             }
+        }
+
+        .fx-search {
+            padding: 8px;
+            margin-top: 10px;
+            box-sizing: border-box;
+            flex: 1;
+            width: 100%;
         }
 
         .fx-section-header {
@@ -645,6 +648,7 @@ function fxwp_options_page()
                 navPages: fxPluginConfig.nav_pages ? Object.values(fxPluginConfig.nav_pages) : [],
                 currentNav: {title: '', sections: []},
                 loadingActions: {},
+                search: '',
                 snackbars: [] // Für mehrere Snackbar-Meldungen
             },
             created: function () {
@@ -664,11 +668,54 @@ function fxwp_options_page()
                     this.loadNavPage(this.navPages[0]);
                 }
             },
+
+            computed: {
+                filteredNavPages: function() {
+                    // Wenn kein Suchbegriff eingegeben wurde, gib nur die aktuell ausgewählte Seite zurück
+                    if (!this.search) {
+                        return [this.currentNav];
+                    }
+
+                    const searchTerm = this.search.toLowerCase();
+
+                    return this.navPages
+                        .map(page => {
+                            // Erstelle eine Kopie der Seite
+                            const newPage = Object.assign({}, page);
+                            // Verwende Object.values, um das sections-Objekt in ein Array zu verwandeln
+                            newPage.sections = Object.values(page.sections)
+                                .map(section => {
+                                    // Filtere die Optionen in der Sektion anhand von Titel und Beschreibung
+                                    const newOptions = {};
+                                    Object.keys(section.options).forEach(key => {
+                                        const option = section.options[key];
+                                        const title = option.title ? option.title.toLowerCase() : '';
+                                        const description = option.description ? option.description.toLowerCase() : '';
+                                        if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                                            newOptions[key] = option;
+                                        }
+                                    });
+                                    // Nur wenn mindestens eine Option passt, soll die Sektion zurückgegeben werden
+                                    if (Object.keys(newOptions).length > 0) {
+                                        const newSection = Object.assign({}, section);
+                                        newSection.options = newOptions;
+                                        return newSection;
+                                    }
+                                    return null;
+                                })
+                                .filter(section => section !== null);
+
+                            return newPage.sections.length > 0 ? newPage : null;
+                        })
+                        .filter(page => page !== null);
+                }
+            },
+
             methods: {
                 loadNavPage: function (nav) {
                     this.currentNav = nav;
                     var newUrl = updateQueryStringParameter(window.location.href, 'nav', nav.slug);
-                    window.history.pushState({ path: newUrl }, '', newUrl);
+                    window.history.pushState({path: newUrl}, '', newUrl);
                     // Update auch das WP-Submenu (aktives Element hervorheben)
                     jQuery('.wp-submenu li').removeClass('current');
                     jQuery('.wp-submenu li a[href="admin.php?page=fxwp-options&nav=' + nav.slug + '"]')
@@ -786,7 +833,7 @@ function fxwp_options_page()
             }
         });
 
-        jQuery(document).on('click', '.wp-submenu a[href*="admin.php?page=fxwp-options"]', function(e) {
+        jQuery(document).on('click', '.wp-submenu a[href*="admin.php?page=fxwp-options"]', function (e) {
             e.preventDefault(); // Verhindert den Seitenreload
             // Extrahiere den 'nav'-Parameter aus der URL
             var url = new URL(jQuery(this).attr('href'), window.location.origin);
@@ -794,7 +841,7 @@ function fxwp_options_page()
 
             if (navSlug && window.vueFxPanel) {
                 // Finde in den Vue-Daten die entsprechende Navigation-Seite
-                var navPage = window.vueFxPanel.navPages.find(function(page) {
+                var navPage = window.vueFxPanel.navPages.find(function (page) {
                     return page.slug === navSlug;
                 });
                 if (navPage) {
