@@ -1,3 +1,8 @@
+## v2.2.2 - 2025-02-24
+
+Anzeige der Update-Informationen fix always true bug
+- remove Speicherwarnung configuration
+
 ## v2.2.1 - 2025-02-24
 
 Speicherwarnung bei % per option config setzbar

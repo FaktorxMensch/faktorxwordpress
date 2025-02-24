@@ -89,7 +89,7 @@ function cud_dashboard_page()
     }
 
     // Anzeige der Update-Informationen in farblich hervorgehobenen Boxen
-    if (true || $plugin_updates_available || $theme_updates_available) {
+    if ($plugin_updates_available || $theme_updates_available) {
         // Disclaimer Box vor den Update-Buttons
         echo '<div class="notice notice-info">';
         echo '<p><strong>Achtung:</strong> Es sind Updates verfügbar für: ';
