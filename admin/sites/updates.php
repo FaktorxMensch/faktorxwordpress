@@ -53,6 +53,15 @@ function fxwp_disable_automatic_updates()
 }
 
 
+add_action('wp_ajax_fxwp_get_releases', 'fxwp_ajax_get_releases');
+
+function fxwp_ajax_get_releases()
+{
+    check_ajax_referer('fxwp_ajax_nonce', 'nonce');
+    $releases = fxwp_get_releases_from_api();
+    wp_send_json_success($releases);
+}
+
 /**
  * Holt die Release-Daten aus der Nuxt API.
  *
@@ -189,78 +198,91 @@ function fxwp_updates_page()
                 </h2>
             </div>
             <div class="inside" id="fxwp-manual-install">
-                <!-- Suchleiste -->
-                <div class="search-box" style="margin-bottom: 1em;">
-                    <input
-                            type="search"
-                            v-model="searchQuery"
-                            class="regular-text"
-                            placeholder="<?php echo esc_attr__('Suche in Changelogs...', 'fxwp'); ?>"
-                    >
+                <div v-if="loading" class="loading-state" style="padding-bottom: 0">
+                    <p><?php echo esc_html__('Lade Versionen...', 'fxwp'); ?></p>
                 </div>
 
-                <!-- Verfügbare Versionen -->
-                <div v-if="releases && releases.length" v-cloak>
-                    <table class="wp-list-table widefat fixed striped">
-                        <thead>
-                        <tr>
-                            <th width="50"><?php echo esc_html__('Version', 'fxwp'); ?></th>
-                            <th width="100"><?php echo esc_html__('Typ', 'fxwp'); ?></th>
-                            <th width="100%"><?php echo esc_html__('Changelog', 'fxwp'); ?></th>
-                            <th width="100"><?php echo esc_html__('Aktion', 'fxwp'); ?></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="release in filteredReleases" :key="release.tag">
-                            <td>
-                                {{ release.tag }}
-                            </td>
-                            <td>
-                                <span v-if="release.isPreview" class="fxwp-preview-badge">Preview</span>
-                            </td>
-                            <td>
-                                <div v-if="release.description" v-html="highlightMatches(release.description)"></div>
-                                <div v-else><?php echo esc_html__('Kein Changelog verfügbar', 'fxwp'); ?></div>
-
-                                <div style="margin-top: .2em;">
-                                    <a :href="release.compareLink" target="_blank" class="hover"
-                                       v-if="release.compareLink">
-                                        <?php echo esc_html__('Vergleiche mit vorheriger Version', 'fxwp'); ?>
-                                    </a>
-                                </div>
-                            </td>
-                            <td>
-                                <form method="post" action="index.php?fxwp_sync=1" style="display: inline;">
-                                    <input type="hidden" name="fxwp_self_update_tag" :value="release.tag">
-                                    <button type="submit"
-                                            class="button button-secondary"><?php echo esc_html__('Installieren', 'fxwp'); ?></button>
-                                </form>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div v-else class="notice notice-info">
-                    <p><?php echo esc_html__('Keine Versionen gefunden.', 'fxwp'); ?></p>
+                <!-- Error State -->
+                <div v-if="error" class="notice notice-error" style="padding-bottom: 0">
+                    <p>{{ error }}</p>
                 </div>
 
-                <!-- Benutzerdefinierte Version -->
-                <div class="custom-version" style="margin-top: 1em;">
-                    <h4><?php echo esc_html__('Benutzerdefinierte Version', 'fxwp'); ?></h4>
-                    <form method="post" action="index.php?fxwp_sync=1" class="custom-version-form"
-                          style="margin-bottom: 0">
+                <!-- Content when loaded -->
+                <template v-if="!loading && !error">
+                    <!-- Suchleiste -->
+                    <div class="search-box" style="margin-bottom: 1em;">
                         <input
-                                type="text"
-                                name="fxwp_custom_update_tag"
+                                type="search"
+                                v-model="searchQuery"
                                 class="regular-text"
-                                placeholder="<?php echo esc_attr__('z.B. v2.0.0', 'fxwp'); ?>"
-                                required
+                                placeholder="<?php echo esc_attr__('Suche in Changelogs...', 'fxwp'); ?>"
                         >
-                        <button type="submit" class="button button-secondary">
-                            <?php echo esc_html__('Installieren', 'fxwp'); ?>
-                        </button>
-                    </form>
-                </div>
+                    </div>
+
+                    <!-- Verfügbare Versionen -->
+                    <div v-if="releases && releases.length" v-cloak>
+                        <table class="wp-list-table widefat fixed striped">
+                            <thead>
+                            <tr>
+                                <th width="50"><?php echo esc_html__('Version', 'fxwp'); ?></th>
+                                <th width="100"><?php echo esc_html__('Typ', 'fxwp'); ?></th>
+                                <th width="100%"><?php echo esc_html__('Changelog', 'fxwp'); ?></th>
+                                <th width="100"><?php echo esc_html__('Aktion', 'fxwp'); ?></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="release in filteredReleases" :key="release.tag">
+                                <td>
+                                    {{ release.tag }}
+                                </td>
+                                <td>
+                                    <span v-if="release.isPreview" class="fxwp-preview-badge">Preview</span>
+                                </td>
+                                <td>
+                                    <div v-if="release.description"
+                                         v-html="highlightMatches(release.description)"></div>
+                                    <div v-else><?php echo esc_html__('Kein Changelog verfügbar', 'fxwp'); ?></div>
+
+                                    <div style="margin-top: .2em;">
+                                        <a :href="release.compareLink" target="_blank" class="hover"
+                                           v-if="release.compareLink">
+                                            <?php echo esc_html__('Vergleiche mit vorheriger Version', 'fxwp'); ?>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <form method="post" action="index.php?fxwp_sync=1" style="display: inline;">
+                                        <input type="hidden" name="fxwp_self_update_tag" :value="release.tag">
+                                        <button type="submit"
+                                                class="button button-secondary"><?php echo esc_html__('Installieren', 'fxwp'); ?></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div v-else class="notice notice-info">
+                        <p><?php echo esc_html__('Keine Versionen gefunden.', 'fxwp'); ?></p>
+                    </div>
+
+                    <!-- Benutzerdefinierte Version -->
+                    <div class="custom-version" style="margin-top: 1em;">
+                        <h4><?php echo esc_html__('Benutzerdefinierte Version', 'fxwp'); ?></h4>
+                        <form method="post" action="index.php?fxwp_sync=1" class="custom-version-form"
+                              style="margin-bottom: 0">
+                            <input
+                                    type="text"
+                                    name="fxwp_custom_update_tag"
+                                    class="regular-text"
+                                    placeholder="<?php echo esc_attr__('z.B. v2.0.0', 'fxwp'); ?>"
+                                    required
+                            >
+                            <button type="submit" class="button button-secondary">
+                                <?php echo esc_html__('Installieren', 'fxwp'); ?>
+                            </button>
+                        </form>
+                    </div>
+                </template>
             </div>
         </div>
 
@@ -318,49 +340,81 @@ function fxwp_updates_page()
             }
         </style>
 
-        <?php
-        // Inline JavaScript für Vue.js Initialisierung
-        $releases = fxwp_get_releases_from_api();
-        ?>
         <script>
+            const fxwpData = <?php echo json_encode(array(
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('fxwp_ajax_nonce')
+            )); ?>;
             document.addEventListener('DOMContentLoaded', function () {
                 const {createApp} = Vue;
 
                 createApp({
                     data() {
                         return {
-                            releases: <?php echo json_encode($releases); ?>,
-                            searchQuery: ''
+                            releases: [],
+                            searchQuery: '',
+                            loading: true,
+                            error: null
                         }
+                    },
+                    created() {
+                        this.fetchReleases();
                     },
                     computed: {
-                        filteredReleases() {
+                            filteredReleases() {
+                                const maxReleases = 10;
 
-                            const maxReleases = 10;
-
-                            let releases = this.releases;
-                            releases.forEach((release, index) => {
-                                if (index < releases.length - 1) {
-                                    release.compareLink = `https://github.com/ziegenhagel/faktorxwordpress/compare/${releases[index + 1].tag}...${release.tag}`;
+                                if (!this.searchQuery) {
+                                    return this.releases.slice(0, maxReleases);
                                 }
-                            })
 
-                            if (!this.searchQuery) return releases.slice(0, maxReleases);
-
-                            const query = this.searchQuery.toLowerCase();
-                            return releases.filter(release => {
-                                const description = release.description || '';
-                                return release.tag.toLowerCase().includes(query) ||
-                                    description.toLowerCase().includes(query);
-                            }).map(release => {
-                                return {
-                                    ...release,
-                                };
-                            }).slice(0, maxReleases);
-
-                        }
+                                const query = this.searchQuery.toLowerCase();
+                                return this.releases
+                                    .filter(release => {
+                                        const description = release.description || '';
+                                        return release.tag.toLowerCase().includes(query) ||
+                                            description.toLowerCase().includes(query);
+                                    })
+                                    .slice(0, maxReleases);
+                            }
                     },
                     methods: {
+                        async fetchReleases() {
+                            try {
+                                const response = await fetch(fxwpData.ajaxUrl, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                    },
+                                    body: new URLSearchParams({
+                                        action: 'fxwp_get_releases',
+                                        nonce: fxwpData.nonce
+                                    })
+                                });
+
+                                const data = await response.json();
+
+                                if (data.success) {
+                                    this.releases = data.data;
+                                    this.processReleases();
+                                } else {
+                                    throw new Error('Failed to fetch releases');
+                                }
+                            } catch (error) {
+                                this.error = 'Fehler beim Laden der Versionen. Bitte versuchen Sie es später erneut.';
+                                console.error('Error fetching releases:', error);
+                            } finally {
+                                this.loading = false;
+                            }
+                        },
+                        processReleases() {
+                            this.releases.forEach((release, index) => {
+                                if (index < this.releases.length - 1) {
+                                    release.compareLink = `https://github.com/ziegenhagel/faktorxwordpress/compare/${this.releases[index + 1].tag}...${release.tag}`;
+                                }
+                            });
+                            console.log('Processed releases:', this.releases);
+                        },
                         highlightMatches(text) {
                             if (!this.searchQuery || !text) return text;
 
@@ -369,8 +423,7 @@ function fxwp_updates_page()
                         }
                     }
                 }).mount('#fxwp-manual-install');
-            })
-            ;
+            });
         </script>
     </div>
     <?php
