@@ -177,7 +177,8 @@ function fxwp_create_backup(): void
         $totalSpace = disk_total_space($backupDir);
         $usedSpace = $totalSpace - $freeSpace;
         $percentUsed = ($usedSpace / $totalSpace) * 100;
-        if ($percentUsed > 95) {
+        // use a var
+        if ($percentUsed > get_option('fxwp_backup_storage_warning_percent', 80)) {
             $to = FXWP_ERROR_EMAIL;
             $subject = 'Backup storage almost full on ' . get_site_url();
             $message = 'The backup storage is almost full on ' . get_site_url() . '. Used space: ' . fxwp_format_file_size($usedSpace) . ' of ' . fxwp_format_file_size($totalSpace) . ' (' . number_format($percentUsed, 2) . '%)';

@@ -1,3 +1,8 @@
+## v2.2.1 - 2025-02-24
+
+Speicherwarnung bei % per option config setzbar
+
+
 ## v2.2.0 - 2025-02-24
 
 - Keine Änderungen seit letztem Release
