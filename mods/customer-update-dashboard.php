@@ -89,8 +89,9 @@ function cud_dashboard_page()
     }
 
     // Anzeige der Update-Informationen in farblich hervorgehobenen Boxen
-    if ($plugin_updates_available || $theme_updates_available) {
-        echo '<div class="notice notice-warning">';
+    if (true || $plugin_updates_available || $theme_updates_available) {
+        // Disclaimer Box vor den Update-Buttons
+        echo '<div class="notice notice-info">';
         echo '<p><strong>Achtung:</strong> Es sind Updates verfügbar für: ';
         if ($plugin_updates_available) {
             echo 'Plugins ';
@@ -99,6 +100,21 @@ function cud_dashboard_page()
             echo 'Themes ';
         }
         echo '</p>';
+        echo '</div>';
+
+        echo '<div class="notice notice-warning">';
+        echo '<h3>Wichtiger Hinweis zu Updates</h3>';
+        echo '<p>Bitte beachten Sie die folgenden Informationen, bevor Sie Updates durchführen:</p>';
+        echo '<ul style="list-style-type: disc; margin-left: 20px;">';
+        echo '<li>WordPress ist eine quelloffene Software und Updates können gelegentlich zu unerwarteten Problemen führen.</li>';
+        echo '<li>Dies gilt insbesondere für Plugins und Themes von Drittanbietern, die möglicherweise nicht vollständig mit der neuesten WordPress-Version kompatibel sind.</li>';
+        echo '<li>Durch das Ausführen von Updates bestätigen Sie, dass Sie die möglichen Risiken verstehen und akzeptieren.</li>';
+        echo '<li><strong>Wichtig:</strong> Prüfen Sie nach dem Update unbedingt Ihre Website auf Fehler oder Funktionsstörungen.</li>';
+        echo '<li>Faktor&times;Mensch MEDIA hat keinen Einfluss auf die Entwicklung und Qualität dieser Updates, da sie von den jeweiligen Entwicklern bereitgestellt werden.</li>';
+        echo '</ul>';
+        echo '<p>Wir empfehlen grundsätzlich, Updates durchzuführen, um die Sicherheit und Funktionalität Ihrer Website zu gewährleisten. Dieser Hinweis dient lediglich Ihrer Information.</p>';
+        echo '</div>';
+
         echo '<p>Nach dem Update sollten Sie unbedingt prüfen, ob alles einwandfrei funktioniert.</p>';
         echo '</div>';
         echo '<p>';

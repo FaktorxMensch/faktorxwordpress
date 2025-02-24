@@ -1,3 +1,7 @@
+## v2.1.7 - 2025-02-24
+
+No changes.
+
 ## v2.1.6 - 2025-02-24
 
 - local instances now have the p2dev icon instead of fxm icon
