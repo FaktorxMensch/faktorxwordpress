@@ -270,6 +270,8 @@ function fxwp_plugin_list_installer_page()
                 advancedOptions[i].style.display = this.checked ? "block" : "none";
             }
         });
+
+        checkbox.click();
     </script>
     <?php
 
