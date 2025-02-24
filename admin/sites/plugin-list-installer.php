@@ -107,7 +107,7 @@ function fxwp_plugin_list_installer_page()
         'fxwp_install_complianz_gdpr' => 'Complianz GDPR plugin installieren',
     );
 
-    $defaul_checked = array('fxwp_install_theme', 'fxwp_install_first_collection', 'fxwp_create_homepage', 'fxwp_create_privacy_policy', 'fxwp_create_imprint', 'fxwp_create_contact_page', 'fxwp_create_menus', 'fxwp_install_seo_plugin');
+    $defaul_checked = array('fxwp_install_theme', 'fxwp_install_first_collection', 'fxwp_create_homepage', 'fxwp_create_privacy_policy', 'fxwp_create_imprint', 'fxwp_create_contact_page', 'fxwp_create_menus', 'fxwp_install_seo_plugin', 'fxwp_install_local_google_fonts');
 
     // Definieren Sie Ihre Plugin-Sammlungen
     $plugin_collections = array(
