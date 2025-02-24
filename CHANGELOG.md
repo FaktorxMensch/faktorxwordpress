@@ -1,3 +1,9 @@
+## v2.1.4 - 2025-02-24
+
+- automatically list all available tags under updates
+- Merge branch 'main' into latest_tags_clickable
+- show latest clickable tags
+
 ## v2.1.3 - 2025-02-24
 
 - improve navigation and subpage visuals
