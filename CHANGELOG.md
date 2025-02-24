@@ -1,3 +1,10 @@
+## v2.1.6 - 2025-02-24
+
+- local instances now have the p2dev icon instead of fxm icon
+- local google fonts as default in the installer
+- better ui for email logs
+- open p2 in new tab
+
 ## v2.1.5 - 2025-02-24
 
 - load tags async
