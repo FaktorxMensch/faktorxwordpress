@@ -677,28 +677,25 @@ function fxwp_options_page()
                     if (!this.search) {
                         return [this.currentNav];
                     }
-                    const searchTerm = this.search.toLowerCase();
-                    const filteredPages = this.navPages
+                    // Bereinige den Suchbegriff
+                    const cleanedSearch = this.cleanString(this.search);
+                    const filtered = this.navPages
                         .map(page => {
                             // Erstelle eine flache Kopie der Seite
                             const newPage = Object.assign({}, page);
-                            // Verwandle das sections-Objekt in ein Array, um map() nutzen zu können
+                            // Verwandle das sections-Objekt in ein Array
                             newPage.sections = Object.values(page.sections)
                                 .map(section => {
                                     const newOptions = {};
                                     Object.keys(section.options).forEach(key => {
                                         const option = section.options[key];
-                                        const title = option.title ? option.title.toLowerCase() : '';
-                                        const description = option.description ? option.description.toLowerCase() : '';
-                                        // Wir ignorieren in beiden fällen alles ausser zahlen und buchstaben
-                                        const regex = /[^a-z0-9]/g;
-                                        // Treffer, wenn der Suchbegriff als Substring vorkommt
-                                        // oder der Levenshtein-Abstand kleiner oder gleich 2 ist
+                                        // Bereinige Titel und Beschreibung
+                                        const cleanedTitle = this.cleanString(option.title || '');
+                                        const cleanedDescription = this.cleanString(option.description || '');
+                                        // Treffer, wenn der bereinigte Text den Suchbegriff enthält
                                         if (
-                                            title.replace(regex, '').includes(searchTerm.replace(regex, '')) ||
-                                            description.replace(regex, '').includes(searchTerm.replace(regex, '')) ||
-                                            this.levenshtein(searchTerm, title) <= 2 ||
-                                            this.levenshtein(searchTerm, description) <= 2
+                                            cleanedTitle.includes(cleanedSearch) ||
+                                            cleanedDescription.includes(cleanedSearch)
                                         ) {
                                             newOptions[key] = option;
                                         }
@@ -714,43 +711,17 @@ function fxwp_options_page()
                             return newPage.sections.length > 0 ? newPage : null;
                         })
                         .filter(page => page !== null);
-                    console.log(filteredPages);
-                    if (filteredPages.length === 0) {
+
+                    if (filtered.length === 0) {
                         return [{title: 'Keine Ergebnisse', sections: []}];
                     }
-                    return filteredPages;
+                    return filtered;
                 }
             },
 
             methods: {
-                levenshtein: function (a, b) {
-                    if (a.length === 0) return b.length;
-                    if (b.length === 0) return a.length;
-                    const matrix = [];
-                    // Initialisiere die erste Zeile und Spalte
-                    for (let i = 0; i <= b.length; i++) {
-                        matrix[i] = [i];
-                    }
-                    for (let j = 0; j <= a.length; j++) {
-                        matrix[0][j] = j;
-                    }
-                    // Berechne die Matrix
-                    for (let i = 1; i <= b.length; i++) {
-                        for (let j = 1; j <= a.length; j++) {
-                            if (b.charAt(i - 1) === a.charAt(j - 1)) {
-                                matrix[i][j] = matrix[i - 1][j - 1];
-                            } else {
-                                matrix[i][j] = Math.min(
-                                    matrix[i - 1][j - 1] + 1, // Substitution
-                                    Math.min(
-                                        matrix[i][j - 1] + 1,   // Insertion
-                                        matrix[i - 1][j] + 1    // Deletion
-                                    )
-                                );
-                            }
-                        }
-                    }
-                    return matrix[b.length][a.length];
+                cleanString: function (str) {
+                    return str.toLowerCase().replace(/[^a-z0-9]/g, '');
                 },
                 loadNavPage: function (nav) {
                     this.currentNav = nav;
