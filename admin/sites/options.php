@@ -760,6 +760,12 @@ function fxwp_options_page()
                     jQuery('.wp-submenu li').removeClass('current');
                     jQuery('.wp-submenu li a[href="admin.php?page=fxwp-options&nav=' + nav.slug + '"]')
                         .parent().addClass('current');
+
+                    // clear search and focus again
+                    this.search = '';
+                    this.$nextTick(() => {
+                        this.$el.querySelector('.fx-search').focus();
+                    });
                 },
                 // Speichern bei onchange
                 saveOption: function (key, value) {
