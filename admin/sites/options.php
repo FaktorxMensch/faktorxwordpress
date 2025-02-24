@@ -153,7 +153,13 @@ function fxwp_options_page()
                 <div v-for="(section, sIndex) in currentNav.sections" :key="sIndex"
                      :class="['fx-section-density-' + (section.density || 'normal')]"
                      class="postbox fx-section">
-                    <h2 class="fx-section-header">{{ section.title }}</h2>
+                    <h2 class="fx-section-header"
+                    >{{ section.title }}</h2>
+                    <div @click="search = section.title" v-if="section.hiddenOptions> 0"
+                         class="fx-hidden-options-label">
+                        Zeige {{ section.hiddenOptions }} versteckte Optionen an ›
+                    </div>
+
                     <div class="fx-options">
                         <div v-for="(option, key) in section.options" :key="key" class="fx-option">
                             <label :for="key" class="fx-option-label" v-if="option.title && option.type !== 'checkbox'">
@@ -299,6 +305,20 @@ function fxwp_options_page()
             margin-bottom: 10px;
             margin-top: 0;
             color: #2d2d2d;
+        }
+
+        .fx-hidden-options-label {
+            color: #0073aa;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            padding: 5px 0;
+            position: relative;
+            z-index: 10000;
+        }
+
+        .fx-hidden-options-label:hover {
+            cursor: pointer;
+            font-weight: bold;
         }
 
         .fx-options {
@@ -503,6 +523,9 @@ function fxwp_options_page()
         /* Alert Box */
         .fx-alert {
             padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             border-radius: 4px;
             margin-bottom: 8px;
             position: relative;
@@ -684,8 +707,15 @@ function fxwp_options_page()
                             // Erstelle eine flache Kopie der Seite
                             const newPage = Object.assign({}, page);
                             // Verwandle das sections-Objekt in ein Array
+
                             newPage.sections = Object.values(page.sections)
                                 .map(section => {
+                                    // if exact match between section title and search term, show all options
+                                    if (this.cleanString(section.title) === cleanedSearch) {
+                                        section.hiddenOptions = 0;
+                                        return section;
+                                    }
+
                                     const newOptions = {};
                                     Object.keys(section.options).forEach(key => {
                                         const option = section.options[key];
@@ -703,6 +733,8 @@ function fxwp_options_page()
                                     if (Object.keys(newOptions).length > 0) {
                                         const newSection = Object.assign({}, section);
                                         newSection.options = newOptions;
+                                        // tell section how many more options are hidden
+                                        newSection.hiddenOptions = Object.keys(section.options).length - Object.keys(newOptions).length;
                                         return newSection;
                                     }
                                     return null;
