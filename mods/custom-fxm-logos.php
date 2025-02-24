@@ -22,8 +22,8 @@ background-position: -2px -2px !important;
 </style>
 ';
 
-    // if its a local instance, have div#wpadminbar be orange
-    if (FXWP_LOCAL_ENV) {
+    // if its a local instance, have div#wpadminbar be orange && if option fxwp_local_instance_color is true
+    if (FXWP_LOCAL_ENV && get_option('fxwp_local_instance_color', true)) {
         echo '<style>
             #wpadminbar #wp-admin-bar-wp-logo > a {
                 background-image: url(' . plugins_url("assets/p2.png", FXWP_PLUGIN_DIR . basename(FXWP_PLUGIN_DIR)) . ') !important;
@@ -32,16 +32,14 @@ background-position: -2px -2px !important;
                 background-position: 0.5px 2px;
             }
         </style>';
-    }
 
-    // as long as were in wp-admin also change wpadmin
-    if (is_admin()) {
-//                background:#049a42 100% !important;
-        echo '<style>
+        if (is_admin()) {
+            echo '<style>
             #wpadminbar {
                 background-image: linear-gradient(90deg, #BA38F8 0%, #39B9FF 50%, #00DC5E 100%) !important;
             }
         </style>';
+        }
     }
 }
 

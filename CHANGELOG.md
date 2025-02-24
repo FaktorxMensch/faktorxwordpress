@@ -1,3 +1,13 @@
+## v2.3.1 - 2025-02-24
+
+if its a local instance, have div#wpadminbar be orange && if option fxwp_local_instance_color is true
+
+
+## v2.3.0 - 2025-02-24
+
+// if its a local instance, have div#wpadminbar be orange && if option fxwp_local_instance_color is true
+
+
 ## v2.2.3 - 2025-02-24
 
 change icon and force color theme when in local installation

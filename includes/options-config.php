@@ -63,8 +63,13 @@ $fxwp_plugin_config = array(
                             'type' => 'alert',
                             'alertIcon' => 'dashicons dashicons-admin-site',
                             'title' => 'Lokale Instanz',
-//                            'color' => fxwp_is_local_instance() ? 'warning' : 'info',
                             'text' => fxwp_is_local_instance() ? 'Es handelt sich um eine lokale Instanz.' : 'Es handelt sich um eine online Instanz.',
+                        ),
+                        'fxwp_local_instance_color' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Lokale Instanz durch Farbe erkennen',
+                            'description' => 'Setzt das Farbschema für lokale Instanzen, um sie besser zu erkennen. Es wird das FXM Theme und das P2 Icon verwendet.',
+                            'default' => true
                         ),
                         'fxwp_restricted' => array(
                             'type' => 'filesize',
