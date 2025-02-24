@@ -1,3 +1,7 @@
+## v2.1.5 - 2025-02-24
+
+- load tags async
+
 ## v2.1.4 - 2025-02-24
 
 - automatically list all available tags under updates
