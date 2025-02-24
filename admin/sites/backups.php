@@ -84,7 +84,7 @@ function fxwp_backups_page()
     $backups = fxwp_list_backups();
     ?>
     <div class="wrap">
-        <h1><?php _e('Backup Manager', 'fxwp'); ?></h1>
+        <h1><?php _e('Archiv', 'fxwp'); ?></h1>
         <p><?php _e('Create and restore backups of your WordPress site.', 'fxwp'); ?></p>
         <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=create'), 'fxwp_critical'); ?>"
            class="button button-primary"> <?php _e('Neue Sicherung erstellen', 'fxwp'); ?> </a>

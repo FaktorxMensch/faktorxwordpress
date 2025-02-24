@@ -81,7 +81,7 @@ function fxwp_updates_page()
 
     ?>
     <div class="wrap">
-        <h1>Aktualisierungen</h1>
+        <h1>System-Updates</h1>
         <?php fxwp_show_deactivated_feature_warning('fxwp_deact_autoupdates'); ?>
         <h2>Automatische Aktualisierungen</h2>
         <form method="post" action="">

@@ -49,7 +49,7 @@ $fxwp_plugin_config = array(
         // Seite: P2 Connection – hier werden die bisher getrennten Optionen zusammengefasst.
         'p2_connection' => array(
             'order' => 30,
-            'title' => 'WP Hosting',
+            'title' => 'PHP Server',
             'icon' => 'dashicons dashicons-wordpress-alt',
             'slug' => 'p2_connection',
             'active_callback' => function () {
@@ -141,8 +141,8 @@ $fxwp_plugin_config = array(
         ),
         // NEU: Seite zum Anzeigen der P2 JSON-Daten
         'p2_data' => array(
-            'title' => 'P2 Integration',
-            'order' => 25,
+            'title' => 'Projektpilot',
+            'order' => 30,
             'icon' => 'dashicons dashicons-vault',
             'slug' => 'p2_data',
             'active_callback' => function () {
@@ -150,7 +150,7 @@ $fxwp_plugin_config = array(
             },
             'sections' => array(
                 'p2_json_display' => array(
-                    'title' => 'P2 JSON Daten',
+                    'title' => 'JSON Daten',
                     'options' => array(
                         'fxwp_customer_json' => array(
                             'type' => 'json',
@@ -210,7 +210,7 @@ $fxwp_plugin_config = array(
         ),
         // Seite für  Restirioncts
         'restrictions' => array(
-            'title' => 'Beschränkungen',
+            'title' => 'Zugriffssteuerung',
             'order' => 20,
             'icon' => 'dashicons dashicons-shield',
             'slug' => 'restrictions',
@@ -372,9 +372,8 @@ $fxwp_plugin_config = array(
                         ),
                     ),
                 ),
-                // Tiefliegende Plugin Beschränkungen
                 'plugin_restrictions' => array(
-                    'title' => 'Plugin Beschränkungen',
+                    'title' => 'Plugin Zugriffssteuerung',
                     'options' => array(
                         'fxwp_wordfence_email_mod_active' => array(
                             'type' => 'checkbox',
@@ -440,8 +439,8 @@ $fxwp_plugin_config = array(
             ),
         ),
         'backup_settings' => array(
-            'title' => 'Sicherung',
-            'order' => 50,
+            'title' => 'Datensicherung',
+            'order' => 35,
             'icon' => 'dashicons dashicons-backup',
             'slug' => 'backup_settings',
             'sections' => array(
