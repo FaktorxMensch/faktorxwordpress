@@ -53,6 +53,7 @@ function fxwp_settings_page()
             'fxwp_restr_admin_elementor' => 'Elementor Einstellungen',
             'fxwp_restr_admin_eael' => 'Essential Addons for Elementor Einstellungen',
             'fxwp_restr_admin_wordfence' => 'Wordfence',
+            'fxwp_restr_rank_math' => 'Rank Math',
         );
         //Get debugging options description from mods/debug-mod.php
         global $debugging_options_description;

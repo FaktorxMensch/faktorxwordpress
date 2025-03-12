@@ -444,6 +444,13 @@ $fxwp_plugin_config = array(
                             'description' => 'Schränkt den Zugriff auf Wordfence ein.',
                             'keywords' => array('wf', 'wordfence', 'securtiy', 'settings', 'admin', 'restrict', 'einschränken')
                         ),
+                        'fxwp_restr_rank_math' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Rank Math',
+                            'default' => false,
+                            'description' => 'Schränkt den Zugriff auf Rank Math ein.',
+                            'keywords' => array('rm', 'rank', 'math', 'seo', 'settings', 'admin', 'restrict', 'einschränken')
+                        ),
                         'fxwp_restr_import' => array(
                             'type' => 'action',
                             'title' => 'Eingeschränkte Funktionen importieren',
@@ -740,6 +747,7 @@ function fxwp_import_restricted_features()
         'fxwp_restr_admin_elementor' => 'Elementor Einstellungen',
         'fxwp_restr_admin_eael' => 'Essential Addons for Elementor Einstellungen',
         'fxwp_restr_admin_wordfence' => 'Wordfence',
+        'fxwp_restr_rank_math' => 'Rank Math',
     );
 
     $alt = get_option("fxwp_restricted_features");

@@ -56,9 +56,11 @@ function fxwp_restrict_pages(): void
                 case 'fxwp_restr_admin_eael':
                     remove_menu_page('eael-settings'); // Essential Addons for Elementor Settings
                     break;
-                // Add mod to hide wordfence menu entry
                 case 'fxwp_restr_admin_wordfence':
                     remove_menu_page('Wordfence'); // Wordfence
+                    break;
+                case 'fxwp_restr_rank_math':
+                    remove_menu_page('rank-math'); // Rank Math
                     break;
                 default:
                     break;
