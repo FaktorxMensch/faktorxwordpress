@@ -1,3 +1,8 @@
+## v2.5.0 - 2025-03-12
+
+- Remove rank math dashboard for customers
+- Remove wordfence dashboard widget for customers
+
 ## v2.4.0 - 2025-03-12
 
 - Option to remove rank math menu entry for customers
