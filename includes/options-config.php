@@ -437,6 +437,13 @@ $fxwp_plugin_config = array(
                             'description' => 'Schränkt den Zugriff auf Einstellungen der Essential Addons for Elementor ein.',
                             'keywords' => array('eael', 'elementor', 'settings', 'admin', 'restrict', 'einschränken')
                         ),
+                        'fxwp_restr_admin_wordfence' => array(
+                            'type' => 'checkbox',
+                            'title' => 'Wordfence',
+                            'default' => false,
+                            'description' => 'Schränkt den Zugriff auf Wordfence ein.',
+                            'keywords' => array('wf', 'wordfence', 'securtiy', 'settings', 'admin', 'restrict', 'einschränken')
+                        ),
                         'fxwp_restr_import' => array(
                             'type' => 'action',
                             'title' => 'Eingeschränkte Funktionen importieren',
@@ -732,6 +739,7 @@ function fxwp_import_restricted_features()
         'fxwp_restr_admin_settings' => 'WP Einstellungen',
         'fxwp_restr_admin_elementor' => 'Elementor Einstellungen',
         'fxwp_restr_admin_eael' => 'Essential Addons for Elementor Einstellungen',
+        'fxwp_restr_admin_wordfence' => 'Wordfence',
     );
 
     $alt = get_option("fxwp_restricted_features");
