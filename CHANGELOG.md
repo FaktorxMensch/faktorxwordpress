@@ -1,3 +1,8 @@
+## v2.4.0 - 2025-03-12
+
+- Option to remove rank math menu entry for customers
+- Option to remove wordfence menu entry for customers
+
 ## v2.3.2 - 2025-02-24
 
 füge suche nach keywords hinzu und weitere bschreibungen
