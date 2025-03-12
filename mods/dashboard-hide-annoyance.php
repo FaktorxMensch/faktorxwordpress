@@ -17,6 +17,8 @@ function remove_dashboard_widgets () {
 	// Hide events calender "news and events" widget
 	remove_meta_box('tribe_dashboard_widget', 'dashboard', 'normal');
 
+    // Hide Wordfence "Activity in the past week"
+	remove_meta_box('wordfence_activity_report_widget', 'dashboard', 'normal');
 
     //Maybe remove essential addons "rate me" widget later.
     //remove_meta_box('', 'dashboard', 'normal', 'core');
