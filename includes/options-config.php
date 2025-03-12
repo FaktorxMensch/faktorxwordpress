@@ -441,14 +441,14 @@ $fxwp_plugin_config = array(
                             'type' => 'checkbox',
                             'title' => 'Wordfence',
                             'default' => false,
-                            'description' => 'Schränkt den Zugriff auf Wordfence ein.',
+                            'description' => 'Schränkt den Zugriff auf Wordfence ein. (Dashboard ist immer ausgebledet!)',
                             'keywords' => array('wf', 'wordfence', 'securtiy', 'settings', 'admin', 'restrict', 'einschränken')
                         ),
                         'fxwp_restr_rank_math' => array(
                             'type' => 'checkbox',
                             'title' => 'Rank Math',
                             'default' => false,
-                            'description' => 'Schränkt den Zugriff auf Rank Math ein.',
+                            'description' => 'Schränkt den Zugriff auf Rank Math ein. (Dashboard ist immer ausgebledet!)',
                             'keywords' => array('rm', 'rank', 'math', 'seo', 'settings', 'admin', 'restrict', 'einschränken')
                         ),
                         'fxwp_restr_import' => array(

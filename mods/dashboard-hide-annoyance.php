@@ -17,8 +17,15 @@ function remove_dashboard_widgets () {
 	// Hide events calender "news and events" widget
 	remove_meta_box('tribe_dashboard_widget', 'dashboard', 'normal');
 
+    // Hide Rank Math Overview Widget
+//    remove_meta_box('rank_math_dashboard_widget', 'dashboard', 'normal');
+
     // Hide Wordfence "Activity in the past week"
 	remove_meta_box('wordfence_activity_report_widget', 'dashboard', 'normal');
+
+    // Hide Rank Math Overview Widget
+
+
 
     //Maybe remove essential addons "rate me" widget later.
     //remove_meta_box('', 'dashboard', 'normal', 'core');
@@ -67,3 +74,11 @@ function fxwp_hide_admin_notices_with_reviews() {
 }
 
 add_action('in_admin_header', 'fxwp_hide_admin_notices_with_reviews');
+
+// Hide Rank Math Overview Widget
+add_action('admin_head', function() {
+    //if current user is not fxm_admin, then do this
+    if (!current_user_can('fxm_admin')) {
+        echo '<style>#rank_math_dashboard_widget, [id^="rank-math-"] { display: none !important; }</style>';
+    }
+});
