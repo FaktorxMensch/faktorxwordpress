@@ -74,7 +74,7 @@ $fxwp_plugin_config = array(
                             'default' => true,
                             'keywords' => array('farbe', 'color', 'local', 'instance', 'theme', 'icon')
                         ),
-                        'fxwp_restricted' => array(
+                        'fxwp_storage_limit' => array(
                             'type' => 'filesize',
                             'title' => 'Speicherlimit',
                             'description' => 'Gib das Speicherlimit in GB, MB oder KB ein. Intern wird der Wert in Bytes gespeichert.',
