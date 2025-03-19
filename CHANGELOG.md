@@ -1,3 +1,7 @@
+## v2.5.4 - 2025-03-19
+
+- fix using storage_limit
+
 ## v2.5.3 - 2025-03-19
 
 - fxwp_storage_limit genutzt
