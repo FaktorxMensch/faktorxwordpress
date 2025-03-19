@@ -24,7 +24,6 @@ define('FXWP_P2_URL', 'https://p2.faktorxmensch.com');
 
 // Server Settings
 // use option to store setting, have the option default to 20 GB
-define('FXWP_STORAGE_LIMIT', get_option('fxwp_storage_limit', 20 * 1024 * 1024 * 1024));
 // set the option if not set
 if (!get_option('fxwp_storage_limit')) {
     update_option('fxwp_storage_limit', 20 * 1024 * 1024 * 1024);

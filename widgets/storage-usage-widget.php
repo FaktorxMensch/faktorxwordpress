@@ -2,9 +2,10 @@
 function fxwp_storage_usage_widget()
 {
     $available_space = fxwp_get_available_storage_space();
-    $used_space = FXWP_STORAGE_LIMIT - $available_space;
+    $FXWP_STORAGE_LIMIT=get_option('fxwp_storage_limit', 21 * 1024 * 1024 * 1024);
+    $used_space = $FXWP_STORAGE_LIMIT - $available_space;
     $used_space = $used_space;
-    $percentage = round($used_space / FXWP_STORAGE_LIMIT * 100);
+    $percentage = round($used_space / $FXWP_STORAGE_LIMIT * 100);
 
     echo '<p>' . sprintf(esc_html__('Ihr verfügbarer Speicherplatz beträgt %1$s. Sie haben %2$s belegt, davon sind %3$s für E-Mails reserviert.', 'fxwp'), fxwp_format_file_size($available_space), fxwp_format_file_size($used_space), fxwp_format_file_size(4 * 1024 * 1024 * 1024)) . '</p>';
     echo '<div class="fxwp-storage-usage">';
@@ -80,7 +81,7 @@ function fxwp_disable_upload_button() {
 
 function fxwp_get_available_storage_space()
 {
-    $storage_limit = FXWP_STORAGE_LIMIT;
+    $storage_limit=get_option('fxwp_storage_limit', 21 * 1024 * 1024 * 1024);
     $mails_space = 4 * 1024 * 1024 * 1024; // 4GB reserved for emails
     $used_space = fxwp_get_directory_size(WP_CONTENT_DIR) + $mails_space;
     $available_space = $storage_limit - $used_space;
@@ -120,7 +121,7 @@ function fxwp_display_storage_limit_notice()
     printf(
         esc_html__('Ihr verfügbarer Speicherplatz beträgt %1$s von %2$s.', 'fxwp'),
         fxwp_format_file_size($available_space),
-        fxwp_format_file_size(FXWP_STORAGE_LIMIT)
+        fxwp_format_file_size(get_option('fxwp_storage_limit', 21 * 1024 * 1024 * 1024))
     );
     echo '</p>';
     echo '</div>';

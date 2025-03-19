@@ -900,8 +900,6 @@ function fxwp_add_options_pages()
 add_action('admin_menu', 'fxwp_add_options_pages');
 
 
-// Das JavaScript wird stattdessen an den admin_footer Hook angehängt,
-// damit es später ausgeführt wird, wenn die DOM-Elemente sicher geladen sind
 function fxwp_hide_submenu_item() {
     echo '<script>document.addEventListener("DOMContentLoaded", function() {document.querySelector("a[href=\'admin.php?page=fxwp-options\']").style.display = "none";});</script>';
 }
