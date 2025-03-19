@@ -1,3 +1,7 @@
+## v2.5.2 - 2025-03-19
+
+- Keine Änderungen seit letztem Release
+
 ## v2.5.1 - 2025-03-19
 
 - Update options-config.php
