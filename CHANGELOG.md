@@ -1,3 +1,7 @@
+## v2.5.1 - 2025-03-19
+
+- Update options-config.php
+
 ## v2.5.0 - 2025-03-12
 
 - Remove rank math dashboard for customers
