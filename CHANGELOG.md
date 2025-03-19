@@ -1,3 +1,7 @@
+## v2.5.3 - 2025-03-19
+
+- fxwp_storage_limit genutzt
+
 ## v2.5.2 - 2025-03-19
 
 - Keine Änderungen seit letztem Release
