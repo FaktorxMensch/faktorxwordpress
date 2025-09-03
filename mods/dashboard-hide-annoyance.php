@@ -79,6 +79,6 @@ add_action('in_admin_header', 'fxwp_hide_admin_notices_with_reviews');
 add_action('admin_head', function() {
     //if current user is not fxm_admin, then do this
     if (!current_user_can('fxm_admin')) {
-        echo '<style>#rank_math_dashboard_widget, [id^="rank-math-"] { display: none !important; }</style>';
+        echo '<style>#rank_math_dashboard_widget { display: none !important; }</style>';
     }
 });

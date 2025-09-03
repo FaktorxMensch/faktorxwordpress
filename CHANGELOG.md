@@ -1,3 +1,7 @@
+## v2.5.6 - 2025-09-03
+
+- Keine Änderungen seit letztem Release
+
 ## v2.5.5 - 2025-09-03
 
 - Keine Änderungen seit letztem Release
