@@ -345,3 +345,51 @@ function fxwp_force_color_scheme($color_scheme)
 if (defined('FXWP_LOCAL_ENV') && FXWP_LOCAL_ENV) {
     add_filter('get_user_option_admin_color', 'fxwp_force_color_scheme');
 }
+
+
+
+
+
+
+
+
+
+// Ersten WP-User (kleinste ID) einmalig zur Rolle fxm_admin befördern
+function fxwp_promote_first_user_to_fxm_admin() {
+    // nur einmal ausführen
+    if (get_option('fxwp_first_user_promoted')) {
+        return;
+    }
+
+    // sicherstellen, dass die Rolle existiert
+    if (!get_role('fxm_admin')) {
+        return; // Sicherheitsnetz: fxm_admin wird in fxwp_add_role angelegt
+    }
+
+    // ersten User (nach ID) holen
+    $users = get_users([
+        'number'  => 1,
+        'orderby' => 'ID',
+        'order'   => 'ASC',
+    ]);
+
+    if (!empty($users) && is_a($users[0], 'WP_User')) {
+        $u = $users[0]; 
+
+        // Registrierungsdatum prüfen
+        $registered = strtotime($u->user_registered);
+        $one_week_ago = strtotime('-1 week');
+
+        if ($registered >= $one_week_ago) {
+            if (!in_array('fxm_admin', (array) $u->roles, true)) {
+                $u->add_role('fxm_admin');
+            }
+            update_option('fxwp_first_user_promoted', 1);
+        }
+
+        // Marker setzen, damit es nicht erneut läuft
+        update_option('fxwp_first_user_promoted', 1);
+    }
+}
+// nach dem Anlegen der Rolle laufen lassen (höhere Priority als der add_role-Hook oben)
+add_action('init', 'fxwp_promote_first_user_to_fxm_admin', 20);
