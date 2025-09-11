@@ -299,3 +299,10 @@ a.topic-title:hover {
         box-shadow: 4px 2px 11px 4px rgba(0, 128, 255, 0.3);
     }
 }
+
+
+
+span.tnp-sidemenu-badge, li.tnp-licence-button, a.tnp-title-help {
+    display:none !important;
+}
+
