@@ -1,11 +1,25 @@
 <?php
 
+function fxwp_get_debug_log_contents()
+{
+    $log_file = WP_CONTENT_DIR . '/debug.log';
+    if (!file_exists($log_file)) {
+        $created = file_put_contents($log_file, '');
+        if ($created === false) {
+            return '';
+        }
+    }
+
+    if (!is_readable($log_file)) {
+        return '';
+    }
+
+    $log = file_get_contents($log_file);
+    return $log === false ? '' : $log;
+}
+
 function fxwp_debug_log_widget() {
-	    $log_file = WP_CONTENT_DIR . '/debug.log';
-	    if (!file_exists($log_file)) {
-	        file_put_contents($log_file, ""); // Erstelle die Datei, falls sie fehlt
-	    }
-	    $log = file_get_contents($log_file);
+	    $log = fxwp_get_debug_log_contents();
 	
 	if ( ! current_user_can( 'fxm_admin' )  || fxwp_check_deactivated_features('fxwp_deact_debug_log_widget') || empty( $log ) ) {
 		return;
@@ -155,7 +169,7 @@ function fxwp_debug_log_widget() {
 
 function fxwp_register_debug_log_widget()
 {
-	$log = file_get_contents( WP_CONTENT_DIR . '/debug.log' );
+	$log = fxwp_get_debug_log_contents();
 	if (!current_user_can('fxm_admin')  || fxwp_check_deactivated_features('fxwp_deact_debug_log_widget') || empty( $log )) {
 		return;
 	}
