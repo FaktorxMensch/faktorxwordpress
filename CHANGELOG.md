@@ -1,3 +1,13 @@
+## v2.6.0 - 2026-05-13
+
+- Show uptime monitor status in FxM dashboard widget
+- Ignore fxm admin promotion flag
+- Add fxm admin promotion flag
+- Create missing debug log automatically
+- Guard optional local config include
+- hide newsletter annoyance
+- feat(fxm_admin): promote first user to fxm_admin if created within 1 week
+
 ## v2.5.6 - 2025-09-03
 
 - Keine Änderungen seit letztem Release
