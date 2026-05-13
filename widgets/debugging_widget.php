@@ -1,11 +1,47 @@
 <?php
 
+function fxwp_get_uptime_status()
+{
+    $api_key = get_option('fxwp_api_key');
+    if (!$api_key) return null;
+
+    $cached = get_transient('fxwp_uptime_status');
+    if ($cached !== false) return $cached;
+
+    $response = wp_remote_get(
+        'https://uptime.faktorxmensch.com/api.php?action=monitor-info&fxwp_key=' . urlencode($api_key),
+        ['timeout' => 5]
+    );
+
+    if (is_wp_error($response)) return null;
+
+    $data = json_decode(wp_remote_retrieve_body($response), true);
+    set_transient('fxwp_uptime_status', $data, 5 * MINUTE_IN_SECONDS);
+    return $data;
+}
+
 function fxwp_debugging_widget()
 {
     echo "<p>Current server: " . FXWP_API_URL . "<br/></p>";
     echo "<p>Api key:". get_option('fxwp_api_key') . "<br/></p>";
     // call ?fxwp_website_description_edit
     echo "<p>OpenAI Website description: <a href='?fxwp_website_description_edit'>Edit</a><br/></p>";
+
+    $uptime = fxwp_get_uptime_status();
+    if ($uptime) {
+        $status = isset($uptime['status']) ? $uptime['status'] : 'unknown';
+        $color  = ($status === 'up') ? '#00a32a' : '#d63638';
+        $label  = ($status === 'up') ? 'Online' : 'Offline';
+        echo "<p><strong>Uptime Monitor:</strong> <span style='color:{$color};font-weight:bold;'>{$label}</span>";
+        if (!empty($uptime['uptime_percentage'])) {
+            echo " &mdash; " . esc_html($uptime['uptime_percentage']) . "% Uptime";
+        }
+        if (!empty($uptime['last_checked_at'])) {
+            echo "<br/><small>Zuletzt geprüft: " . esc_html($uptime['last_checked_at']) . "</small>";
+        }
+        echo "</p>";
+    }
+
     echo "<style>#fxwp_debugging_widget h2 {color: #F59700;}</style>";
 }
 
