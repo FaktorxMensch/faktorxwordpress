@@ -1,5 +1,10 @@
 ## v2.6.1 - 2026-05-15
 
+- Version number revert
+- Fixing uptime montior to show correct status
+
+## v2.6.1 - 2026-05-15
+
 - Keine Änderungen seit letztem Release
 
 ## v2.6.0 - 2026-05-13
