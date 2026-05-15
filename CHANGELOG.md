@@ -1,3 +1,7 @@
+## v2.6.1 - 2026-05-15
+
+- Keine Änderungen seit letztem Release
+
 ## v2.6.0 - 2026-05-13
 
 - Show uptime monitor status in FxM dashboard widget
