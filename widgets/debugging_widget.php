@@ -29,15 +29,15 @@ function fxwp_debugging_widget()
 
     $uptime = fxwp_get_uptime_status();
     if ($uptime) {
-        $status = isset($uptime['status']) ? $uptime['status'] : 'unknown';
-        $color  = ($status === 'up') ? '#00a32a' : '#d63638';
-        $label  = ($status === 'up') ? 'Online' : 'Offline';
+        $status = isset($uptime['monitor']['last_status']) ? $uptime['monitor']['last_status'] : 'unknown';
+        $color  = ($status === 'UP') ? '#00a32a' : '#d63638';
+        $label  = ($status === 'UP') ? 'Online' : 'Offline';
         echo "<p><strong>Uptime Monitor:</strong> <span style='color:{$color};font-weight:bold;'>{$label}</span>";
-        if (!empty($uptime['uptime_percentage'])) {
-            echo " &mdash; " . esc_html($uptime['uptime_percentage']) . "% Uptime";
+        if (isset($uptime['monitor']['html_hash_alert'])) {
+            echo "<br/><small>HTML Change Notification: " . ($uptime['monitor']['html_hash_alert']?  "Ja" : "Nein") . "</small>";
         }
-        if (!empty($uptime['last_checked_at'])) {
-            echo "<br/><small>Zuletzt geprüft: " . esc_html($uptime['last_checked_at']) . "</small>";
+        if (!empty($uptime['monitor']['last_checked_at'])) {
+            echo "<br/><small>Zuletzt geprüft: " . esc_html($uptime['monitor']['last_checked_at']) . "</small>";
         }
         echo "</p>";
     }
