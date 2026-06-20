@@ -1,3 +1,7 @@
+## v2.7.0 - 2026-06-20
+
+- Make backups reliable, resumable & secure
+
 ## v2.6.1 - 2026-05-15
 
 - Release v2.6.1
