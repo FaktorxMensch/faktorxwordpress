@@ -44,6 +44,46 @@ function fxwp_get_backup_tag($backup)
 //add_action('init', 'fxwp_mock_backups');
 //add_action('init', 'fxwp_delete_expired_backups');
 
+/**
+ * Stream a backup file to the browser through PHP.
+ *
+ * Backups are no longer web-accessible (the directory is denied via .htaccess),
+ * so downloads go through here where we can enforce a capability check, the
+ * existing nonce, and -- crucially -- guard against path traversal via the
+ * user-supplied filename.
+ */
+function fxwp_download_backup($backupFile, $type = 'files')
+{
+    if (!current_user_can('administrator')) {
+        wp_die('Insufficient permissions');
+    }
+
+    // Reject anything that isn't a plain backup filename to stop ../ traversal.
+    $backupFile = basename(wp_unslash($backupFile));
+    if (!preg_match('/^backup_[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2}\.zip$/', $backupFile)) {
+        wp_die('Invalid backup file');
+    }
+
+    $path = WP_CONTENT_DIR . '/fxwp-backups/' . $backupFile;
+    if ($type === 'db') {
+        $path .= '.sql';
+    }
+
+    // Make sure the resolved path is still inside the backup directory.
+    $backupDir = realpath(WP_CONTENT_DIR . '/fxwp-backups/');
+    $realPath = realpath($path);
+    if ($realPath === false || strpos($realPath, $backupDir) !== 0 || !is_file($realPath)) {
+        wp_die('Backup file not found');
+    }
+
+    nocache_headers();
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename="' . basename($realPath) . '"');
+    header('Content-Length: ' . filesize($realPath));
+    readfile($realPath);
+    exit;
+}
+
 function fxwp_backups_page()
 {
     // Check if a backup action was submitted
@@ -75,6 +115,9 @@ function fxwp_backups_page()
                 // do cron manually but first sent the user to the backup page
                 wp_redirect(admin_url('admin.php?page=fxwp-backups'));
                 do_action('fxwp_backup_task');
+                break;
+            case 'download':
+                fxwp_download_backup($_GET['backup_file'], isset($_GET['type']) ? $_GET['type'] : 'files');
                 break;
         }
     }
@@ -175,12 +218,14 @@ function fxwp_backups_page()
                         <?php } else {
                             echo "<a class='button button-warning'>Backup fehlerhaft!</a>";
                         } ?>
-                        <!-- have download files and db backup -->
-                        <a href="<?php echo esc_url(content_url('fxwp-backups/' . $backup . '.sql')); ?>"
+                        <!-- have download files and db backup (routed through a
+                             capability- and nonce-checked PHP handler since the
+                             backup directory is no longer web-accessible) -->
+                        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=download&type=db&backup_file=' . $backup), 'fxwp_critical'); ?>"
                            class="button button-secondary">
                             <?php _e('Datenbank herunterladen', 'fxwp'); ?>
                         </a>
-                        <a href="<?php echo esc_url(content_url('fxwp-backups/' . $backup)); ?>"
+                        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=download&type=files&backup_file=' . $backup), 'fxwp_critical'); ?>"
                            class="button button-secondary">
                             <?php _e('Dateien herunterladen', 'fxwp'); ?>
                         </a>

@@ -4,55 +4,663 @@ if (!defined('ABSPATH')) {
 }
 require_once plugin_dir_path(__FILE__) . '../includes/helpers.php';
 
+/**
+ * Backup engine -- chunked & resumable.
+ *
+ * A backup is run as a *job* whose state lives in the option `fxwp_backup_state`.
+ * Each invocation of the cron processes one time-budgeted "slice" of the job and,
+ * if more work remains, schedules itself to continue. This decouples "how long a
+ * backup takes" from "how long a single PHP request may run", which is the root
+ * cause of the orphaned-".sql-without-.zip" failures customers report: previously
+ * the whole site was zipped in a single ZipArchive::close(), and any timeout or
+ * disk hiccup during that one spike left a half-written archive behind.
+ *
+ * Phases:
+ *   db       -> dump the database (mysqldump, or a resumable per-table PHP fallback)
+ *   files    -> add site files to the zip in batches, closing/reopening each slice
+ *   finalize -> verify integrity, run retention, record success
+ */
+
 if (!wp_next_scheduled('fxwp_backup_task')) {
-//    wp_schedule_event(time(), 'hourly', 'fxwp_backup_task');
     wp_schedule_event(time(), FXWP_BACKUP_INTERVAL, 'fxwp_backup_task');
 }
 
-add_action('fxwp_backup_task', function () {
+// Both the recurring schedule and the self-rescheduled "continue" event drive the
+// same tick. The continue event lets a long backup advance across many short
+// requests instead of needing one long one.
+add_action('fxwp_backup_task', 'fxwp_backup_tick');
+add_action('fxwp_backup_continue', 'fxwp_backup_tick');
+
+/**
+ * Cron entry point. Advances a running job, or starts a new one when due.
+ */
+function fxwp_backup_tick()
+{
     if (fxwp_check_deactivated_features('fxwp_deact_backups')) {
         return;
     }
 
-    // Check if the last backup was not completed.
-    $completed = get_option('fxwp_backup_expected_completion', null); // Default to 1 to assume previous success if not set
+    // Heartbeat: record that the backup cron actually fired. The dashboard uses
+    // this to warn if backups have effectively stopped running (e.g. no traffic
+    // to drive WP-Cron and no external cron configured).
+    fxwp_backup_record_cron_run();
 
-    if ($completed === 0) {  // Use strict comparison
-        // Last backup was interrupted
-        $message = "The previous backup attempt was not completed successfully on site: " . get_site_url();
-        $headers = array('Content-Type: text/html; charset=UTF-8');
-        wp_mail(FXWP_ERROR_EMAIL, 'Backup not completed on ' . get_site_url(), $message, $headers);
-    }
-
-    // Reset the expected completion status
-    update_option('fxwp_backup_expected_completion', 0);
+    $budget = (int)get_option('fxwp_backup_time_budget', 15); // seconds per slice
 
     try {
-        // Attempt to set the maximum execution time to 180 seconds.
-        // Note: This might not work on all server configurations.
-        set_time_limit(180);
-        //fix max_execution_time if .user.ini exists
-        fxwp_fix_execution_time();
-        fxwp_create_backup();
-        fxwp_delete_expired_backups();
-        update_option('fxwp_backup_expected_completion', 1); // Mark as completed successfully
-    } catch (Exception $e) {
-        // Leave the completion status as 0 if there's an error
-        $message = "Backup process failed with error: " . $e->getMessage();
+        $state = get_option('fxwp_backup_state', array());
+        if (!empty($state['active'])) {
+            // A job is in progress -> advance it by one slice.
+            fxwp_backup_process_slice($budget);
+        } else {
+            // Start a new job only if one is due. Gate on both last completion and
+            // last attempt so a frequent external cron can't trigger a start storm.
+            $last = max(
+                (int)get_option('fxwp_backup_last_completed', 0),
+                (int)get_option('fxwp_backup_last_attempt', 0)
+            );
+            if (time() - $last >= fxwp_backup_interval_seconds() - 300) {
+                fxwp_backup_start();
+                fxwp_backup_process_slice($budget);
+            }
+        }
+    } catch (\Throwable $e) {
+        $msg = 'Backup process failed on ' . get_site_url() . ': ' . $e->getMessage();
+        error_log($msg);
         $headers = array('Content-Type: text/html; charset=UTF-8');
-        wp_mail(FXWP_ERROR_EMAIL, 'Backup failed on ' . get_site_url(), $message, $headers);
+        wp_mail(FXWP_ERROR_EMAIL, 'Backup failed on ' . get_site_url(), $msg, $headers);
     }
-});
+}
+
+/**
+ * Map the configured WP-Cron schedule name to seconds.
+ */
+function fxwp_backup_interval_seconds()
+{
+    $map = array(
+        'hourly'     => HOUR_IN_SECONDS,
+        'twicedaily' => 12 * HOUR_IN_SECONDS,
+        'daily'      => DAY_IN_SECONDS,
+        'weekly'     => WEEK_IN_SECONDS,
+    );
+    $i = FXWP_BACKUP_INTERVAL;
+    return isset($map[$i]) ? $map[$i] : 12 * HOUR_IN_SECONDS;
+}
+
+/**
+ * Record a cron heartbeat (keeps a short rolling history for the dashboard).
+ */
+function fxwp_backup_record_cron_run()
+{
+    update_option('fxwp_backup_cron_last_run', time());
+    $runs = get_option('fxwp_backup_cron_runs', array());
+    if (!is_array($runs)) {
+        $runs = array();
+    }
+    $runs[] = time();
+    if (count($runs) > 60) {
+        $runs = array_slice($runs, -60);
+    }
+    update_option('fxwp_backup_cron_runs', $runs);
+}
+
+/**
+ * Health summary for the dashboard widget / login warning.
+ *
+ * @return array{last_run:int,runs_last_7d:int,last_backup:int,healthy:bool}
+ */
+function fxwp_backup_cron_health()
+{
+    $last = (int)get_option('fxwp_backup_cron_last_run', 0);
+    $runs = get_option('fxwp_backup_cron_runs', array());
+    if (!is_array($runs)) {
+        $runs = array();
+    }
+    $weekAgo = time() - WEEK_IN_SECONDS;
+    $recent = array_filter($runs, function ($t) use ($weekAgo) {
+        return (int)$t >= $weekAgo;
+    });
+
+    return array(
+        'last_run'     => $last,
+        'runs_last_7d' => count($recent),
+        'last_backup'  => (int)get_option('fxwp_backup_last_completed', 0),
+        // "Runs at least once a week" is the bar we promise customers.
+        'healthy'      => (count($recent) >= 1) && ($last >= $weekAgo),
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Job lifecycle                                                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Begin a new backup job: prepare the directory, run pre-flight checks and write
+ * the initial state. Throws (caught by the tick) if the environment isn't ready.
+ */
+function fxwp_backup_start()
+{
+    fxwp_backup_raise_limits();
+    fxwp_fix_execution_time();
+
+    // Throttle starts regardless of outcome so a frequent external cron can't
+    // re-trigger a failing backup every few minutes.
+    update_option('fxwp_backup_last_attempt', time());
+
+    $backupDir = ABSPATH . 'wp-content/fxwp-backups/';
+    if (!file_exists($backupDir)) {
+        mkdir($backupDir, 0755, true);
+    }
+
+    fxwp_check_backup_permissions($backupDir);
+    fxwp_secure_backup_dir($backupDir);
+    fxwp_check_backup_disk_space($backupDir);
+
+    $base = 'backup_' . date('Y-m-d_H-i-s');
+    // The DB dump is written first and incrementally; start it empty.
+    @file_put_contents($backupDir . $base . '.zip.sql', '');
+
+    $state = array(
+        'active'          => true,
+        'base'            => $base,
+        'phase'           => 'db',
+        'started_at'      => time(),
+        'tables'          => fxwp_backup_list_tables(),
+        'table_offset'    => 0,
+        'php_dump'        => false,
+        'mysqldump_tried' => false,
+        'db_header'       => false,
+        'manifest_built'  => false,
+        'file_index'      => 0,
+        'total_files'     => 0,
+        'attempts'        => 0,
+        'error'           => '',
+    );
+
+    update_option('fxwp_backup_expected_completion', 0);
+    update_option('fxwp_backup_state', $state);
+    error_log('fxwp backup started: ' . $base);
+}
+
+/**
+ * Process one slice of the active job. With $budgetSeconds === 0 it runs the job
+ * to completion (used by the manual "create backup now" button).
+ */
+function fxwp_backup_process_slice($budgetSeconds)
+{
+    fxwp_backup_raise_limits();
+
+    $state = get_option('fxwp_backup_state', array());
+    if (empty($state['active'])) {
+        return;
+    }
+
+    $state['attempts'] = (int)$state['attempts'] + 1;
+    $deadline = $budgetSeconds > 0 ? microtime(true) + $budgetSeconds : 0;
+
+    $backupDir  = ABSPATH . 'wp-content/fxwp-backups/';
+    $backupFile = $backupDir . $state['base'] . '.zip';
+    $dumpFile   = $backupFile . '.sql';
+
+    try {
+        do {
+            switch ($state['phase']) {
+                case 'db':
+                    fxwp_backup_db_phase($state, $dumpFile, $deadline);
+                    break;
+                case 'files':
+                    fxwp_backup_files_phase($state, $backupDir, $backupFile, $deadline);
+                    break;
+                case 'finalize':
+                    fxwp_backup_finalize($state, $backupDir, $backupFile, $dumpFile);
+                    break;
+                default:
+                    $state['active'] = false;
+            }
+            update_option('fxwp_backup_state', $state);
+        } while (!empty($state['active']) && ($deadline == 0 || microtime(true) < $deadline));
+    } catch (\Throwable $e) {
+        // Abort the job (don't loop forever on a hard error). Any DB dump already
+        // written is kept on disk as a usable database-only backup.
+        $state['active'] = false;
+        $state['error']  = $e->getMessage();
+        update_option('fxwp_backup_state', $state);
+        throw new Exception($e->getMessage());
+    }
+
+    if (!empty($state['active'])) {
+        fxwp_backup_schedule_continue();
+    }
+}
+
+/**
+ * Ask WP to fire another tick soon, so a running job keeps advancing even on a
+ * site whose only driver is WP-Cron. (Single events are de-duplicated.)
+ */
+function fxwp_backup_schedule_continue()
+{
+    if (!wp_next_scheduled('fxwp_backup_continue')) {
+        wp_schedule_single_event(time() + 30, 'fxwp_backup_continue');
+    }
+}
+
+function fxwp_backup_raise_limits()
+{
+    @ini_set('memory_limit', '512M');
+    @set_time_limit(0);
+    @ignore_user_abort(true);
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Phase: database                                                            */
+/* -------------------------------------------------------------------------- */
+
+function fxwp_backup_db_phase(&$state, $dumpFile, $deadline)
+{
+    if (empty($state['php_dump'])) {
+        if (empty($state['mysqldump_tried'])) {
+            // Persist the "tried" flag *before* shelling out, so a crash mid-dump
+            // doesn't make us retry mysqldump forever.
+            $state['mysqldump_tried'] = true;
+            update_option('fxwp_backup_state', $state);
+
+            if (fxwp_backup_mysqldump_full($dumpFile) && @filesize($dumpFile) > 0) {
+                $state['phase'] = 'files';
+                return;
+            }
+            error_log('fxwp backup: mysqldump unavailable/failed, falling back to PHP dump');
+        }
+        // Switch to the resumable PHP dump and start the .sql from scratch.
+        $state['php_dump'] = true;
+        @file_put_contents($dumpFile, '');
+    }
+
+    // Resumable, table-by-table PHP dump.
+    $mysqli = fxwp_backup_db_connect();
+    if (empty($state['db_header'])) {
+        file_put_contents($dumpFile, "SET FOREIGN_KEY_CHECKS=0;\n", FILE_APPEND);
+        $state['db_header'] = true;
+    }
+
+    while (!empty($state['tables'])) {
+        if ($deadline && microtime(true) >= $deadline) {
+            $mysqli->close();
+            return; // resume this table next slice
+        }
+        $table  = $state['tables'][0];
+        $offset = (int)$state['table_offset'];
+        $done   = fxwp_backup_php_dump_table($mysqli, $table, $dumpFile, $offset, $deadline);
+        $state['table_offset'] = $offset;
+        if ($done) {
+            array_shift($state['tables']);
+            $state['table_offset'] = 0;
+        } else {
+            $mysqli->close();
+            return; // deadline hit mid-table; resume from $offset next slice
+        }
+    }
+
+    file_put_contents($dumpFile, "SET FOREIGN_KEY_CHECKS=1;\n", FILE_APPEND);
+    $mysqli->close();
+    $state['phase'] = 'files';
+}
+
+/**
+ * Run a hardened single-shot mysqldump of the whole database.
+ *
+ * Hardening over the old command:
+ *   - credentials passed via a 0600 --defaults-extra-file (not on the command
+ *     line, so they don't leak through `ps`), and escapeshellarg'd paths;
+ *   - DB_HOST parsed for host:port / socket forms (the old --host='localhost:3306'
+ *     silently broke mysqldump);
+ *   - --single-transaction --quick for a consistent, low-memory InnoDB dump;
+ *   - stderr captured and logged, and a return-code + non-empty-file check so a
+ *     failed dump is detected instead of leaving a truncated .sql behind.
+ *
+ * @return bool true on success.
+ */
+function fxwp_backup_mysqldump_full($dumpFile)
+{
+    if (!function_exists('exec')) {
+        return false;
+    }
+    $disabled = array_map('trim', explode(',', (string)ini_get('disable_functions')));
+    if (in_array('exec', $disabled, true)) {
+        return false;
+    }
+
+    list($host, $port, $socket) = fxwp_backup_parse_db_host(DB_HOST);
+
+    $cnf = tempnam(sys_get_temp_dir(), 'fxwpcnf');
+    if ($cnf === false) {
+        return false;
+    }
+    $ini = "[client]\nuser=" . DB_USER . "\npassword=" . DB_PASSWORD . "\n";
+    if ($socket !== '') {
+        $ini .= "socket=" . $socket . "\n";
+    } else {
+        $ini .= "host=" . $host . "\n";
+        if ($port !== '') {
+            $ini .= "port=" . $port . "\n";
+        }
+    }
+    file_put_contents($cnf, $ini);
+    @chmod($cnf, 0600);
+
+    $errFile = $dumpFile . '.err';
+    $cmd = 'mysqldump --defaults-extra-file=' . escapeshellarg($cnf)
+        . ' --single-transaction --quick --no-tablespaces --skip-lock-tables'
+        . ' --default-character-set=utf8mb4 ' . escapeshellarg(DB_NAME)
+        . ' > ' . escapeshellarg($dumpFile)
+        . ' 2> ' . escapeshellarg($errFile);
+
+    $out = array();
+    $rv = null;
+    @exec($cmd, $out, $rv);
+    @unlink($cnf);
+
+    if ($rv !== 0) {
+        $err = @file_get_contents($errFile);
+        error_log('fxwp mysqldump failed (rv=' . $rv . '): ' . substr((string)$err, 0, 500));
+        @unlink($errFile);
+        return false;
+    }
+    @unlink($errFile);
+    return true;
+}
+
+/**
+ * Parse a WordPress DB_HOST into [host, port, socket].
+ * Handles "localhost", "127.0.0.1:3306", "localhost:/path/to/sock" and "/path/sock".
+ */
+function fxwp_backup_parse_db_host($h)
+{
+    $host = (string)$h;
+    $port = '';
+    $socket = '';
+    if ($host !== '' && $host[0] === '/') {
+        return array('', '', $host); // bare socket path
+    }
+    if (strpos($host, ':') !== false) {
+        list($a, $b) = explode(':', $host, 2);
+        $host = $a;
+        if (is_numeric($b)) {
+            $port = $b;
+        } else {
+            $socket = $b;
+        }
+    }
+    return array($host, $port, $socket);
+}
+
+function fxwp_backup_db_connect()
+{
+    list($host, $port, $socket) = fxwp_backup_parse_db_host(DB_HOST);
+    $mysqli = @new mysqli(
+        $host !== '' ? $host : null,
+        DB_USER,
+        DB_PASSWORD,
+        DB_NAME,
+        $port !== '' ? (int)$port : 0,
+        $socket !== '' ? $socket : null
+    );
+    if ($mysqli->connect_error) {
+        throw new Exception('Failed to connect to the database: ' . $mysqli->connect_error);
+    }
+    @$mysqli->set_charset('utf8mb4');
+    return $mysqli;
+}
+
+function fxwp_backup_list_tables()
+{
+    $mysqli = fxwp_backup_db_connect();
+    $tables = array();
+    $result = $mysqli->query('SHOW TABLES');
+    if ($result) {
+        while ($row = $result->fetch_array(MYSQLI_NUM)) {
+            $tables[] = $row[0];
+        }
+    }
+    $mysqli->close();
+    return $tables;
+}
+
+/**
+ * Dump one table to $dumpFile in row batches, resuming from $offset.
+ *
+ * Correctness fixes over the old fallback: NULLs are written as NULL (not ""),
+ * and rows are streamed in batches so a large table never buffers fully in PHP
+ * memory and can be paused/resumed at a deadline.
+ *
+ * @param int  $offset  In/out: row offset to resume from; updated as rows are written.
+ * @return bool true when the table is fully dumped, false if paused at the deadline.
+ */
+function fxwp_backup_php_dump_table($mysqli, $table, $dumpFile, &$offset, $deadline)
+{
+    $batch = (int)get_option('fxwp_backup_rows_per_batch', 2000);
+    $tableEsc = str_replace('`', '``', $table);
+
+    if ($offset === 0) {
+        $create = $mysqli->query('SHOW CREATE TABLE `' . $tableEsc . '`');
+        $createRow = $create ? $create->fetch_row() : null;
+        $header = "\nDROP TABLE IF EXISTS `" . $tableEsc . "`;\n";
+        if ($createRow) {
+            $header .= $createRow[1] . ";\n";
+        }
+        file_put_contents($dumpFile, $header, FILE_APPEND);
+    }
+
+    while (true) {
+        if ($deadline && microtime(true) >= $deadline) {
+            return false; // paused
+        }
+        $result = $mysqli->query('SELECT * FROM `' . $tableEsc . '` LIMIT ' . $batch . ' OFFSET ' . $offset);
+        if (!$result || $result->num_rows === 0) {
+            return true; // done
+        }
+        $numFields = $result->field_count;
+        $buf = '';
+        while ($row = $result->fetch_row()) {
+            $vals = array();
+            for ($k = 0; $k < $numFields; $k++) {
+                $vals[] = $row[$k] === null ? 'NULL' : "'" . $mysqli->real_escape_string($row[$k]) . "'";
+            }
+            $buf .= 'INSERT INTO `' . $tableEsc . '` VALUES(' . implode(',', $vals) . ");\n";
+        }
+        file_put_contents($dumpFile, $buf, FILE_APPEND);
+
+        $rows = $result->num_rows;
+        $offset += $rows;
+        $result->free();
+        if ($rows < $batch) {
+            return true; // last page
+        }
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Phase: files                                                              */
+/* -------------------------------------------------------------------------- */
+
+function fxwp_backup_files_phase(&$state, $backupDir, $backupFile, $deadline)
+{
+    $rootDir  = ABSPATH;
+    $manifest = $backupDir . '.' . $state['base'] . '.files';
+
+    if (empty($state['manifest_built'])) {
+        fxwp_backup_build_manifest($rootDir, $manifest, $state);
+        $state['manifest_built'] = true;
+        $state['file_index'] = 0;
+    }
+
+    $lines = file($manifest, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) {
+        $lines = array();
+    }
+    $total = count($lines);
+    $state['total_files'] = $total;
+
+    $zip = new ZipArchive();
+    // First slice creates the archive; later slices append to it. Closing the zip
+    // each slice means we never rely on one giant final close() that can time out.
+    $flag = ((int)$state['file_index'] === 0) ? (ZipArchive::CREATE | ZipArchive::OVERWRITE) : 0;
+    if ($zip->open($backupFile, $flag) !== true) {
+        throw new Exception('Failed to open backup zip: ' . $backupFile . ' (' . $zip->getStatusString() . ')');
+    }
+
+    $i = (int)$state['file_index'];
+    $added = 0;
+    $perSlice = (int)get_option('fxwp_backup_files_per_slice', 300);
+    for (; $i < $total; $i++) {
+        if ($deadline) {
+            if (microtime(true) >= $deadline || $added >= $perSlice) {
+                break;
+            }
+        }
+        $path = $lines[$i];
+        if (is_file($path)) {
+            $rel = substr($path, strlen($rootDir));
+            @$zip->addFile($path, $rel);
+        }
+        $added++;
+    }
+
+    if ($zip->close() !== true) {
+        throw new Exception('Failed to close backup zip: ' . $backupFile);
+    }
+
+    // Advance the cursor only after a successful flush.
+    $state['file_index'] = $i;
+    if ($i >= $total) {
+        $state['phase'] = 'finalize';
+    }
+}
+
+/**
+ * Build the list of files to archive.
+ *
+ * Exclusions match whole path *segments* (not substrings), so we no longer
+ * accidentally drop legitimate files like a plugin named "...-cache" or any path
+ * that merely contains the word "backup" -- a bug that silently produced
+ * incomplete, unrestorable archives.
+ */
+function fxwp_backup_build_manifest($rootDir, $manifest, &$state)
+{
+    $fh = fopen($manifest, 'w');
+    if ($fh === false) {
+        throw new Exception('Cannot write backup manifest: ' . $manifest);
+    }
+
+    $it = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($rootDir, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::LEAVES_ONLY,
+        RecursiveIteratorIterator::CATCH_GET_CHILD // skip unreadable dirs
+    );
+
+    $count = 0;
+    foreach ($it as $file) {
+        if ($file->isDir()) {
+            continue;
+        }
+        $path = $file->getPathname();
+        $rel  = substr($path, strlen($rootDir));
+        if (fxwp_backup_is_excluded($rel)) {
+            continue;
+        }
+        fwrite($fh, $path . "\n");
+        $count++;
+    }
+    fclose($fh);
+    $state['total_files'] = $count;
+}
+
+function fxwp_backup_is_excluded($relativePath)
+{
+    $exclude = array(
+        'fxwp-backups', 'cache', 'upgrade', 'backwpup', 'wp-clone',
+        'snapshots', 'updraft', 'ai1wm-backups', 'node_modules', '.git',
+    );
+    $segments = explode('/', str_replace('\\', '/', trim($relativePath, '/')));
+    foreach ($segments as $seg) {
+        if (in_array(strtolower($seg), $exclude, true)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Phase: finalize                                                            */
+/* -------------------------------------------------------------------------- */
+
+function fxwp_backup_finalize(&$state, $backupDir, $backupFile, $dumpFile)
+{
+    // Integrity check: the zip must be openable with files in it, and the SQL
+    // dump must be non-empty. Only then do we treat the backup as good.
+    $reason = '';
+    if (!file_exists($backupFile)) {
+        $reason = 'zip file missing';
+    } else {
+        $zip = new ZipArchive();
+        if ($zip->open($backupFile) !== true) {
+            $reason = 'zip not openable';
+        } else {
+            if ($zip->numFiles <= 0) {
+                $reason = 'zip contains no files';
+            }
+            $zip->close();
+        }
+    }
+    if ($reason === '' && (!file_exists($dumpFile) || @filesize($dumpFile) <= 0)) {
+        $reason = 'database dump empty or missing';
+    }
+
+    if ($reason !== '') {
+        $state['active'] = false;
+        $state['error'] = $reason;
+        throw new Exception('Backup verification failed: ' . $reason);
+    }
+
+    fxwp_delete_expired_backups();
+    update_option('fxwp_backup_last_completed', time());
+    update_option('fxwp_backup_expected_completion', 1);
+    @unlink($backupDir . '.' . $state['base'] . '.files');
+
+    $state['active'] = false;
+    error_log('fxwp backup completed: ' . $state['base']);
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Manual / synchronous entry point (admin "create backup now")              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Run a backup to completion in the current request. Used by the admin button.
+ * Resumes an in-progress job if one exists, otherwise starts a fresh one.
+ */
+function fxwp_create_backup(): void
+{
+    $state = get_option('fxwp_backup_state', array());
+    if (empty($state['active'])) {
+        fxwp_backup_start();
+    }
+    do {
+        fxwp_backup_process_slice(0); // 0 = no time budget: run to completion
+        $state = get_option('fxwp_backup_state', array());
+    } while (!empty($state['active']));
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Pre-flight checks                                                          */
+/* -------------------------------------------------------------------------- */
 
 function fxwp_check_backup_permissions($backupDir)
 {
-
     if (!is_writable($backupDir)) {
         error_log("Backup directory not writable: $backupDir");
         throw new Exception("Backup directory not writable");
     }
 
-    // Test file creation
     $testFile = $backupDir . 'test.tmp';
     if (@file_put_contents($testFile, 'test') === false) {
         error_log("Cannot write to backup directory: $backupDir");
@@ -61,262 +669,130 @@ function fxwp_check_backup_permissions($backupDir)
     unlink($testFile);
 }
 
-function fxwp_create_backup(): void
+/**
+ * Block all web access to the backup directory.
+ *
+ * Backups bundle the database dump and wp-config.php (which holds the DB
+ * credentials), so they must never be downloadable at a guessable URL. We drop
+ * both an .htaccess (Apache / LiteSpeed) and an empty index.html (directory
+ * listing fallback for any server). On nginx, location-level denies must still
+ * be configured at the server level -- the admin download buttons go through a
+ * capability- and nonce-checked PHP handler instead of a direct file URL.
+ */
+function fxwp_secure_backup_dir($backupDir)
 {
-    error_log('Creating backup');
-
-    // Increase limits
-    ini_set('memory_limit', '512M');
-    set_time_limit(300); // 5 minutes
-
-    // Define the WordPress root directory
-    $rootDir = ABSPATH;
-
-    // Define the backup directory
-    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
-
-    /* ------------------- Debugging ------------------- */
-    error_log("Current PHP process user: " . posix_getpwuid(posix_geteuid())['name']);
-    error_log("Backup directory owner: " . posix_getpwuid(fileowner($backupDir))['name']);
-
-    $tempDir = sys_get_temp_dir();
-    error_log("Temp directory: " . $tempDir);
-    error_log("Temp directory writable: " . (is_writable($tempDir) ? 'yes' : 'no'));
-
-    $freeSpace = disk_free_space($backupDir);
-    error_log("Free space in backup directory: " . $freeSpace . " bytes");
-    /* ------------------- Debugging end ------------------- */
-
-    // Check if the backup directory exists, if not, create it
-    if (!file_exists($backupDir)) {
-        mkdir($backupDir, 0755, true);
+    $htaccess = $backupDir . '.htaccess';
+    if (!file_exists($htaccess)) {
+        $rules = "# Added by Faktor x WordPress -- backups contain DB dumps and credentials.\n"
+            . "<IfModule mod_authz_core.c>\n"
+            . "    Require all denied\n"
+            . "</IfModule>\n"
+            . "<IfModule !mod_authz_core.c>\n"
+            . "    Order allow,deny\n"
+            . "    Deny from all\n"
+            . "</IfModule>\n";
+        @file_put_contents($htaccess, $rules);
     }
 
-    fxwp_check_backup_permissions($backupDir);
-
-    // Define the name of the backup file
-    $backupFile = $backupDir . 'backup_' . date('Y-m-d_H-i-s') . '.zip';
-
-    // Dump the Database
-    $dumpFile = $backupFile . '.sql';
-
-    // take wp-configs DB credentials
-    $output = array();
-    $returnValue = null;
-    exec("mysqldump --user='" . DB_USER . "' --password='" . DB_PASSWORD . "' --host='" . DB_HOST . "' '" . DB_NAME . "' > $dumpFile", $output, $returnValue);
-
-    // if mysqldump failed
-    if ($returnValue !== 0) {
-        error_log("mysqldump failed with error code: $returnValue");
-        error_log("Trying to dump the database using PHP");
-        // fall back to PHP
-        $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
-
-        if ($mysqli->connect_error) {
-            error_log("Failed to connect to the database: " . $mysqli->connect_error);
-            throw new Exception("Failed to connect to the database: " . $mysqli->connect_error);
-//		    die( 'Connect Error (' . $mysqli->connect_errno . ') '
-//		         . $mysqli->connect_error );
-        }
-
-        $tables = array();
-        $result = $mysqli->query('SHOW TABLES');
-        while ($row = $result->fetch_array(MYSQLI_NUM)) {
-            $tables[] = $row[0];
-        }
-
-        $sql = 'SET FOREIGN_KEY_CHECKS=0;' . "\n";
-        foreach ($tables as $table) {
-            $result = $mysqli->query('SELECT * FROM ' . $table);
-            $numFields = $result->field_count;
-            $numRows = $result->num_rows;
-            $i = 0;
-
-            $sql .= 'DROP TABLE IF EXISTS ' . $table . ';';
-            $row2 = $mysqli->query('SHOW CREATE TABLE ' . $table)->fetch_row();
-            $sql .= "\n\n" . $row2[1] . ";\n\n";
-
-            for ($j = 0; $j < $numFields; $j++) {
-                while ($row = $result->fetch_row()) {
-                    if ($i % $numRows == 0) {
-                        $sql .= 'INSERT INTO ' . $table . ' VALUES(';
-                    } else {
-                        $sql .= '(';
-                    }
-
-                    for ($k = 0; $k < $numFields; $k++) {
-                        if (isset($row[$k])) {
-                            $sql .= '"' . $mysqli->real_escape_string($row[$k]) . '"';
-                        } else {
-                            $sql .= '""';
-                        }
-                        if ($k < $numFields - 1) {
-                            $sql .= ',';
-                        }
-                    }
-
-                    if ((($i + 1) % $numRows) == 0) {
-                        $sql .= ");";
-                    } else {
-                        $sql .= "),";
-                    }
-                    $i++;
-                }
-            }
-        }
-        $sql .= "\n\n\n";
-
-
-        $sql .= 'SET FOREIGN_KEY_CHECKS=1;';
-
-        // Write the SQL dump to a file
-        file_put_contents($dumpFile, $sql);
-
-        // wenn der speicher zu 95% voll ist, dann schrei eine email an uns
-        $freeSpace = disk_free_space($backupDir);
-        $totalSpace = disk_total_space($backupDir);
-        $usedSpace = $totalSpace - $freeSpace;
-        $percentUsed = ($usedSpace / $totalSpace) * 100;
-        // use a var
-        if ($percentUsed > get_option('fxwp_backup_storage_warning_percent', 80)) {
-            $to = FXWP_ERROR_EMAIL;
-            $subject = 'Backup storage almost full on ' . get_site_url();
-            $message = 'The backup storage is almost full on ' . get_site_url() . '. Used space: ' . fxwp_format_file_size($usedSpace) . ' of ' . fxwp_format_file_size($totalSpace) . ' (' . number_format($percentUsed, 2) . '%)';
-            $headers = array('Content-Type: text/html; charset=UTF-8');
-            wp_mail($to, $subject, $message, $headers);
-        }
+    $index = $backupDir . 'index.html';
+    if (!file_exists($index)) {
+        @file_put_contents($index, '');
     }
-    // Check if the dump file was created
-    if (!file_exists($dumpFile)) {
-        error_log("Failed to create database dump file $dumpFile");
-        throw new Exception("Failed to create database dump file $dumpFile");
+}
+
+/**
+ * Abort the backup before writing anything if there isn't enough space.
+ *
+ * IMPORTANT: on shared hosting disk_free_space()/disk_total_space() report the
+ * *physical filesystem* (often many TB), not your account quota -- so they can
+ * say "2 TB free" while your 20 GB plan is full. We therefore prefer the
+ * quota-aware figure from fxwp_get_available_storage_space() (used vs configured
+ * fxwp_storage_limit), and only fall back to disk_free_space() if it's missing.
+ */
+function fxwp_check_backup_disk_space($backupDir)
+{
+    // Estimate the next backup's size from the largest existing one (+50% margin),
+    // with a 512 MB floor when there's nothing to measure yet.
+    $largest = 0;
+    foreach (glob($backupDir . 'backup_*.zip') as $existing) {
+        $largest = max($largest, (int)@filesize($existing));
     }
+    $required = max((int)($largest * 1.5), 512 * 1024 * 1024);
 
-    // Create a new zip archive
-    $zip = new ZipArchive();
-    if ($zip->open($backupFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-        error_log("Failed to create backup file $backupFile with error code: " . $zip->getStatusString());
-        throw new Exception("Failed to create backup file $backupFile: " . $zip->getStatusString());
-    }
-
-    // Create recursive directory iterator
-    $files = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($rootDir),
-        RecursiveIteratorIterator::LEAVES_ONLY
-    );
-
-    foreach ($files as $name => $file) {
-//        // Skip directories (they would be added automatically) and skip wp-config.php and skip everything under wp-content/fxwp-backups
-//        if (!$file->isDir() && strpos($name, '/wp-content/uploads/') === false && strpos($name, '/wp-config.php') === false && strpos($name, '/wp-content/fxwp-backups/') === false) {
-
-        // Some patterns to be excluded from the backup
-        $exclude_patterns = array('backup*', '*backups', 'backwpup*', 'snapshots', 'wp-clone', 'upgrade', 'cache');
-        $exclude = false;
-        foreach ($exclude_patterns as $dir) {
-            if (fnmatch('*' . $dir . '*', $name)) {
-                $exclude = true;
-                break;
-            }
-        }
-        if (!$file->isDir() && !$exclude) {
-            // Get real and relative path for current file
-            $filePath = $file->getRealPath();
-            $relativePath = substr($filePath, strlen($rootDir));
-
-            // Add current file to archive
-            try {
-                $zip->addFile($filePath, $relativePath);
-            } catch (Exception $e) {
-                error_log("Failed to add file $filePath to backup file $backupFile with error: " . $e->getMessage());
-            }
+    if (function_exists('fxwp_get_available_storage_space')) {
+        $available = fxwp_get_available_storage_space();
+    } else {
+        $available = @disk_free_space($backupDir);
+        if ($available === false) {
+            return; // can't tell -- don't block
         }
     }
 
-// Before closing the ZIP, add error checking
-    if ($zip->numFiles > 0) {
-        error_log("ZIP contains " . $zip->numFiles . " files before closing");
+    if ($available !== false && $available < $required) {
+        throw new Exception(
+            'not enough free space for backup. Available: ' . fxwp_format_file_size($available)
+            . ', required: ~' . fxwp_format_file_size($required) . '.'
+        );
     }
-
-// Try to close with error checking
-    $closeResult = $zip->close();
-    if ($closeResult !== true) {
-        error_log("ZIP close failed with status: " . $zip->getStatusString());
-        // Try to force proper permissions before closing
-        @chmod($backupFile, 0666);
-        $closeResult = $zip->close();
-        if ($closeResult !== true) {
-            throw new Exception("Failed to close ZIP file after permission adjustment");
-        }
-    }
-
-// Verify file exists and is readable
-    if (!file_exists($backupFile)) {
-        error_log("Backup file does not exist after ZIP close: " . $backupFile);
-        throw new Exception("Backup file not created");
-    }
-
 }
 
 function fxwp_fix_execution_time()
 {
     $max_execution_time = ini_get('max_execution_time');
     if ($max_execution_time < 180) {
-        ini_set('max_execution_time', 180);
+        @ini_set('max_execution_time', 180);
     }
-    $userIniPath = ABSPATH . '.user.ini'; // ABSPATH is the WordPress root directory
+    $userIniPath = ABSPATH . '.user.ini';
 
-    // Check if .user.ini exists or not
     if (file_exists($userIniPath)) {
         $currentSettings = file_get_contents($userIniPath);
-        // Check if max_execution_time is already set
         if (strpos($currentSettings, 'max_execution_time') === false) {
-            // Append max_execution_time setting if not found
-            file_put_contents($userIniPath, "\nmax_execution_time=180", FILE_APPEND);
-        } // else if it exists and is less than 180, set it to 180
-        else {
+            @file_put_contents($userIniPath, "\nmax_execution_time=180", FILE_APPEND);
+        } else {
             $currentSettings = preg_replace('/max_execution_time\s*=\s*\d+/', 'max_execution_time=180', $currentSettings);
-            file_put_contents($userIniPath, $currentSettings);
+            @file_put_contents($userIniPath, $currentSettings);
         }
     }
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Retention                                                                  */
+/* -------------------------------------------------------------------------- */
+
 function fxwp_get_backup_timestamp($filename)
 {
-    // get the filename without the path
     $filename = basename($filename);
     $backup2 = str_replace('backup_', '', $filename);
     $backup2 = str_replace('.zip', '', $backup2);
     $parts = explode('_', $backup2);
 
     $date = $parts[0];
-    $time = $parts[1];
-    //                        $date = str_replace('-', '.', $date);
-    $time = str_replace('-', ':', $time);
+    $time = isset($parts[1]) ? str_replace('-', ':', $parts[1]) : '00:00:00';
 
-    $date = $date . ' ' . $time;
-    $ts = strtotime($date);
-    return $ts;
+    return strtotime($date . ' ' . $time);
 }
 
 function fxwp_delete_expired_backups()
 {
-    $rootDir = ABSPATH;
-    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
+    $backupDir = ABSPATH . 'wp-content/fxwp-backups/';
     $files = glob($backupDir . 'backup_*.zip');
+    if (!is_array($files)) {
+        $files = array();
+    }
 
-    // Sort the array so the oldest files are first but take its filebasename
+    // Oldest first.
     array_multisort(
         array_map('fxwp_get_backup_timestamp', $files), SORT_NUMERIC, SORT_ASC,
         $files
     );
 
     $now = time();
-    $hourly = $daily = $monthly = $older = array();
+    $hourly = $daily = $monthly = array();
 
     foreach ($files as $file) {
         $fileTime = fxwp_get_backup_timestamp($file);
-        $hoursOld = floor(($now - $fileTime) / (60 * 60));
-        $daysOld = floor(($now - $fileTime) / (60 * 60 * 24));
+        $hoursOld = floor(($now - $fileTime) / HOUR_IN_SECONDS);
+        $daysOld  = floor(($now - $fileTime) / DAY_IN_SECONDS);
 
         if ($hoursOld < FXWP_BACKUP_DAYS_SON) {
             $hourly[] = $file;
@@ -324,171 +800,173 @@ function fxwp_delete_expired_backups()
             $daily[] = $file;
         } elseif ($daysOld < FXWP_BACKUP_DAYS_GRANDFATHER) {
             $monthly[] = $file;
-        } else {
-            $older[] = $file;
         }
+        // older than grandfather -> not kept (deleted below)
     }
 
-    // Throw every second daily backup away
-    $daily = array_filter($daily, function ($key) {
-        return $key % 2 == 0;
-    }, ARRAY_FILTER_USE_KEY);
-
-    // Keep only the last hourly backup per hour
-    $keptHourly = array();
+    // Keep one backup per hour / day / month respectively.
+    $keptHourly = $keptDaily = $keptMonthly = array();
     foreach ($hourly as $file) {
-        $timestamp = fxwp_get_backup_timestamp($file);
-        $hourKey = date('Y-m-d-H', $timestamp);
-        $keptHourly[$hourKey] = $file;
+        $keptHourly[date('Y-m-d-H', fxwp_get_backup_timestamp($file))] = $file;
     }
-
-    // Keep only one daily backup per day for FXWP_BACKUP_DAYS_FATHER days
-    $keptDaily = array();
     foreach ($daily as $file) {
-        $timestamp = fxwp_get_backup_timestamp($file);
-        $dayKey = date('Y-m-d', $timestamp);
-        $keptDaily[$dayKey] = $file;
+        $keptDaily[date('Y-m-d', fxwp_get_backup_timestamp($file))] = $file;
     }
-
-    // Keep only one monthly backup per month for FXWP_BACKUP_DAYS_GRANDFATHER days
-    $keptMonthly = array();
     foreach ($monthly as $file) {
-        $timestamp = fxwp_get_backup_timestamp($file);
-        $monthKey = date('Y-m', $timestamp);
-        $keptMonthly[$monthKey] = $file;
+        $keptMonthly[date('Y-m', fxwp_get_backup_timestamp($file))] = $file;
     }
 
-    // Merge all the backups we want to keep
-    $keptBackups = array_merge($keptHourly, $keptDaily, $keptMonthly);
+    $keptBackups = array_merge(
+        array_values($keptHourly),
+        array_values($keptDaily),
+        array_values($keptMonthly)
+    );
 
-    // Delete the backups not in the keptBackups array
+    // Delete zips (and their .sql) we are not keeping.
     foreach ($files as $file) {
-        if (!in_array($file, $keptBackups)) {
-            unlink($file);
-            unlink($file . ".sql");
+        if (!in_array($file, $keptBackups, true)) {
+            @unlink($file);
+            @unlink($file . '.sql');
         }
     }
 
+    // Orphaned .sql (a DB dump whose .zip never completed) is a *valuable*
+    // database-only backup, not garbage. We keep it -- and crucially do NOT email
+    // about it on every run (that was the noise customers complained about) --
+    // removing it only once it is older than the grandfather window. The in-
+    // progress job's own dump is skipped.
+    $state = get_option('fxwp_backup_state', array());
+    $activeBase = (!empty($state['active']) && !empty($state['base'])) ? $state['base'] : null;
 
-    $unsuccessfulBackups = array();
-    $all_files = glob($backupDir . '*');
-//	If file is *.sql and no other file with the same name but without the .sql exists, delete it
-    foreach ($all_files as $file) {
-//        error_log("Found file: ".$file);
-        if (strpos($file, '.sql') !== false) {
-            $filebasename = str_replace('.sql', '', $file);
-//            error_log("Checking file: ".$filebasename);
-            if (!in_array($filebasename, $all_files)) {
-                // Did not find the zip backup file
-                error_log("Did not find the zip backup file: " . $filebasename);
-                foreach (glob($filebasename . '*') as $rem_file) {
-//                    error_log("Found file to delete: ".$rem_file);
-                    $unsuccessfulBackups[] = $rem_file;
-                    unlink($rem_file);
-                    error_log("Deleted file: " . $rem_file);
-                }
-            }
+    foreach (glob($backupDir . 'backup_*.zip.sql') as $sql) {
+        $zip = substr($sql, 0, -4); // strip ".sql"
+        if (file_exists($zip)) {
+            continue; // has a matching zip -> not an orphan
+        }
+        $base = basename($zip, '.zip');
+        if ($activeBase !== null && $base === $activeBase) {
+            continue; // backup currently in progress
+        }
+        $daysOld = floor(($now - fxwp_get_backup_timestamp($zip)) / DAY_IN_SECONDS);
+        if ($daysOld >= FXWP_BACKUP_DAYS_GRANDFATHER) {
+            @unlink($sql);
         }
     }
-    //if there are any unsuccessful backups, sent email
-    if (count($unsuccessfulBackups) > 0) {
-        $unsuccessfulBackups = implode(", ", $unsuccessfulBackups);
-        $to = FXWP_ERROR_EMAIL;
-        //Get site url
-        $site_url = get_site_url();
-        $subject = 'Unsuccessful backups on ' . $site_url;
-        $message = 'The following backups were not successful and have been deleted: ' . $unsuccessfulBackups;
 
-        if (is_array($keptBackups) && !empty($keptBackups)) {
-            $keptBackupsString = implode(", ", $keptBackups);
-        } else {
-            $keptBackupsString = 'No backups kept';
+    // Clean up stale manifests left by aborted jobs.
+    foreach (glob($backupDir . '.backup_*.files') as $mf) {
+        if (@filemtime($mf) < $now - DAY_IN_SECONDS) {
+            @unlink($mf);
         }
-        $message .= '<br><br>Kept backups: ' . implode(", ", $keptBackups);
-        $headers = array('Content-Type: text/html; charset=UTF-8');
-        wp_mail($to, $subject, $message, $headers);
     }
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Restore / delete / list                                                    */
+/* -------------------------------------------------------------------------- */
+
 function fxwp_restore_backup($backupFile)
 {
-    // Define the backup directory
-    $backupFile = ABSPATH . 'wp-content/fxwp-backups/' . $backupFile;
+    $backupFile = ABSPATH . 'wp-content/fxwp-backups/' . basename($backupFile);
 
-    // Create a new zip archive
     $zip = new ZipArchive();
     if ($zip->open($backupFile) !== true) {
         exit("Failed to open backup file $backupFile");
     }
-
-    // Extract the backup file
     $zip->extractTo(ABSPATH);
     $zip->close();
 
-    // Restore the database
     $dumpFile = $backupFile . '.sql';
-
-    $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
-
-    if ($mysqli->connect_error) {
-        die('Connect Error (' . $mysqli->connect_errno . ') '
-            . $mysqli->connect_error);
-    }
+    $mysqli = fxwp_backup_db_connect();
 
     $mysqli->query('SET FOREIGN_KEY_CHECKS=0');
     $mysqli->query('SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO"');
 
-    // Read the SQL dump file
     $sqlStatements = file_get_contents($dumpFile);
-
-    // Execute the SQL statements
     if ($mysqli->multi_query($sqlStatements)) {
         do {
-            // Fetch the result of each query
             $mysqli->store_result();
         } while ($mysqli->more_results() && $mysqli->next_result());
     }
 
     $mysqli->query('SET FOREIGN_KEY_CHECKS=1');
     $mysqli->query('SET SQL_MODE=""');
-
     $mysqli->close();
-
 }
 
-function fxwp_delete_backup()
+function fxwp_delete_backup($backupFile = null)
 {
-    // Define the WordPress root directory
-    $rootDir = ABSPATH;
+    $backupDir = ABSPATH . 'wp-content/fxwp-backups/';
 
-    // Define the backup directory
-    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
-
-    // Get the latest backup file
-    $files = glob($backupDir . '*.zip');
-    $latestBackup = $files[0];
-
-    // Delete the backup file
-    unlink($latestBackup);
-    unlink($latestBackup . '.sql');
+    if ($backupFile) {
+        $target = $backupDir . basename($backupFile);
+    } else {
+        $files = glob($backupDir . '*.zip');
+        $target = $files ? $files[0] : null;
+    }
+    if ($target) {
+        @unlink($target);
+        @unlink($target . '.sql');
+    }
 }
-
 
 function fxwp_list_backups()
 {
-    // Define the WordPress root directory
-    $rootDir = ABSPATH;
-
-    // Define the backup directory
-    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
-
-    // Get all backup files
+    $backupDir = ABSPATH . 'wp-content/fxwp-backups/';
     $files = glob($backupDir . '*.zip');
+    return array_map('basename', $files ?: array());
+}
 
-    // make an array of the files
-    $files = array_map(function ($file) {
-        return basename($file);
-    }, $files);
+/* -------------------------------------------------------------------------- */
+/*  External triggers (reliable cron without depending on site traffic)        */
+/* -------------------------------------------------------------------------- */
 
-    return $files;
+/**
+ * REST endpoint so an external/system cron (e.g. All-Inkl) can drive backups
+ * directly, independent of site traffic and WP-Cron:
+ *
+ *   https://EXAMPLE.com/wp-json/fxwp/v1/run-backup-cron?key=<fxwp_api_key>
+ *
+ * Each call processes one slice, so configuring the host cron to hit it every
+ * few minutes lets even large sites finish a backup across many short requests.
+ */
+add_action('rest_api_init', function () {
+    register_rest_route('fxwp/v1', '/run-backup-cron', array(
+        'methods'             => 'GET',
+        'callback'            => 'fxwp_backup_rest_run',
+        'permission_callback' => '__return_true',
+    ));
+});
+
+function fxwp_backup_rest_run($request)
+{
+    $key = (string)$request->get_param('key');
+    $expected = (string)get_option('fxwp_api_key');
+    if ($key === '' || $expected === '' || !hash_equals($expected, $key)) {
+        return new WP_REST_Response(array('ok' => false, 'error' => 'invalid key'), 403);
+    }
+
+    do_action('fxwp_backup_task');
+
+    $state = get_option('fxwp_backup_state', array());
+    return new WP_REST_Response(array(
+        'ok'     => true,
+        'active' => !empty($state['active']),
+        'phase'  => isset($state['phase']) ? $state['phase'] : null,
+    ), 200);
+}
+
+/**
+ * WP-CLI: `wp fxwp-backup` advances the backup by one slice (or starts one).
+ * Pair with a system cron for the most reliable, timeout-free backups:
+ *   * * * * * cd /path/to/wp && wp fxwp-backup --quiet
+ */
+if (defined('WP_CLI') && WP_CLI) {
+    WP_CLI::add_command('fxwp-backup', function () {
+        do_action('fxwp_backup_task');
+        $s = get_option('fxwp_backup_state', array());
+        WP_CLI::success('Backup tick done. ' . (!empty($s['active'])
+            ? 'In progress (phase: ' . $s['phase'] . ').'
+            : 'No job active.'));
+    });
 }
