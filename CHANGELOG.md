@@ -1,3 +1,7 @@
+## v2.7.1 - 2026-06-21
+
+- Local-time backup filenames + accurate cron day-counter
+
 ## v2.7.0 - 2026-06-20
 
 - Make backups reliable, resumable & secure
