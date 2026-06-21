@@ -49,6 +49,16 @@ function fxwp_backup_health_widget_render()
         esc_html__('Letztes erfolgreiches Backup: %s', 'fxwp'),
         esc_html($fmt($h['last_backup']))
     ) . '</li>';
+    if (function_exists('fxwp_s3_enabled') && fxwp_s3_enabled()) {
+        echo '<li>' . sprintf(
+            esc_html__('Letzte Off-Site-Kopie (S3): %s', 'fxwp'),
+            esc_html($fmt((int)get_option('fxwp_s3_last_upload', 0)))
+        ) . '</li>';
+        $s3err = get_option('fxwp_s3_last_error', '');
+        if ($s3err) {
+            echo '<li style="color:#dc3232">' . esc_html__('S3-Fehler: ', 'fxwp') . esc_html($s3err) . '</li>';
+        }
+    }
     echo '</ul>';
 
     $state = get_option('fxwp_backup_state', array());

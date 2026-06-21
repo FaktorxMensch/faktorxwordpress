@@ -233,6 +233,13 @@ function fxwp_backup_process_slice($budgetSeconds)
                 case 'finalize':
                     fxwp_backup_finalize($state, $backupDir, $backupFile, $dumpFile);
                     break;
+                case 's3':
+                    if (function_exists('fxwp_s3_upload_phase')) {
+                        fxwp_s3_upload_phase($state, $backupDir, $backupFile, $dumpFile, $deadline);
+                    } else {
+                        $state['active'] = false;
+                    }
+                    break;
                 default:
                     $state['active'] = false;
             }
@@ -644,9 +651,17 @@ function fxwp_backup_finalize(&$state, $backupDir, $backupFile, $dumpFile)
     update_option('fxwp_backup_last_completed', time());
     update_option('fxwp_backup_expected_completion', 1);
     @unlink($backupDir . '.' . $state['base'] . '.files');
-
-    $state['active'] = false;
     error_log('fxwp backup completed: ' . $state['base']);
+
+    // The local backup is now verified and recorded as successful. If off-site
+    // (S3) copy is configured, hand off to the resumable upload phase; its
+    // success/failure is independent of the (already good) local backup.
+    if (function_exists('fxwp_s3_enabled') && fxwp_s3_enabled()) {
+        $state['phase'] = 's3';
+        unset($state['s3']); // initialised lazily by the upload phase
+    } else {
+        $state['active'] = false;
+    }
 }
 
 /* -------------------------------------------------------------------------- */

@@ -86,6 +86,11 @@ function fxwp_download_backup($backupFile, $type = 'files')
 
 function fxwp_backups_page()
 {
+    // Save off-site (S3) settings if the form was submitted (fxm_admin only).
+    fxwp_s3_handle_settings_post();
+
+    $s3_test_result = null;
+
     // Check if a backup action was submitted
     if (isset($_GET['backup_action'])) {
 
@@ -119,6 +124,9 @@ function fxwp_backups_page()
             case 'download':
                 fxwp_download_backup($_GET['backup_file'], isset($_GET['type']) ? $_GET['type'] : 'files');
                 break;
+            case 's3test':
+                $s3_test_result = fxwp_s3_test();
+                break;
         }
     }
 
@@ -137,6 +145,62 @@ function fxwp_backups_page()
         <br>
         <?php fxwp_show_deactivated_feature_warning('fxwp_deact_backups'); ?>
         <br>
+
+        <?php if (current_user_can('fxm_admin')):
+            $s3_enabled = function_exists('fxwp_s3_enabled') && fxwp_s3_enabled();
+            $s3_last = (int) get_option('fxwp_s3_last_upload', 0);
+            $s3_err = get_option('fxwp_s3_last_error', '');
+            $s3cfg = function_exists('fxwp_s3_config') ? fxwp_s3_config() : array('secret' => '');
+            $secret_set = $s3cfg['secret'] !== '';
+            ?>
+            <?php if ($s3_test_result): ?>
+                <div class="notice notice-<?php echo $s3_test_result['ok'] ? 'success' : 'error'; ?> is-dismissible">
+                    <p><?php echo esc_html($s3_test_result['message']); ?></p></div>
+            <?php endif; ?>
+            <div class="postbox" style="margin-top:15px">
+                <div class="postbox-header">
+                    <h2 class="hndle" style="padding:8px 12px"><?php _e('Off-Site-Sicherung (S3)', 'fxwp'); ?></h2>
+                </div>
+                <div class="inside">
+                    <p>
+                        <?php _e('Status:', 'fxwp'); ?>
+                        <?php if ($s3_enabled): ?>
+                            <strong style="color:#46b450"><?php _e('aktiv', 'fxwp'); ?></strong>
+                        <?php else: ?>
+                            <strong style="color:#dc3232"><?php _e('nicht konfiguriert', 'fxwp'); ?></strong>
+                        <?php endif; ?>
+                        <?php if ($s3_last): ?>
+                            &middot; <?php printf(esc_html__('Letzter Upload: %s', 'fxwp'), esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $s3_last))); ?>
+                        <?php endif; ?>
+                    </p>
+                    <?php if ($s3_err): ?>
+                        <div class="notice notice-error inline"><p><?php printf(esc_html__('Letzter Fehler: %s', 'fxwp'), esc_html($s3_err)); ?></p></div>
+                    <?php endif; ?>
+                    <form method="post" action="">
+                        <?php wp_nonce_field('fxwp_s3_settings', 'fxwp_s3_settings_nonce'); ?>
+                        <table class="form-table">
+                            <tr><th><label><?php _e('Endpoint-URL', 'fxwp'); ?></label></th>
+                                <td><input type="text" name="fxwp_s3_endpoint" class="regular-text" placeholder="https://s3.example.com" value="<?php echo esc_attr(get_option('fxwp_s3_endpoint', '')); ?>"></td></tr>
+                            <tr><th><label><?php _e('Region', 'fxwp'); ?></label></th>
+                                <td><input type="text" name="fxwp_s3_region" class="regular-text" placeholder="us-east-1" value="<?php echo esc_attr(get_option('fxwp_s3_region', '')); ?>"></td></tr>
+                            <tr><th><label><?php _e('Bucket', 'fxwp'); ?></label></th>
+                                <td><input type="text" name="fxwp_s3_bucket" class="regular-text" value="<?php echo esc_attr(get_option('fxwp_s3_bucket', '')); ?>"></td></tr>
+                            <tr><th><label><?php _e('Pfad-Präfix (optional)', 'fxwp'); ?></label></th>
+                                <td><input type="text" name="fxwp_s3_prefix" class="regular-text" placeholder="<?php echo esc_attr(preg_replace('#^https?://#', '', get_site_url()) . '/'); ?>" value="<?php echo esc_attr(get_option('fxwp_s3_prefix', '')); ?>"></td></tr>
+                            <tr><th><label><?php _e('Zugriffsschlüssel', 'fxwp'); ?></label></th>
+                                <td><input type="text" name="fxwp_s3_access_key" class="regular-text" autocomplete="off" value="<?php echo esc_attr(get_option('fxwp_s3_access_key', '')); ?>"></td></tr>
+                            <tr><th><label><?php _e('Geheimer Zugriffsschlüssel', 'fxwp'); ?></label></th>
+                                <td><input type="password" name="fxwp_s3_secret_key" class="regular-text" autocomplete="new-password" placeholder="<?php echo $secret_set ? esc_attr__('•••••••• (gesetzt – zum Ändern neu eingeben)', 'fxwp') : esc_attr__('nicht gesetzt', 'fxwp'); ?>">
+                                    <p class="description"><?php _e('Wird verschlüsselt gespeichert. Leer lassen, um den bestehenden Schlüssel zu behalten.', 'fxwp'); ?></p></td></tr>
+                        </table>
+                        <input type="submit" class="button button-primary" value="<?php esc_attr_e('Speichern', 'fxwp'); ?>">
+                        <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=s3test'), 'fxwp_critical'); ?>" class="button button-secondary"><?php _e('Verbindung testen', 'fxwp'); ?></a>
+                    </form>
+                    <p class="description"><?php _e('Sicherer: <code>FXWP_S3_*</code>-Konstanten in der <code>wp-config.php</code> definieren (haben Vorrang vor diesen Feldern).', 'fxwp'); ?></p>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <?php if (!empty($backups)): ?>
             <table class="wp-list-table widefat fixed striped">
                 <?php
