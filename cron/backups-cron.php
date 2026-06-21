@@ -88,20 +88,28 @@ function fxwp_backup_interval_seconds()
 }
 
 /**
- * Record a cron heartbeat (keeps a short rolling history for the dashboard).
+ * Record a cron heartbeat as a per-day counter (local day buckets).
+ *
+ * A rolling list of timestamps would be capped and under-count a frequent cron;
+ * counting per calendar day gives an accurate "runs in the last 7 days" figure
+ * while staying tiny (we keep at most the last 14 day buckets).
  */
 function fxwp_backup_record_cron_run()
 {
     update_option('fxwp_backup_cron_last_run', time());
-    $runs = get_option('fxwp_backup_cron_runs', array());
-    if (!is_array($runs)) {
-        $runs = array();
+
+    $days = get_option('fxwp_backup_cron_days', array());
+    if (!is_array($days)) {
+        $days = array();
     }
-    $runs[] = time();
-    if (count($runs) > 60) {
-        $runs = array_slice($runs, -60);
+    $today = current_time('Y-m-d'); // local day
+    $days[$today] = (isset($days[$today]) ? (int)$days[$today] : 0) + 1;
+
+    if (count($days) > 14) {
+        ksort($days);
+        $days = array_slice($days, -14, null, true);
     }
-    update_option('fxwp_backup_cron_runs', $runs);
+    update_option('fxwp_backup_cron_days', $days);
 }
 
 /**
@@ -112,21 +120,29 @@ function fxwp_backup_record_cron_run()
 function fxwp_backup_cron_health()
 {
     $last = (int)get_option('fxwp_backup_cron_last_run', 0);
-    $runs = get_option('fxwp_backup_cron_runs', array());
-    if (!is_array($runs)) {
-        $runs = array();
+    $days = get_option('fxwp_backup_cron_days', array());
+    if (!is_array($days)) {
+        $days = array();
     }
-    $weekAgo = time() - WEEK_IN_SECONDS;
-    $recent = array_filter($runs, function ($t) use ($weekAgo) {
-        return (int)$t >= $weekAgo;
-    });
 
+    // Sum runs across the last 7 calendar days (purely string-based, so no
+    // timezone ambiguity).
+    $runs7 = 0;
+    $todayTs = strtotime(current_time('Y-m-d'));
+    for ($i = 0; $i < 7; $i++) {
+        $key = date('Y-m-d', $todayTs - $i * DAY_IN_SECONDS);
+        if (isset($days[$key])) {
+            $runs7 += (int)$days[$key];
+        }
+    }
+
+    $weekAgo = time() - WEEK_IN_SECONDS;
     return array(
         'last_run'     => $last,
-        'runs_last_7d' => count($recent),
+        'runs_last_7d' => $runs7,
         'last_backup'  => (int)get_option('fxwp_backup_last_completed', 0),
         // "Runs at least once a week" is the bar we promise customers.
-        'healthy'      => (count($recent) >= 1) && ($last >= $weekAgo),
+        'healthy'      => ($runs7 >= 1) && ($last >= $weekAgo),
     );
 }
 
@@ -156,7 +172,10 @@ function fxwp_backup_start()
     fxwp_secure_backup_dir($backupDir);
     fxwp_check_backup_disk_space($backupDir);
 
-    $base = 'backup_' . date('Y-m-d_H-i-s');
+    // Name the backup in the site's local timezone (WordPress runs PHP in UTC,
+    // so plain date() would be 2h behind German wall-clock in summer).
+    // fxwp_get_backup_timestamp() parses it back timezone-aware.
+    $base = 'backup_' . current_time('Y-m-d_H-i-s');
     // The DB dump is written first and incrementally; start it empty.
     @file_put_contents($backupDir . $base . '.zip.sql', '');
 
@@ -761,15 +780,18 @@ function fxwp_fix_execution_time()
 
 function fxwp_get_backup_timestamp($filename)
 {
-    $filename = basename($filename);
-    $backup2 = str_replace('backup_', '', $filename);
-    $backup2 = str_replace('.zip', '', $backup2);
-    $parts = explode('_', $backup2);
+    $base = basename($filename);
+    $base = str_replace(array('.sql', '.zip'), '', $base);
+    $base = str_replace('backup_', '', $base);
+    $parts = explode('_', $base);
 
     $date = $parts[0];
     $time = isset($parts[1]) ? str_replace('-', ':', $parts[1]) : '00:00:00';
 
-    return strtotime($date . ' ' . $time);
+    // Filenames are written in the site's local timezone (see fxwp_backup_start).
+    // get_gmt_from_date() interprets the string as local time and returns the
+    // correct UTC epoch, so retention math and date_i18n() display stay correct.
+    return (int) get_gmt_from_date($date . ' ' . $time, 'U');
 }
 
 function fxwp_delete_expired_backups()
