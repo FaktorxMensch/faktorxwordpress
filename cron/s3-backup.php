@@ -502,8 +502,13 @@ function fxwp_s3_test()
         if ($put['code'] < 200 || $put['code'] >= 300) {
             return array('ok' => false, 'message' => 'PUT HTTP ' . $put['code'] . ' ' . substr($put['body'], 0, 200));
         }
-        fxwp_s3_curl($cfg, 'DELETE', $key, array(), array(), hash('sha256', ''), null, null, null);
-        return array('ok' => true, 'message' => 'Verbindung OK (Test-Objekt geschrieben und gelöscht).');
+        // Best-effort cleanup. With a recommended write-only IAM policy the DELETE
+        // may be denied -- that's fine, the upload itself works.
+        $del = fxwp_s3_curl($cfg, 'DELETE', $key, array(), array(), hash('sha256', ''), null, null, null);
+        if ($del['code'] >= 200 && $del['code'] < 300) {
+            return array('ok' => true, 'message' => 'Verbindung OK (Test-Objekt geschrieben und gelöscht).');
+        }
+        return array('ok' => true, 'message' => 'Verbindung OK – Upload funktioniert. Test-Objekt konnte nicht gelöscht werden (vermutlich write-only Rechte); ggf. „' . $key . '" manuell entfernen.');
     } catch (\Throwable $e) {
         return array('ok' => false, 'message' => $e->getMessage());
     }
