@@ -47,7 +47,7 @@ function fxwp_s3_config()
 
     $region = fxwp_s3_get_value('fxwp_s3_region', 'FXWP_S3_REGION');
     if ($region === '') {
-        $region = 'us-east-1';
+        $region = 'eu-central-1';
     }
 
     $bucket = fxwp_s3_get_value('fxwp_s3_bucket', 'FXWP_S3_BUCKET');
@@ -76,6 +76,36 @@ function fxwp_s3_enabled()
 {
     $c = fxwp_s3_config();
     return $c['endpoint'] !== '' && $c['bucket'] !== '' && $c['access'] !== '' && $c['secret'] !== '';
+}
+
+/**
+ * Extract the calendar month ("YYYY-MM") from a backup base name
+ * ("backup_YYYY-MM-DD_HH-ii-ss").
+ */
+function fxwp_s3_backup_month($base)
+{
+    if (preg_match('/(\d{4}-\d{2})-\d{2}_/', (string)$base, $m)) {
+        return $m[1];
+    }
+    return current_time('Y-m');
+}
+
+/**
+ * Decide whether THIS backup should be copied off-site.
+ *
+ * Default mode "monthly" uploads only the first successful backup of each
+ * calendar month (the long-term/grandfather copy) to keep S3 cost minimal --
+ * one object per site per month. Mode "all" uploads every backup. The month
+ * marker is only advanced on a *successful* upload (see the upload phase), so a
+ * failed monthly upload is retried by the next backup that month.
+ */
+function fxwp_s3_should_upload($base)
+{
+    if (get_option('fxwp_s3_upload_mode', 'monthly') === 'all') {
+        return true;
+    }
+    $month = fxwp_s3_backup_month($base);
+    return $month !== '' && $month !== (string)get_option('fxwp_s3_last_uploaded_month', '');
 }
 
 /**
@@ -206,6 +236,8 @@ function fxwp_s3_upload_phase(&$state, $backupDir, $backupFile, $dumpFile, $dead
 
         if ($s['stage'] === 'done') {
             update_option('fxwp_s3_last_upload', time());
+            // Mark this month as covered only now that the upload truly succeeded.
+            update_option('fxwp_s3_last_uploaded_month', fxwp_s3_backup_month(isset($state['base']) ? $state['base'] : ''));
             delete_option('fxwp_s3_last_error');
             unset($state['s3']);
             $state['active'] = false;
@@ -447,6 +479,9 @@ function fxwp_s3_handle_settings_post()
     update_option('fxwp_s3_bucket', sanitize_text_field(wp_unslash($_POST['fxwp_s3_bucket'] ?? '')), false);
     update_option('fxwp_s3_prefix', sanitize_text_field(wp_unslash($_POST['fxwp_s3_prefix'] ?? '')), false);
     update_option('fxwp_s3_access_key', sanitize_text_field(wp_unslash($_POST['fxwp_s3_access_key'] ?? '')), false);
+
+    $mode = (($_POST['fxwp_s3_upload_mode'] ?? '') === 'all') ? 'all' : 'monthly';
+    update_option('fxwp_s3_upload_mode', $mode, false);
 
     $secret = isset($_POST['fxwp_s3_secret_key']) ? trim(wp_unslash($_POST['fxwp_s3_secret_key'])) : '';
     if ($secret !== '') {

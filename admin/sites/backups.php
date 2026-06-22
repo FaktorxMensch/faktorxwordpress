@@ -192,6 +192,13 @@ function fxwp_backups_page()
                             <tr><th><label><?php _e('Geheimer Zugriffsschlüssel', 'fxwp'); ?></label></th>
                                 <td><input type="password" name="fxwp_s3_secret_key" class="regular-text" autocomplete="new-password" placeholder="<?php echo $secret_set ? esc_attr__('•••••••• (gesetzt – zum Ändern neu eingeben)', 'fxwp') : esc_attr__('nicht gesetzt', 'fxwp'); ?>">
                                     <p class="description"><?php _e('Wird verschlüsselt gespeichert. Leer lassen, um den bestehenden Schlüssel zu behalten.', 'fxwp'); ?></p></td></tr>
+                            <tr><th><label><?php _e('Upload-Modus', 'fxwp'); ?></label></th>
+                                <td><?php $mode = get_option('fxwp_s3_upload_mode', 'monthly'); ?>
+                                    <select name="fxwp_s3_upload_mode">
+                                        <option value="monthly" <?php selected($mode, 'monthly'); ?>><?php _e('Nur monatlich (erstes Backup pro Monat)', 'fxwp'); ?></option>
+                                        <option value="all" <?php selected($mode, 'all'); ?>><?php _e('Jedes Backup', 'fxwp'); ?></option>
+                                    </select>
+                                    <p class="description"><?php _e('„Nur monatlich" lädt pro Monat genau ein Backup hoch – minimale S3-Kosten.', 'fxwp'); ?></p></td></tr>
                         </table>
                         <input type="submit" class="button button-primary" value="<?php esc_attr_e('Speichern', 'fxwp'); ?>">
                         <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=s3test'), 'fxwp_critical'); ?>" class="button button-secondary"><?php _e('Verbindung testen', 'fxwp'); ?></a>

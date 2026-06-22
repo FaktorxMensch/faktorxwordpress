@@ -656,7 +656,8 @@ function fxwp_backup_finalize(&$state, $backupDir, $backupFile, $dumpFile)
     // The local backup is now verified and recorded as successful. If off-site
     // (S3) copy is configured, hand off to the resumable upload phase; its
     // success/failure is independent of the (already good) local backup.
-    if (function_exists('fxwp_s3_enabled') && fxwp_s3_enabled()) {
+    if (function_exists('fxwp_s3_enabled') && fxwp_s3_enabled()
+        && fxwp_s3_should_upload($state['base'])) {
         $state['phase'] = 's3';
         unset($state['s3']); // initialised lazily by the upload phase
     } else {
