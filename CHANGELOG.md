@@ -1,3 +1,7 @@
+## v2.8.2 - 2026-06-24
+
+- S3: tag every uploaded object (incl. test/all) for lifecycle targeting
+
 ## v2.8.1 - 2026-06-24
 
 - Hide backup-status dashboard widget when backups are disabled
