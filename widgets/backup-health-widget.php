@@ -82,6 +82,9 @@ function fxwp_register_backup_health_widget()
     if (!current_user_can('fxm_admin')) {
         return;
     }
+    if (fxwp_check_deactivated_features('fxwp_deact_backups')) {
+        return; // backups disabled in settings -> hide the status widget
+    }
     wp_add_dashboard_widget(
         'fxwp_backup_health_widget',
         'Backup-Status (Faktor&times;WP)',
