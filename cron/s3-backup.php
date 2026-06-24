@@ -326,7 +326,9 @@ function fxwp_s3_upload_phase(&$state, $backupDir, $backupFile, $dumpFile, $dead
             if ($sc !== '') {
                 $objHeaders['x-amz-storage-class'] = $sc;
             }
-            if ($tierFolder !== '') {
+            // Always tag with the tier (father/grandfather/all) so no plugin
+            // object is left untagged -- S3 lifecycle can't target "no tag".
+            if ($tier !== '') {
                 $objHeaders['x-amz-tagging'] = 'tier=' . $tier;
             }
             $state['s3'] = array(
@@ -698,7 +700,9 @@ function fxwp_s3_test()
         $cfg = fxwp_s3_config();
         $key = $cfg['prefix'] . 'fxwp-s3-test.txt';
         $body = 'fxwp connection test ' . gmdate('c');
-        $put = fxwp_s3_curl($cfg, 'PUT', $key, array(), array('content-type' => 'text/plain'), hash('sha256', $body), $body, null, null);
+        // Tag the test object so it is cleaned up by the tier=test lifecycle rule
+        // (write-only credentials can't delete it themselves).
+        $put = fxwp_s3_curl($cfg, 'PUT', $key, array(), array('content-type' => 'text/plain', 'x-amz-tagging' => 'tier=test'), hash('sha256', $body), $body, null, null);
         if ($put['code'] < 200 || $put['code'] >= 300) {
             return array('ok' => false, 'message' => 'PUT HTTP ' . $put['code'] . ' ' . substr($put['body'], 0, 200));
         }
