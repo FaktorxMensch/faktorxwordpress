@@ -26,21 +26,16 @@ function fxwp_mock_backups()
 
 function fxwp_get_backup_tag($backup)
 {
-    // Mirror the retention engine's tiering (see fxwp_delete_expired_backups in
-    // cron/backups-cron.php) so the label matches how the file is actually kept,
-    // instead of the old hard-coded 7/30-day thresholds.
-    $now = time();
-    $ts = fxwp_get_backup_timestamp($backup);
-    $hoursOld = floor(($now - $ts) / HOUR_IN_SECONDS);
-    $daysOld = floor(($now - $ts) / DAY_IN_SECONDS);
-
-    if ($hoursOld < FXWP_BACKUP_DAYS_SON) {
-        return __('Sohn', 'fxwp');
+    // Single source of truth shared with the retention engine
+    // (fxwp_backup_tier in cron/backups-cron.php).
+    switch (fxwp_backup_tier(fxwp_get_backup_timestamp($backup))) {
+        case 'son':
+            return __('Sohn', 'fxwp');
+        case 'father':
+            return __('Vater', 'fxwp');
+        default:
+            return __('Großvater', 'fxwp');
     }
-    if ($daysOld < FXWP_BACKUP_DAYS_FATHER) {
-        return __('Vater', 'fxwp');
-    }
-    return __('Großvater', 'fxwp');
 }
 
 // testing
@@ -202,7 +197,7 @@ function fxwp_backups_page()
                                         <option value="monthly" <?php selected($mode, 'monthly'); ?>><?php _e('Nur Großvater (1×/Monat)', 'fxwp'); ?></option>
                                         <option value="all" <?php selected($mode, 'all'); ?>><?php _e('Jedes Backup', 'fxwp'); ?></option>
                                     </select>
-                                    <p class="description"><?php _e('„Vater + Großvater" lädt pro Tag ein Vater- und pro Monat ein Großvater-Backup in getrennte Ordner (<code>father/</code>, <code>grandfather/</code>) – für getrennte Lifecycle-Regeln in AWS.', 'fxwp'); ?></p></td></tr>
+                                    <p class="description"><?php _e('„Vater + Großvater" lädt pro Tag ein Vater- und pro Monat ein Großvater-Backup hoch, abgelegt unter <code>&lt;webseite&gt;/father/</code> bzw. <code>&lt;webseite&gt;/grandfather/</code> und mit Objekt-Tag <code>tier=…</code> für getrennte AWS-Lifecycle-Regeln.', 'fxwp'); ?></p></td></tr>
                             <?php
                             $classes = array('STANDARD' => 'Standard', 'STANDARD_IA' => 'Standard-IA', 'GLACIER_IR' => 'Glacier Instant Retrieval', 'GLACIER' => 'Glacier Flexible', 'DEEP_ARCHIVE' => 'Glacier Deep Archive');
                             $cf = get_option('fxwp_s3_class_father', 'STANDARD_IA');

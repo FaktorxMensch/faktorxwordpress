@@ -815,6 +815,33 @@ function fxwp_get_backup_timestamp($filename)
     return (int) get_gmt_from_date($date . ' ' . $time, 'U');
 }
 
+/**
+ * Classify a backup into its GFS tier by age. Single source of truth shared by
+ * the retention engine and the Archiv UI label, so they can never disagree.
+ *   son         -> last 24 hours                          (kept one per hour)
+ *   father      -> < FXWP_BACKUP_DAYS_FATHER days          (kept one per day)
+ *   grandfather -> < FXWP_BACKUP_DAYS_GRANDFATHER days     (kept one per month)
+ *   expired     -> older (not kept)
+ */
+function fxwp_backup_tier($fileTime, $now = null)
+{
+    if ($now === null) {
+        $now = time();
+    }
+    $age = $now - $fileTime;
+    if ($age < DAY_IN_SECONDS) { // last 24 hours
+        return 'son';
+    }
+    $daysOld = floor($age / DAY_IN_SECONDS);
+    if ($daysOld < FXWP_BACKUP_DAYS_FATHER) {
+        return 'father';
+    }
+    if ($daysOld < FXWP_BACKUP_DAYS_GRANDFATHER) {
+        return 'grandfather';
+    }
+    return 'expired';
+}
+
 function fxwp_delete_expired_backups()
 {
     $backupDir = ABSPATH . 'wp-content/fxwp-backups/';
@@ -833,18 +860,18 @@ function fxwp_delete_expired_backups()
     $hourly = $daily = $monthly = array();
 
     foreach ($files as $file) {
-        $fileTime = fxwp_get_backup_timestamp($file);
-        $hoursOld = floor(($now - $fileTime) / HOUR_IN_SECONDS);
-        $daysOld  = floor(($now - $fileTime) / DAY_IN_SECONDS);
-
-        if ($hoursOld < FXWP_BACKUP_DAYS_SON) {
-            $hourly[] = $file;
-        } elseif ($daysOld < FXWP_BACKUP_DAYS_FATHER) {
-            $daily[] = $file;
-        } elseif ($daysOld < FXWP_BACKUP_DAYS_GRANDFATHER) {
-            $monthly[] = $file;
+        switch (fxwp_backup_tier(fxwp_get_backup_timestamp($file), $now)) {
+            case 'son':
+                $hourly[] = $file;
+                break;
+            case 'father':
+                $daily[] = $file;
+                break;
+            case 'grandfather':
+                $monthly[] = $file;
+                break;
+            // 'expired' -> not kept (deleted below)
         }
-        // older than grandfather -> not kept (deleted below)
     }
 
     // Keep one backup per hour / day / month respectively.
