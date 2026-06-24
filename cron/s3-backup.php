@@ -400,10 +400,14 @@ function fxwp_s3_upload_phase(&$state, $backupDir, $backupFile, $dumpFile, $dead
             $tier = isset($state['s3_tier']) ? $state['s3_tier'] : '';
             $base = isset($state['base']) ? $state['base'] : '';
             $zipKey = $s['zip_key'];
+            // Advance the day marker on any tiered upload, and the month marker
+            // additionally for grandfather -- so the first backup of a month is a
+            // single grandfather upload, not also a father on the same day.
+            if ($tier === 'father' || $tier === 'grandfather') {
+                update_option('fxwp_s3_last_uploaded_day', fxwp_s3_backup_day($base));
+            }
             if ($tier === 'grandfather') {
                 update_option('fxwp_s3_last_uploaded_month', fxwp_s3_backup_month($base));
-            } elseif ($tier === 'father') {
-                update_option('fxwp_s3_last_uploaded_day', fxwp_s3_backup_day($base));
             }
             delete_option('fxwp_s3_last_error');
             unset($state['s3'], $state['s3_tier']);
