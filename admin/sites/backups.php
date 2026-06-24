@@ -26,18 +26,21 @@ function fxwp_mock_backups()
 
 function fxwp_get_backup_tag($backup)
 {
-    //Backup is grandfather if it is older than 30 days
-    if (fxwp_get_backup_timestamp($backup) < strtotime('-30 days')) {
-        return __('Großvater', 'fxwp');
-    }
-    //Backup is father if it is older than 7 days
-    if (fxwp_get_backup_timestamp($backup) < strtotime('-7 days')) {
-        return __('Vater', 'fxwp');
-    }
-    //Backup is son if it is younger than 7 days
-    if (fxwp_get_backup_timestamp($backup) > strtotime('-7 days')) {
+    // Mirror the retention engine's tiering (see fxwp_delete_expired_backups in
+    // cron/backups-cron.php) so the label matches how the file is actually kept,
+    // instead of the old hard-coded 7/30-day thresholds.
+    $now = time();
+    $ts = fxwp_get_backup_timestamp($backup);
+    $hoursOld = floor(($now - $ts) / HOUR_IN_SECONDS);
+    $daysOld = floor(($now - $ts) / DAY_IN_SECONDS);
+
+    if ($hoursOld < FXWP_BACKUP_DAYS_SON) {
         return __('Sohn', 'fxwp');
     }
+    if ($daysOld < FXWP_BACKUP_DAYS_FATHER) {
+        return __('Vater', 'fxwp');
+    }
+    return __('Großvater', 'fxwp');
 }
 
 // testing
