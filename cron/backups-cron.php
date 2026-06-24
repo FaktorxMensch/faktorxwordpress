@@ -45,6 +45,13 @@ function fxwp_backup_tick()
     // to drive WP-Cron and no external cron configured).
     fxwp_backup_record_cron_run();
 
+    // Refresh centrally-managed S3 credentials (TTL-guarded). The primary
+    // trigger is the hourly monitor cron; this covers sites driven only by the
+    // external backup cron.
+    if (function_exists('fxwp_s3_maybe_sync_remote')) {
+        fxwp_s3_maybe_sync_remote();
+    }
+
     $budget = (int)get_option('fxwp_backup_time_budget', 15); // seconds per slice
 
     try {
@@ -818,9 +825,10 @@ function fxwp_get_backup_timestamp($filename)
 /**
  * Classify a backup into its GFS tier by age. Single source of truth shared by
  * the retention engine and the Archiv UI label, so they can never disagree.
- *   son         -> last 24 hours                          (kept one per hour)
- *   father      -> < FXWP_BACKUP_DAYS_FATHER days          (kept one per day)
- *   grandfather -> < FXWP_BACKUP_DAYS_GRANDFATHER days     (kept one per month)
+ * All three thresholds are in DAYS (FXWP_BACKUP_DAYS_* multiplied by a day):
+ *   son         -> < FXWP_BACKUP_DAYS_SON days          (kept one per hour)
+ *   father      -> < FXWP_BACKUP_DAYS_FATHER days        (kept one per day)
+ *   grandfather -> < FXWP_BACKUP_DAYS_GRANDFATHER days   (kept one per month)
  *   expired     -> older (not kept)
  */
 function fxwp_backup_tier($fileTime, $now = null)
@@ -829,7 +837,7 @@ function fxwp_backup_tier($fileTime, $now = null)
         $now = time();
     }
     $age = $now - $fileTime;
-    if ($age < DAY_IN_SECONDS) { // last 24 hours
+    if ($age < FXWP_BACKUP_DAYS_SON * DAY_IN_SECONDS) {
         return 'son';
     }
     $daysOld = floor($age / DAY_IN_SECONDS);

@@ -197,6 +197,98 @@ function fxwp_s3_decrypt($enc)
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Central credential sync (from the monitor cron)                            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Refresh S3 credentials from the central API (ProjectPilot) so they don't have
+ * to be entered on every site by hand. Primary trigger is the hourly monitor
+ * cron (fxm_hourly_event); TTL-guarded so extra callers can't hammer the API.
+ *
+ * wp-config FXWP_S3_* constants always take precedence and disable remote sync.
+ */
+function fxwp_s3_maybe_sync_remote($force = false)
+{
+    if (defined('FXWP_S3_SECRET_KEY') && FXWP_S3_SECRET_KEY !== '') {
+        return; // credentials pinned in wp-config -> nothing to sync
+    }
+    if (get_option('fxwp_s3_remote_sync', '1') !== '1') {
+        return; // central sync disabled for this site
+    }
+    $last = (int)get_option('fxwp_s3_remote_synced', 0);
+    if (!$force && (time() - $last) < HOUR_IN_SECONDS) {
+        return; // synced recently
+    }
+    fxwp_s3_fetch_remote_config();
+}
+add_action('fxm_hourly_event', 'fxwp_s3_maybe_sync_remote');
+
+/**
+ * Fetch S3 credentials from FXWP_API_URL/{api_key}/s3-credentials and cache them
+ * locally (secret encrypted at rest). The backend must return JSON like:
+ *   { "success": true, "s3": {
+ *       "endpoint": "https://s3.eu-central-1.amazonaws.com",
+ *       "region": "eu-central-1",
+ *       "bucket": "fxwp-bkups-...",
+ *       "access_key": "AKIA...",
+ *       "secret_key": "...",
+ *       "prefix": ""            // optional
+ *   } }
+ *
+ * @return array{ok:bool,message:string}
+ */
+function fxwp_s3_fetch_remote_config()
+{
+    // Mark the attempt up front so a persistent failure retries hourly (via the
+    // TTL guard) rather than on every page load / backup tick.
+    update_option('fxwp_s3_remote_synced', time());
+
+    $api_key = (string)get_option('fxwp_api_key', '');
+    if ($api_key === '') {
+        return array('ok' => false, 'message' => 'kein API-Key gesetzt');
+    }
+
+    $response = wp_remote_post(FXWP_API_URL . '/' . rawurlencode($api_key) . '/s3-credentials', array('timeout' => 15));
+    if (is_wp_error($response)) {
+        error_log('fxwp s3 remote sync failed: ' . $response->get_error_message());
+        return array('ok' => false, 'message' => $response->get_error_message());
+    }
+    $code = (int)wp_remote_retrieve_response_code($response);
+    if ($code !== 200) {
+        error_log('fxwp s3 remote sync HTTP ' . $code);
+        return array('ok' => false, 'message' => 'HTTP ' . $code);
+    }
+
+    $data = json_decode(wp_remote_retrieve_body($response), true);
+    if (!is_array($data)) {
+        return array('ok' => false, 'message' => 'ungültige Antwort');
+    }
+    $s3 = (isset($data['s3']) && is_array($data['s3'])) ? $data['s3'] : $data;
+
+    $endpoint = isset($s3['endpoint']) ? esc_url_raw(trim((string)$s3['endpoint'])) : '';
+    $bucket   = isset($s3['bucket']) ? sanitize_text_field((string)$s3['bucket']) : '';
+    $access   = isset($s3['access_key']) ? sanitize_text_field((string)$s3['access_key']) : '';
+    $secret   = isset($s3['secret_key']) ? (string)$s3['secret_key'] : '';
+    if ($endpoint === '' || $bucket === '' || $access === '' || $secret === '') {
+        return array('ok' => false, 'message' => 'unvollständige Zugangsdaten');
+    }
+
+    update_option('fxwp_s3_endpoint', $endpoint, false);
+    update_option('fxwp_s3_bucket', $bucket, false);
+    update_option('fxwp_s3_access_key', $access, false);
+    update_option('fxwp_s3_secret_key_enc', fxwp_s3_encrypt($secret), false);
+    if (isset($s3['region']) && $s3['region'] !== '') {
+        update_option('fxwp_s3_region', sanitize_text_field((string)$s3['region']), false);
+    }
+    if (isset($s3['prefix'])) {
+        update_option('fxwp_s3_prefix', sanitize_text_field((string)$s3['prefix']), false);
+    }
+
+    error_log('fxwp s3 remote sync OK');
+    return array('ok' => true, 'message' => 'Zugangsdaten zentral aktualisiert');
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Upload phase (called from the backup job's process loop)                   */
 /* -------------------------------------------------------------------------- */
 
@@ -551,11 +643,27 @@ function fxwp_s3_handle_settings_post()
         return;
     }
 
-    update_option('fxwp_s3_endpoint', esc_url_raw(trim(wp_unslash($_POST['fxwp_s3_endpoint'] ?? ''))), false);
-    update_option('fxwp_s3_region', sanitize_text_field(wp_unslash($_POST['fxwp_s3_region'] ?? '')), false);
-    update_option('fxwp_s3_bucket', sanitize_text_field(wp_unslash($_POST['fxwp_s3_bucket'] ?? '')), false);
+    update_option('fxwp_s3_remote_sync', (($_POST['fxwp_s3_remote_sync'] ?? '') === '1') ? '1' : '0', false);
+
+    // Only overwrite non-secret fields when a value is actually provided, so
+    // toggling settings doesn't blank credentials that were synced centrally.
+    $endpoint = esc_url_raw(trim(wp_unslash($_POST['fxwp_s3_endpoint'] ?? '')));
+    if ($endpoint !== '') {
+        update_option('fxwp_s3_endpoint', $endpoint, false);
+    }
+    $region = sanitize_text_field(wp_unslash($_POST['fxwp_s3_region'] ?? ''));
+    if ($region !== '') {
+        update_option('fxwp_s3_region', $region, false);
+    }
+    $bucket = sanitize_text_field(wp_unslash($_POST['fxwp_s3_bucket'] ?? ''));
+    if ($bucket !== '') {
+        update_option('fxwp_s3_bucket', $bucket, false);
+    }
+    $access = sanitize_text_field(wp_unslash($_POST['fxwp_s3_access_key'] ?? ''));
+    if ($access !== '') {
+        update_option('fxwp_s3_access_key', $access, false);
+    }
     update_option('fxwp_s3_prefix', sanitize_text_field(wp_unslash($_POST['fxwp_s3_prefix'] ?? '')), false);
-    update_option('fxwp_s3_access_key', sanitize_text_field(wp_unslash($_POST['fxwp_s3_access_key'] ?? '')), false);
 
     $mode = in_array($_POST['fxwp_s3_upload_mode'] ?? '', array('tiered', 'monthly', 'all'), true)
         ? $_POST['fxwp_s3_upload_mode'] : 'tiered';

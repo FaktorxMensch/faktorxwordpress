@@ -125,6 +125,10 @@ function fxwp_backups_page()
             case 's3test':
                 $s3_test_result = fxwp_s3_test();
                 break;
+            case 's3sync':
+                $s3_test_result = function_exists('fxwp_s3_fetch_remote_config')
+                    ? fxwp_s3_fetch_remote_config() : null;
+                break;
         }
     }
 
@@ -174,9 +178,21 @@ function fxwp_backups_page()
                     <?php if ($s3_err): ?>
                         <div class="notice notice-error inline"><p><?php printf(esc_html__('Letzter Fehler: %s', 'fxwp'), esc_html($s3_err)); ?></p></div>
                     <?php endif; ?>
+                    <?php $s3_synced = (int)get_option('fxwp_s3_remote_synced', 0); ?>
+                    <p>
+                        <?php _e('Zentrale Verwaltung (ProjectPilot):', 'fxwp'); ?>
+                        <strong><?php echo get_option('fxwp_s3_remote_sync', '1') === '1' ? esc_html__('an', 'fxwp') : esc_html__('aus', 'fxwp'); ?></strong>
+                        <?php if ($s3_synced): ?>
+                            &middot; <?php printf(esc_html__('zuletzt synchronisiert: %s her', 'fxwp'), esc_html(human_time_diff($s3_synced, time()))); ?>
+                        <?php endif; ?>
+                        &nbsp;<a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=s3sync'), 'fxwp_critical'); ?>" class="button button-small"><?php _e('Jetzt synchronisieren', 'fxwp'); ?></a>
+                    </p>
                     <form method="post" action="">
                         <?php wp_nonce_field('fxwp_s3_settings', 'fxwp_s3_settings_nonce'); ?>
                         <table class="form-table">
+                            <tr><th><label><?php _e('Zugangsdaten-Quelle', 'fxwp'); ?></label></th>
+                                <td><label><input type="checkbox" name="fxwp_s3_remote_sync" value="1" <?php checked(get_option('fxwp_s3_remote_sync', '1'), '1'); ?>> <?php _e('Zentral von ProjectPilot beziehen (stündlich via Monitor-Cron)', 'fxwp'); ?></label>
+                                    <p class="description"><?php _e('Wenn aktiv, werden Endpoint/Bucket/Schlüssel automatisch gesetzt – die Felder unten dienen nur als Fallback und werden bei der nächsten Synchronisierung überschrieben.', 'fxwp'); ?></p></td></tr>
                             <tr><th><label><?php _e('Endpoint-URL', 'fxwp'); ?></label></th>
                                 <td><input type="text" name="fxwp_s3_endpoint" class="regular-text" placeholder="https://s3.example.com" value="<?php echo esc_attr(get_option('fxwp_s3_endpoint', '')); ?>"></td></tr>
                             <tr><th><label><?php _e('Region', 'fxwp'); ?></label></th>
