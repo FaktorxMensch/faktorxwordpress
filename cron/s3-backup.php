@@ -91,21 +91,69 @@ function fxwp_s3_backup_month($base)
 }
 
 /**
- * Decide whether THIS backup should be copied off-site.
- *
- * Default mode "monthly" uploads only the first successful backup of each
- * calendar month (the long-term/grandfather copy) to keep S3 cost minimal --
- * one object per site per month. Mode "all" uploads every backup. The month
- * marker is only advanced on a *successful* upload (see the upload phase), so a
- * failed monthly upload is retried by the next backup that month.
+ * Extract the calendar day ("YYYY-MM-DD") from a backup base name.
  */
-function fxwp_s3_should_upload($base)
+function fxwp_s3_backup_day($base)
 {
-    if (get_option('fxwp_s3_upload_mode', 'monthly') === 'all') {
-        return true;
+    if (preg_match('/(\d{4}-\d{2}-\d{2})_/', (string)$base, $m)) {
+        return $m[1];
     }
+    return current_time('Y-m-d');
+}
+
+/**
+ * Decide whether (and as which tier) THIS backup should be copied off-site.
+ *
+ * Tiers map to distinct key prefixes so AWS lifecycle rules can expire them
+ * differently (e.g. father/ after 30 days, grandfather/ after a year):
+ *   - grandfather: the first successful backup of each calendar month
+ *   - father:      the first successful backup of each calendar day
+ *
+ * Markers are only advanced on a *successful* upload (see the upload phase), so
+ * a failed upload is retried by the next backup in the same window.
+ *
+ * Modes: "tiered" (default, father + grandfather), "monthly" (grandfather only),
+ * "all" (every backup, no tier folder).
+ *
+ * @return array{upload:bool,tier:string}
+ */
+function fxwp_s3_upload_plan($base)
+{
+    $mode = get_option('fxwp_s3_upload_mode', 'tiered');
+    if ($mode === 'all') {
+        return array('upload' => true, 'tier' => 'all');
+    }
+
     $month = fxwp_s3_backup_month($base);
-    return $month !== '' && $month !== (string)get_option('fxwp_s3_last_uploaded_month', '');
+    if ($month !== '' && $month !== (string)get_option('fxwp_s3_last_uploaded_month', '')) {
+        return array('upload' => true, 'tier' => 'grandfather');
+    }
+
+    if ($mode === 'tiered') {
+        $day = fxwp_s3_backup_day($base);
+        if ($day !== '' && $day !== (string)get_option('fxwp_s3_last_uploaded_day', '')) {
+            return array('upload' => true, 'tier' => 'father');
+        }
+    }
+
+    return array('upload' => false, 'tier' => '');
+}
+
+/**
+ * Storage class for a tier. Defaults are cost-aware: the long-lived grandfather
+ * goes to GLACIER, but the short-lived father uses STANDARD_IA -- putting a
+ * 30-day father into Glacier would trigger Glacier's 90-day minimum-duration
+ * charge (you'd pay for 90 days to keep it 30).
+ */
+function fxwp_s3_storage_class_for($tier)
+{
+    if ($tier === 'grandfather') {
+        return get_option('fxwp_s3_class_grandfather', 'GLACIER');
+    }
+    if ($tier === 'father') {
+        return get_option('fxwp_s3_class_father', 'STANDARD_IA');
+    }
+    return get_option('fxwp_s3_class_default', 'STANDARD');
 }
 
 /**
@@ -171,29 +219,36 @@ function fxwp_s3_upload_phase(&$state, $backupDir, $backupFile, $dumpFile, $dead
         if (empty($state['s3'])) {
             $size = (int)@filesize($backupFile);
             $partSize = max(5 * 1024 * 1024, (int)get_option('fxwp_s3_part_size', 16 * 1024 * 1024));
+            // Tier becomes a top-level key folder (father/ , grandfather/) so AWS
+            // lifecycle rules can expire each tier on its own schedule across all
+            // sites. "all" mode uses no tier folder.
+            $tier = isset($state['s3_tier']) ? $state['s3_tier'] : '';
+            $tierFolder = ($tier === 'father' || $tier === 'grandfather') ? $tier . '/' : '';
             $state['s3'] = array(
-                'stage'       => $size <= $partSize ? 'zip_single' : 'zip_init',
-                'upload_id'   => '',
-                'part_number' => 1,
-                'offset'      => 0,
-                'parts'       => array(),
-                'zip_key'     => $cfg['prefix'] . basename($backupFile),
-                'sql_key'     => $cfg['prefix'] . basename($dumpFile),
-                'zip_size'    => $size,
-                'part_size'   => $partSize,
+                'stage'         => $size <= $partSize ? 'zip_single' : 'zip_init',
+                'upload_id'     => '',
+                'part_number'   => 1,
+                'offset'        => 0,
+                'parts'         => array(),
+                'zip_key'       => $tierFolder . $cfg['prefix'] . basename($backupFile),
+                'sql_key'       => $tierFolder . $cfg['prefix'] . basename($dumpFile),
+                'zip_size'      => $size,
+                'part_size'     => $partSize,
+                'storage_class' => fxwp_s3_storage_class_for($tier),
             );
         }
         $s = &$state['s3'];
 
         // Small archive: one streamed PUT.
         if ($s['stage'] === 'zip_single') {
-            fxwp_s3_put_file($cfg, $s['zip_key'], $backupFile);
+            fxwp_s3_put_file($cfg, $s['zip_key'], $backupFile, $s['storage_class']);
             $s['stage'] = 'sql';
         }
 
-        // Large archive: initialise the multipart upload.
+        // Large archive: initialise the multipart upload (storage class is set
+        // here, on the resulting object, not on the individual parts).
         if ($s['stage'] === 'zip_init') {
-            $s['upload_id'] = fxwp_s3_multipart_create($cfg, $s['zip_key']);
+            $s['upload_id'] = fxwp_s3_multipart_create($cfg, $s['zip_key'], $s['storage_class']);
             $s['stage'] = 'zip';
         }
 
@@ -226,22 +281,29 @@ function fxwp_s3_upload_phase(&$state, $backupDir, $backupFile, $dumpFile, $dead
             $s['stage'] = 'sql';
         }
 
-        // Database dump (small): one streamed PUT.
+        // Database dump (small): one streamed PUT, same storage class.
         if ($s['stage'] === 'sql') {
             if (file_exists($dumpFile) && filesize($dumpFile) > 0) {
-                fxwp_s3_put_file($cfg, $s['sql_key'], $dumpFile);
+                fxwp_s3_put_file($cfg, $s['sql_key'], $dumpFile, $s['storage_class']);
             }
             $s['stage'] = 'done';
         }
 
         if ($s['stage'] === 'done') {
             update_option('fxwp_s3_last_upload', time());
-            // Mark this month as covered only now that the upload truly succeeded.
-            update_option('fxwp_s3_last_uploaded_month', fxwp_s3_backup_month(isset($state['base']) ? $state['base'] : ''));
+            // Advance the tier marker only now that the upload truly succeeded.
+            $tier = isset($state['s3_tier']) ? $state['s3_tier'] : '';
+            $base = isset($state['base']) ? $state['base'] : '';
+            $zipKey = $s['zip_key'];
+            if ($tier === 'grandfather') {
+                update_option('fxwp_s3_last_uploaded_month', fxwp_s3_backup_month($base));
+            } elseif ($tier === 'father') {
+                update_option('fxwp_s3_last_uploaded_day', fxwp_s3_backup_day($base));
+            }
             delete_option('fxwp_s3_last_error');
-            unset($state['s3']);
+            unset($state['s3'], $state['s3_tier']);
             $state['active'] = false;
-            error_log('fxwp s3 upload completed: ' . basename($backupFile));
+            error_log('fxwp s3 upload completed (' . $tier . '): ' . $zipKey);
         }
     } catch (\Throwable $e) {
         if (!empty($cfg) && !empty($state['s3']['upload_id'])) {
@@ -277,7 +339,7 @@ function fxwp_s3_notify_failure($message)
 /*  S3 operations                                                              */
 /* -------------------------------------------------------------------------- */
 
-function fxwp_s3_put_file($cfg, $key, $path)
+function fxwp_s3_put_file($cfg, $key, $path, $storageClass = '')
 {
     $size = (int)filesize($path);
     $hash = hash_file('sha256', $path); // streaming, low memory
@@ -285,7 +347,11 @@ function fxwp_s3_put_file($cfg, $key, $path)
     if (!$fh) {
         throw new Exception('cannot open file for upload: ' . $path);
     }
-    $res = fxwp_s3_curl($cfg, 'PUT', $key, array(), array(), $hash, null, $fh, $size);
+    $headers = array();
+    if ($storageClass !== '') {
+        $headers['x-amz-storage-class'] = $storageClass;
+    }
+    $res = fxwp_s3_curl($cfg, 'PUT', $key, array(), $headers, $hash, null, $fh, $size);
     fclose($fh);
     if ($res['code'] < 200 || $res['code'] >= 300) {
         throw new Exception('PUT ' . $key . ' -> HTTP ' . $res['code'] . ' ' . substr($res['body'], 0, 300));
@@ -293,9 +359,13 @@ function fxwp_s3_put_file($cfg, $key, $path)
     return true;
 }
 
-function fxwp_s3_multipart_create($cfg, $key)
+function fxwp_s3_multipart_create($cfg, $key, $storageClass = '')
 {
-    $res = fxwp_s3_curl($cfg, 'POST', $key, array('uploads' => ''), array(), hash('sha256', ''), '', null, null);
+    $headers = array();
+    if ($storageClass !== '') {
+        $headers['x-amz-storage-class'] = $storageClass;
+    }
+    $res = fxwp_s3_curl($cfg, 'POST', $key, array('uploads' => ''), $headers, hash('sha256', ''), '', null, null);
     if ($res['code'] < 200 || $res['code'] >= 300) {
         throw new Exception('create multipart -> HTTP ' . $res['code'] . ' ' . substr($res['body'], 0, 300));
     }
@@ -309,7 +379,7 @@ function fxwp_s3_multipart_upload_part($cfg, $key, $uploadId, $partNumber, $chun
 {
     $hash = hash('sha256', $chunk);
     $query = array('partNumber' => (string)$partNumber, 'uploadId' => $uploadId);
-    $res = fxwp_s3_curl($cfg, 'PUT', $key, $query, array('Content-Type: application/octet-stream'), $hash, $chunk, null, null);
+    $res = fxwp_s3_curl($cfg, 'PUT', $key, $query, array('content-type' => 'application/octet-stream'), $hash, $chunk, null, null);
     if ($res['code'] < 200 || $res['code'] >= 300) {
         throw new Exception('upload part ' . $partNumber . ' -> HTTP ' . $res['code'] . ' ' . substr($res['body'], 0, 300));
     }
@@ -329,7 +399,7 @@ function fxwp_s3_multipart_complete($cfg, $key, $uploadId, $parts)
     }
     $xml .= '</CompleteMultipartUpload>';
 
-    $res = fxwp_s3_curl($cfg, 'POST', $key, array('uploadId' => $uploadId), array('Content-Type: application/xml'), hash('sha256', $xml), $xml, null, null);
+    $res = fxwp_s3_curl($cfg, 'POST', $key, array('uploadId' => $uploadId), array('content-type' => 'application/xml'), hash('sha256', $xml), $xml, null, null);
     if ($res['code'] < 200 || $res['code'] >= 300) {
         throw new Exception('complete multipart -> HTTP ' . $res['code'] . ' ' . substr($res['body'], 0, 300));
     }
@@ -380,6 +450,11 @@ function fxwp_s3_curl($cfg, $method, $key, array $query, array $extraHeaders, $p
         'x-amz-content-sha256' => $payloadHash,
         'x-amz-date'           => $amzDate,
     );
+    // Extra headers (e.g. x-amz-storage-class, content-type) must be *signed* --
+    // S3 rejects requests where an x-amz-* header is present but not signed.
+    foreach ($extraHeaders as $hk => $hv) {
+        $signedHeadersMap[strtolower($hk)] = trim((string)$hv);
+    }
     ksort($signedHeadersMap);
     $canonicalHeaders = '';
     foreach ($signedHeadersMap as $hk => $hv) {
@@ -405,14 +480,11 @@ function fxwp_s3_curl($cfg, $method, $key, array $query, array $extraHeaders, $p
     $url = $scheme . '://' . $hostHeader . $canonicalUri . ($canonicalQuery !== '' ? '?' . $canonicalQuery : '');
 
     $headers = array(
-        'Host: ' . $hostHeader,
-        'x-amz-date: ' . $amzDate,
-        'x-amz-content-sha256: ' . $payloadHash,
         'Authorization: ' . $authorization,
         'Expect:', // avoid 100-continue stalls on some servers
     );
-    foreach ($extraHeaders as $eh) {
-        $headers[] = $eh;
+    foreach ($signedHeadersMap as $hk => $hv) {
+        $headers[] = ($hk === 'host' ? 'Host' : $hk) . ': ' . $hv;
     }
 
     $ch = curl_init();
@@ -480,8 +552,19 @@ function fxwp_s3_handle_settings_post()
     update_option('fxwp_s3_prefix', sanitize_text_field(wp_unslash($_POST['fxwp_s3_prefix'] ?? '')), false);
     update_option('fxwp_s3_access_key', sanitize_text_field(wp_unslash($_POST['fxwp_s3_access_key'] ?? '')), false);
 
-    $mode = (($_POST['fxwp_s3_upload_mode'] ?? '') === 'all') ? 'all' : 'monthly';
+    $mode = in_array($_POST['fxwp_s3_upload_mode'] ?? '', array('tiered', 'monthly', 'all'), true)
+        ? $_POST['fxwp_s3_upload_mode'] : 'tiered';
     update_option('fxwp_s3_upload_mode', $mode, false);
+
+    $classes = array('STANDARD', 'STANDARD_IA', 'ONEZONE_IA', 'INTELLIGENT_TIERING', 'GLACIER_IR', 'GLACIER', 'DEEP_ARCHIVE');
+    $father = (string)($_POST['fxwp_s3_class_father'] ?? '');
+    $grand = (string)($_POST['fxwp_s3_class_grandfather'] ?? '');
+    if (in_array($father, $classes, true)) {
+        update_option('fxwp_s3_class_father', $father, false);
+    }
+    if (in_array($grand, $classes, true)) {
+        update_option('fxwp_s3_class_grandfather', $grand, false);
+    }
 
     $secret = isset($_POST['fxwp_s3_secret_key']) ? trim(wp_unslash($_POST['fxwp_s3_secret_key'])) : '';
     if ($secret !== '') {
@@ -498,7 +581,7 @@ function fxwp_s3_test()
         $cfg = fxwp_s3_config();
         $key = $cfg['prefix'] . 'fxwp-s3-test.txt';
         $body = 'fxwp connection test ' . gmdate('c');
-        $put = fxwp_s3_curl($cfg, 'PUT', $key, array(), array('Content-Type: text/plain'), hash('sha256', $body), $body, null, null);
+        $put = fxwp_s3_curl($cfg, 'PUT', $key, array(), array('content-type' => 'text/plain'), hash('sha256', $body), $body, null, null);
         if ($put['code'] < 200 || $put['code'] >= 300) {
             return array('ok' => false, 'message' => 'PUT HTTP ' . $put['code'] . ' ' . substr($put['body'], 0, 200));
         }

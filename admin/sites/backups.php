@@ -193,12 +193,28 @@ function fxwp_backups_page()
                                 <td><input type="password" name="fxwp_s3_secret_key" class="regular-text" autocomplete="new-password" placeholder="<?php echo $secret_set ? esc_attr__('•••••••• (gesetzt – zum Ändern neu eingeben)', 'fxwp') : esc_attr__('nicht gesetzt', 'fxwp'); ?>">
                                     <p class="description"><?php _e('Wird verschlüsselt gespeichert. Leer lassen, um den bestehenden Schlüssel zu behalten.', 'fxwp'); ?></p></td></tr>
                             <tr><th><label><?php _e('Upload-Modus', 'fxwp'); ?></label></th>
-                                <td><?php $mode = get_option('fxwp_s3_upload_mode', 'monthly'); ?>
+                                <td><?php $mode = get_option('fxwp_s3_upload_mode', 'tiered'); ?>
                                     <select name="fxwp_s3_upload_mode">
-                                        <option value="monthly" <?php selected($mode, 'monthly'); ?>><?php _e('Nur monatlich (erstes Backup pro Monat)', 'fxwp'); ?></option>
+                                        <option value="tiered" <?php selected($mode, 'tiered'); ?>><?php _e('Vater + Großvater (1×/Tag + 1×/Monat)', 'fxwp'); ?></option>
+                                        <option value="monthly" <?php selected($mode, 'monthly'); ?>><?php _e('Nur Großvater (1×/Monat)', 'fxwp'); ?></option>
                                         <option value="all" <?php selected($mode, 'all'); ?>><?php _e('Jedes Backup', 'fxwp'); ?></option>
                                     </select>
-                                    <p class="description"><?php _e('„Nur monatlich" lädt pro Monat genau ein Backup hoch – minimale S3-Kosten.', 'fxwp'); ?></p></td></tr>
+                                    <p class="description"><?php _e('„Vater + Großvater" lädt pro Tag ein Vater- und pro Monat ein Großvater-Backup in getrennte Ordner (<code>father/</code>, <code>grandfather/</code>) – für getrennte Lifecycle-Regeln in AWS.', 'fxwp'); ?></p></td></tr>
+                            <?php
+                            $classes = array('STANDARD' => 'Standard', 'STANDARD_IA' => 'Standard-IA', 'GLACIER_IR' => 'Glacier Instant Retrieval', 'GLACIER' => 'Glacier Flexible', 'DEEP_ARCHIVE' => 'Glacier Deep Archive');
+                            $cf = get_option('fxwp_s3_class_father', 'STANDARD_IA');
+                            $cg = get_option('fxwp_s3_class_grandfather', 'GLACIER');
+                            ?>
+                            <tr><th><label><?php _e('Speicherklasse Vater', 'fxwp'); ?></label></th>
+                                <td><select name="fxwp_s3_class_father"><?php foreach ($classes as $v => $l) {
+                                        echo '<option value="' . esc_attr($v) . '" ' . selected($cf, $v, false) . '>' . esc_html($l) . '</option>';
+                                    } ?></select>
+                                    <p class="description"><?php _e('Empfehlung Standard-IA: Glacier hätte bei 30-Tage-Aufbewahrung eine 90-Tage-Mindestgebühr.', 'fxwp'); ?></p></td></tr>
+                            <tr><th><label><?php _e('Speicherklasse Großvater', 'fxwp'); ?></label></th>
+                                <td><select name="fxwp_s3_class_grandfather"><?php foreach ($classes as $v => $l) {
+                                        echo '<option value="' . esc_attr($v) . '" ' . selected($cg, $v, false) . '>' . esc_html($l) . '</option>';
+                                    } ?></select>
+                                    <p class="description"><?php _e('Glacier ist hier ideal (Aufbewahrung > 90 Tage).', 'fxwp'); ?></p></td></tr>
                         </table>
                         <input type="submit" class="button button-primary" value="<?php esc_attr_e('Speichern', 'fxwp'); ?>">
                         <a href="<?php echo wp_nonce_url(admin_url('admin.php?page=fxwp-backups&backup_action=s3test'), 'fxwp_critical'); ?>" class="button button-secondary"><?php _e('Verbindung testen', 'fxwp'); ?></a>
