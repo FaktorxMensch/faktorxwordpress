@@ -1,3 +1,7 @@
+## v2.8.1 - 2026-06-24
+
+- Hide backup-status dashboard widget when backups are disabled
+
 ## v2.8.0 - 2026-06-24
 
 - S3: grandfather upload also marks the day to avoid a same-day father
