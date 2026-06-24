@@ -1,3 +1,14 @@
+## v2.8.0 - 2026-06-24
+
+- S3: grandfather upload also marks the day to avoid a same-day father
+- Son tier back to days; central S3 credential sync via monitor cron
+- Son tier = last 24h; S3 keys per-site with tier object tags
+- Align Archiv backup tags with the retention engine
+- S3: tiered father/grandfather uploads with per-tier storage class
+- S3: connection test tolerates write-only credentials
+- S3: default eu-central-1 + monthly-only upload mode
+- Add resumable off-site (S3) backup copy
+
 ## v2.7.1 - 2026-06-21
 
 - Local-time backup filenames + accurate cron day-counter
