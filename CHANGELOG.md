@@ -1,3 +1,7 @@
+## v2.9.0 - 2026-06-26
+
+- add fxm recover
+
 ## v2.8.2 - 2026-06-24
 
 - S3: tag every uploaded object (incl. test/all) for lifecycle targeting
