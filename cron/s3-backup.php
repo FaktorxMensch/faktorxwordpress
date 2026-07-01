@@ -310,7 +310,7 @@ function fxwp_s3_upload_phase(&$state, $backupDir, $backupFile, $dumpFile, $dead
 
         if (empty($state['s3'])) {
             $size = (int)@filesize($backupFile);
-            $partSize = max(5 * 1024 * 1024, (int)get_option('fxwp_s3_part_size', 16 * 1024 * 1024));
+            $partSize = max(5 * 1024 * 1024, (int)get_option('fxwp_s3_part_size', 8 * 1024 * 1024));
             // Tier becomes a top-level key folder (father/ , grandfather/) so AWS
             // lifecycle rules can expire each tier on its own schedule across all
             // sites. "all" mode uses no tier folder.
@@ -482,15 +482,80 @@ function fxwp_s3_multipart_upload_part($cfg, $key, $uploadId, $partNumber, $chun
 {
     $hash = hash('sha256', $chunk);
     $query = array('partNumber' => (string)$partNumber, 'uploadId' => $uploadId);
-    $res = fxwp_s3_curl($cfg, 'PUT', $key, $query, array('content-type' => 'application/octet-stream'), $hash, $chunk, null, null);
-    if ($res['code'] < 200 || $res['code'] >= 300) {
-        throw new Exception('upload part ' . $partNumber . ' -> HTTP ' . $res['code'] . ' ' . substr($res['body'], 0, 300));
+    $maxAttempts = min(6, max(1, (int)get_option('fxwp_s3_part_retries', 4)));
+    $lastError = '';
+
+    for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+        try {
+            $res = fxwp_s3_curl($cfg, 'PUT', $key, $query, array('content-type' => 'application/octet-stream'), $hash, $chunk, null, null);
+        } catch (\Throwable $e) {
+            $lastError = $e->getMessage();
+            if (fxwp_s3_is_retryable_exception($e)) {
+                if ($attempt < $maxAttempts) {
+                    fxwp_s3_log_part_retry($partNumber, $attempt, $maxAttempts, $lastError);
+                    fxwp_s3_retry_delay($attempt);
+                    continue;
+                }
+                break;
+            }
+            throw new Exception('upload part ' . $partNumber . ' -> ' . $lastError);
+        }
+
+        if ($res['code'] >= 200 && $res['code'] < 300) {
+            $etag = isset($res['headers']['etag']) ? trim($res['headers']['etag'], '"') : '';
+            if ($etag === '') {
+                throw new Exception('missing ETag for part ' . $partNumber);
+            }
+            return $etag;
+        }
+
+        $lastError = 'HTTP ' . $res['code'] . ' ' . substr($res['body'], 0, 300);
+        if ($attempt < $maxAttempts && fxwp_s3_is_retryable_response($res)) {
+            fxwp_s3_log_part_retry($partNumber, $attempt, $maxAttempts, $lastError);
+            fxwp_s3_retry_delay($attempt);
+            continue;
+        }
+
+        break;
     }
-    $etag = isset($res['headers']['etag']) ? trim($res['headers']['etag'], '"') : '';
-    if ($etag === '') {
-        throw new Exception('missing ETag for part ' . $partNumber);
+
+    throw new Exception('upload part ' . $partNumber . ' -> ' . $lastError);
+}
+
+function fxwp_s3_is_retryable_response($res)
+{
+    $code = isset($res['code']) ? (int)$res['code'] : 0;
+    if (in_array($code, array(408, 429, 500, 502, 503, 504), true)) {
+        return true;
     }
-    return $etag;
+    if ($code === 400 && isset($res['body']) && strpos((string)$res['body'], '<Code>RequestTimeout</Code>') !== false) {
+        return true;
+    }
+    return false;
+}
+
+function fxwp_s3_is_retryable_exception($e)
+{
+    $message = strtolower($e->getMessage());
+    foreach (array('timed out', 'timeout', 'connection reset', 'ssl_read', 'recv failure', 'send failure') as $needle) {
+        if (strpos($message, $needle) !== false) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function fxwp_s3_log_part_retry($partNumber, $attempt, $maxAttempts, $reason)
+{
+    error_log(
+        'fxwp s3 upload part ' . (int)$partNumber . ' retry '
+        . ((int)$attempt + 1) . '/' . (int)$maxAttempts . ': ' . $reason
+    );
+}
+
+function fxwp_s3_retry_delay($attempt)
+{
+    usleep(min(3000000, 250000 * (1 << max(0, (int)$attempt - 1))));
 }
 
 function fxwp_s3_multipart_complete($cfg, $key, $uploadId, $parts)
