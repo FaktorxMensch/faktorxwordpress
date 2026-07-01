@@ -1,3 +1,7 @@
+## v2.9.2 - 2026-07-01
+
+- Improve S3 multipart backup retries
+
 ## v2.9.1 - 2026-06-26
 
 - Keine Änderungen seit letztem Release
@@ -184,4 +188,3 @@ No changes.
 - move options up in menu
 - Added cap check to login_as action to make sure user is really allowed to login_as other user
 - add option to turn off wordfence email mod
-
