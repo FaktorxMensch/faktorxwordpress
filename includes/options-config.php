@@ -539,7 +539,15 @@ $fxwp_plugin_config = array(
                 'backup_settings' => array(
                     'title' => 'Backup Einstellungen',
                     'options' => array(
-                        'fxwp_backup_interval' => array(
+                       'fxwp_backup_retention_info' => array(
+                           'type' => 'alert',
+                           'alertIcon' => 'dashicons dashicons-info-outline',
+                           'title' => 'Speicherort-spezifische Aufbewahrung',
+                           'text' => 'Die folgenden Einstellungen beziehen sich ausschließlich auf lokale Sicherungen. S3-Backups werden unabhängig von AWS Lifecycle Policies verwaltet (365 Tage für monatliche Backups).',
+                           'color' => 'info',
+                           'keywords' => array('backup', 'retention', 's3', 'aws', 'lokal', 'local', 'speicher', 'storage')
+                       ),
+                       'fxwp_backup_interval' => array(
                             'type' => 'select',
                             'title' => 'Backup Intervall',
                             'description' => 'Wählen Sie aus, wie oft Backups erstellt werden sollen.',
@@ -554,23 +562,23 @@ $fxwp_plugin_config = array(
                         'fxwp_backup_days_son' => array(
                             'type' => 'number',
                             'title' => 'Stündliche Backups behalten (Tage)',
-                            'description' => 'Anzahl der Tage, für die stündliche Backups aufbewahrt werden sollen.',
+                            'description' => 'Anzahl der Tage, für die stündliche lokale Backups aufbewahrt werden sollen.',
                             'default' => 3,
-                            'keywords' => array('backup', 'retention', 'hourly', 'days', 'aufbewahren')
+                            'keywords' => array('backup', 'retention', 'hourly', 'days', 'aufbewahren', 'lokal', 'local')
                         ),
                         'fxwp_backup_days_father' => array(
                             'type' => 'number',
                             'title' => 'Tägliche Backups behalten (Tage)',
-                            'description' => 'Anzahl der Tage, für die tägliche Backups aufbewahrt werden sollen.',
+                            'description' => 'Anzahl der Tage, für die tägliche lokale Backups aufbewahrt werden sollen.',
                             'default' => 12,
-                            'keywords' => array('backup', 'retention', 'daily', 'days', 'aufbewahren')
+                            'keywords' => array('backup', 'retention', 'daily', 'days', 'aufbewahren', 'lokal', 'local')
                         ),
                         'fxwp_backup_days_grandfather' => array(
                             'type' => 'number',
                             'title' => 'Monatliche Backups behalten (Tage)',
-                            'description' => 'Anzahl der Tage, für die monatliche Backups aufbewahrt werden sollen.',
+                            'description' => 'Anzahl der Tage, für die monatliche lokale Backups aufbewahrt werden sollen.',
                             'default' => 90,
-                            'keywords' => array('backup', 'retention', 'monthly', 'days', 'aufbewahren')
+                            'keywords' => array('backup', 'retention', 'monthly', 'days', 'aufbewahren', 'lokal', 'local')
                         )
                     )
                 )
