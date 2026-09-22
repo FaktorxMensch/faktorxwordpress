@@ -1,3 +1,7 @@
+## v2.9.3 - 2026-09-22
+
+- Clarify backup retention is local-only, S3 managed by AWS lifecycle
+
 ## v2.9.2 - 2026-07-01
 
 - Improve S3 multipart backup retries
