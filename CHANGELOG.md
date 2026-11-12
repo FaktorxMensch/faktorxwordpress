@@ -1,3 +1,7 @@
+## v2.10.0 - 2026-11-12
+
+- fxwp: Projekt-ID-Routen absichern, Admin-Wiederherstellung ergänzen
+
 ## v2.9.3 - 2026-09-22
 
 - Clarify backup retention is local-only, S3 managed by AWS lifecycle
