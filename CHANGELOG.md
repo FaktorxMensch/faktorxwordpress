@@ -1,3 +1,7 @@
+## v3.0.1 - 2026-11-12
+
+- Signing: fxr preflight, keygen fix, untrack release.sig
+
 ## v3.0.0 - 2026-11-12
 
 - Add singing key, from now on each update needs to be signed.
