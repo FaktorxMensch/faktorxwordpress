@@ -127,6 +127,10 @@ function fxwp_generate_topics($description)
 
 function fxwp_register_description_widget()
 {
+    // The "Blog Themen" widget only feeds the Schreibwerkstatt, which is switched
+    // off for now (see admin/sites/topic.php). Remove this return to bring it back.
+    return;
+
     if (!current_user_can('edit_posts') || (!current_user_can('fxm_admin') && fxwp_check_deactivated_features('fxwp_deact_ai'))) {
         return;
     }

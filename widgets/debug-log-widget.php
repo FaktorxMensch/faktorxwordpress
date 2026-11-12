@@ -46,11 +46,14 @@ function fxwp_debug_log_widget() {
 			// Reformatting the line
 //			$logEntries[$key] = "Date: ".date(DATE_ATOM,$date).", Level: $level, Message: $field";
 			$logEntries[$key] = "[".date(DATE_ATOM,$date)."] ";
-			$logEntries[$key] .= ($level!=="") ? "<span style='color: $levelColor[$level]'>PHP $level</span> " : "";
-			$logEntries[$key] .= "$field";
+			// The log contains request data (URLs, POST bodies, user agents), so
+			// every part taken from it is escaped before it is printed.
+			$color = isset($levelColor[$level]) ? $levelColor[$level] : 'unset';
+			$logEntries[$key] .= ($level!=="") ? "<span style='color: " . esc_attr($color) . "'>PHP " . esc_html($level) . "</span> " : "";
+			$logEntries[$key] .= esc_html($field);
 		} else {
 			// Handle lines that do not match the pattern
-			$logEntries[$key] = $line;
+			$logEntries[$key] = esc_html($line);
 		}
 	}
 	//Add lines back together
@@ -184,6 +187,9 @@ function fxwp_register_debug_log_widget()
 add_action('wp_dashboard_setup', 'fxwp_register_debug_log_widget');
 
 function fxwp_handle_debug_log_clear() {
+	if (!current_user_can('fxm_admin')) {
+		wp_die('Access denied');
+	}
 	// verify the nonce
 	if (!isset($_POST['fxwp_debug_log_clear_nonce']) || !wp_verify_nonce($_POST['fxwp_debug_log_clear_nonce'], 'fxwp_debug_log_clear_action')) {
 		wp_die('Security check fail');

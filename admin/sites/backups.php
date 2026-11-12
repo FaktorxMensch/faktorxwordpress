@@ -4,7 +4,7 @@ function fxwp_mock_backups()
 {
     // delete all backups
     $rootDir = ABSPATH;
-    $backupDir = $rootDir . 'wp-content/fxwp-backups/';
+    $backupDir = fxwp_backup_dir();
     $files = glob($backupDir . '*.zip*');
     foreach ($files as $file) {
         unlink($file);
@@ -15,7 +15,7 @@ function fxwp_mock_backups()
     for ($i = 0; $i < $hours; $i += 1) {
         $date = date('Y-m-d_H-i-s', strtotime("-$i hours"));
         $file = "backup_$date.zip";
-        $path = WP_CONTENT_DIR . "/fxwp-backups/$file";
+        $path = fxwp_backup_dir() . $file;
         if (!file_exists($path)) {
             file_put_contents($path, '');
             file_put_contents($path . ".sql", '');
@@ -62,13 +62,13 @@ function fxwp_download_backup($backupFile, $type = 'files')
         wp_die('Invalid backup file');
     }
 
-    $path = WP_CONTENT_DIR . '/fxwp-backups/' . $backupFile;
+    $path = fxwp_backup_dir() . $backupFile;
     if ($type === 'db') {
         $path .= '.sql';
     }
 
     // Make sure the resolved path is still inside the backup directory.
-    $backupDir = realpath(WP_CONTENT_DIR . '/fxwp-backups/');
+    $backupDir = realpath(fxwp_backup_dir());
     $realPath = realpath($path);
     if ($realPath === false || strpos($realPath, $backupDir) !== 0 || !is_file($realPath)) {
         wp_die('Backup file not found');
@@ -256,12 +256,12 @@ function fxwp_backups_page()
                         echo '</b><br>';
 
                         // get filesize
-                        $file = WP_CONTENT_DIR . '/fxwp-backups/' . $backup;
+                        $file = fxwp_backup_dir() . $backup;
                         if (file_exists($file)) {
                             $size = filesize($file);
                             $size = size_format($size);
                             printf('Dateigröße: %s', $size);
-                            $db_file = WP_CONTENT_DIR . '/fxwp-backups/' . $backup . '.sql';
+                            $db_file = fxwp_backup_dir() . $backup . '.sql';
                             echo " | ";
                             if (file_exists($db_file)) {
                                 $size = filesize($db_file);

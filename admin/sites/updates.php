@@ -114,7 +114,7 @@ function fxwp_updates_page()
     }
 
     // Enqueue Vue.js
-    wp_enqueue_script('vue', 'https://unpkg.com/vue@3/dist/vue.global.js', array(), null, true);
+    wp_enqueue_script('vue', 'https://unpkg.com/vue@3.4.38/dist/vue.global.js', array(), null, true);
     ?>
     <div class="wrap">
         <h1 style="margin-bottom: 10px"><?php echo esc_html__('System-Updates', 'fxwp'); ?></h1>
@@ -252,6 +252,7 @@ function fxwp_updates_page()
                                 </td>
                                 <td>
                                     <form method="post" action="index.php?fxwp_sync=1" style="display: inline;">
+                                        <input type="hidden" name="_wpnonce" value="<?php echo esc_attr(wp_create_nonce('fxwp_sync')); ?>">
                                         <input type="hidden" name="fxwp_self_update_tag" :value="release.tag">
                                         <button type="submit"
                                                 class="button button-secondary"><?php echo esc_html__('Installieren', 'fxwp'); ?></button>
@@ -270,6 +271,7 @@ function fxwp_updates_page()
                         <h4><?php echo esc_html__('Benutzerdefinierte Version', 'fxwp'); ?></h4>
                         <form method="post" action="index.php?fxwp_sync=1" class="custom-version-form"
                               style="margin-bottom: 0">
+                            <input type="hidden" name="_wpnonce" value="<?php echo esc_attr(wp_create_nonce('fxwp_sync')); ?>">
                             <input
                                     type="text"
                                     name="fxwp_custom_update_tag"
@@ -289,7 +291,7 @@ function fxwp_updates_page()
         <!-- Aktuelle Version & Update-Prüfung -->
         <div class="fxwp-version-info">
             <span><?php echo esc_html__('Version', 'fxwp'); ?><?php echo esc_html(FXWP_VERSION); ?></span>
-            <a href="<?php echo esc_url(admin_url('index.php?fxwp_sync=1')); ?>">
+            <a href="<?php echo esc_url(wp_nonce_url(admin_url('index.php?fxwp_sync=1'), 'fxwp_sync')); ?>">
                 <?php echo esc_html__('Prüfen auf Updates', 'fxwp'); ?>
             </a>
         </div>

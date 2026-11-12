@@ -7,6 +7,8 @@
 
 require_once plugin_dir_path(__FILE__) . 'config.php';
 require_once plugin_dir_path(__FILE__) . 'helpers.php';
+require_once plugin_dir_path(__FILE__) . 'recover.php';
+require_once plugin_dir_path(__FILE__) . 'update-signature.php';
 
 function fxwp_include_all_php($directory)
 {

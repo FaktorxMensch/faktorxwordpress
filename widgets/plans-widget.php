@@ -16,7 +16,7 @@ function fxwp_plans_widget()
         echo '<tbody>';
         foreach ($plans as $plan) {
             echo '<tr>';
-            echo '<td style="text-decoration: ' . ($plan->cancelled_at ? 'line-through' : 'none') . '">' . $plan->plan->name . '</td>';
+            echo '<td style="text-decoration: ' . ($plan->cancelled_at ? 'line-through' : 'none') . '">' . esc_html($plan->plan->name) . '</td>';
             echo '<td style="text-align: end">' . ($plan->cancelled_at ? 'gekündigt' : ($plan->invoicing_interval == 'monthly' ? 'monatlich' : 'jährlich')) . '</td>';
 
 //            echo '<td align="end">' . number_format($plan->plan->monthly_costs / 100, 2) . ' €</td>';

@@ -1,6 +1,40 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * Emergency tool: restores the agency's admin account on this site and mails
+ * the new password to the agency address.
+ *
+ * It must not be callable by just anyone, so it only runs when the caller has
+ * proven access to the server:
+ *
+ *   1. From a shell:   php wp-content/plugins/faktorxwordpress/admin/fxm-recover.php
+ *   2. In the browser: upload an empty file named "fxwp-recover.flag" into the
+ *      plugin folder (wp-content/plugins/faktorxwordpress/) via FTP, then open
+ *      this file's URL. The flag is deleted on use, so it works exactly once.
+ *
+ * Without server access, use ProjectPilot instead (monitor call with
+ * "recover_admin": true, authenticated by the site's API key).
+ */
+
+$fxwp_recover_is_cli = (PHP_SAPI === 'cli');
+
+if (!$fxwp_recover_is_cli) {
+    $fxwp_recover_flag = dirname(__DIR__) . '/fxwp-recover.flag';
+
+    if (!is_file($fxwp_recover_flag)) {
+        http_response_code(404);
+        exit;
+    }
+    // One use only: if the flag cannot be removed, refuse to run -- otherwise
+    // the script would stay open to everyone.
+    if (!@unlink($fxwp_recover_flag)) {
+        http_response_code(500);
+        header('Content-Type: text/plain; charset=utf-8');
+        exit("Could not delete fxwp-recover.flag. Delete it manually; nothing was changed.\n");
+    }
+}
+
 function fxm_find_wp_load(string $start_dir): ?string
 {
     $dir = realpath($start_dir);
@@ -26,77 +60,19 @@ if (!$wp_load) {
 }
 
 require_once $wp_load;
+// Also works while the plugin itself is deactivated.
+require_once dirname(__DIR__) . '/includes/recover.php';
 
+$result = fxwp_recover_admin_access();
 
-$email = 'accounts@faktorxmensch.com';
-$username = 'fxmadmin-recovery';
-$display_name = 'Faktor Mensch Admin';
-
-$admin_role = get_role('administrator');
-
-if (!$admin_role) {
-    exit('Administrator role not found.');
+if (!$fxwp_recover_is_cli) {
+    header('Content-Type: text/plain; charset=utf-8');
 }
 
-$fxm_role = get_role('fxm_admin');
-
-if (!$fxm_role) {
-    add_role('fxm_admin', 'FxM Admin', $admin_role->capabilities);
-    $fxm_role = get_role('fxm_admin');
+if (!$result['ok']) {
+    exit($result['error'] . "\n");
 }
-
-if ($fxm_role) {
-    foreach ($admin_role->capabilities as $cap => $grant) {
-        if ($grant) {
-            $fxm_role->add_cap($cap, true);
-        }
-    }
-
-    $fxm_role->add_cap('fxm_admin', true);
-}
-
-$user = get_user_by('email', $email);
-$password = wp_generate_password(24, true, true);
-$created = false;
-
-if (!$user) {
-    $user_id = wp_create_user($username, $password, $email);
-
-    if (is_wp_error($user_id)) {
-        exit('User creation failed: ' . $user_id->get_error_message());
-    }
-
-    wp_update_user([
-        'ID' => $user_id,
-        'display_name' => $display_name,
-        'nickname' => $display_name,
-    ]);
-
-    $user = get_user_by('ID', $user_id);
-    $created = true;
-} else {
-    $user_id = $user->ID;
-    wp_set_password($password, $user_id);
-}
-
-$wp_user = new WP_User($user_id);
-$wp_user->add_role('administrator');
-$wp_user->add_role('fxm_admin');
-
-$login_url = wp_login_url();
-
-$subject = 'WordPress Admin-Zugang wiederhergestellt';
-$message = "Der WordPress Admin-Zugang wurde wiederhergestellt.\n\n";
-$message .= "Login-URL: {$login_url}\n";
-$message .= "Benutzername: {$username}\n";
-$message .= "E-Mail: {$email}\n";
-$message .= "Passwort: {$password}\n\n";
-$message .= "Rollen: administrator, fxm_admin\n\n";
-
-$mail_sent = wp_mail($email, $subject, $message);
-
-header('Content-Type: text/plain; charset=utf-8');
 
 echo "Done.\n\n";
-echo "Created new user: " . ($created ? 'yes' : 'no, existing user password was reset') . "\n";
-echo "Email sent: " . ($mail_sent ? 'yes' : 'no') . "\n\n";
+echo "Created new user: " . ($result['created'] ? 'yes' : 'no, existing user password was reset') . "\n";
+echo "Email sent: " . ($result['mail_sent'] ? 'yes' : 'no') . "\n\n";

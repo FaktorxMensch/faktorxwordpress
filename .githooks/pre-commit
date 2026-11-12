@@ -1,0 +1,5 @@
+#!/bin/sh
+# Pre-commit hook: nothing gets committed unless all checks pass.
+# Enable once per checkout:   git config core.hooksPath .githooks
+# Skip in an emergency:       git commit --no-verify
+exec sh "$(git rev-parse --show-toplevel)/tests/run.sh"

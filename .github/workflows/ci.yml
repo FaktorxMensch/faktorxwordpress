@@ -1,0 +1,29 @@
+# Runs every automatic check (the same ones as the pre-commit hook) on GitHub,
+# so a broken or insecure change is caught even if someone commits without the hook.
+name: Checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # the plugin needs PHP 8 (str_contains); test the oldest supported and current ones
+        php: ['8.1', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: sodium, curl, zip
+          coverage: none
+      - name: Run all checks
+        run: sh tests/run.sh

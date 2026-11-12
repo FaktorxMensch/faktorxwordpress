@@ -41,3 +41,13 @@ define('FXWP_BACKUP_DAYS_GRANDFATHER', get_option('fxwp_backup_days_grandfather'
 define('FXWP_THEME_REPO_URI', 'https://github.com/FaktorxMensch/faktorxwordpress-theme/archive/refs/heads/main.zip');
 
 define('FXWP_ERROR_EMAIL', 'wp@faktorxmensch.com');
+
+// Signed updates (see includes/update-signature.php and docs/release-signing.md).
+// Public keys (base64) whose signature a release must carry before the
+// self-updater installs it. While this list is empty, updates are installed
+// unchecked, as before. Once it contains a key, EVERY release needs a
+// release.sig asset -- sites refuse releases without a valid one.
+// Create a key with:  php tools/sign-release.php keygen <file outside the repo>
+// Keep an old key in the list for one release when replacing it.
+define('FXWP_UPDATE_PUBLIC_KEYS', array(
+));

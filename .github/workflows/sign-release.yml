@@ -1,0 +1,65 @@
+# Signs a release so that customer sites accept it (docs/release-signing.md).
+#
+# Only does something if the repository secret FXWP_SIGNING_KEY exists. If you
+# keep the private key on your own machine instead (safer), this workflow just
+# reports that and you sign with:
+#   php tools/sign-release.php sign <tag> --key <file> --upload
+name: Sign release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to sign (e.g. v2.9.4)'
+        required: true
+
+permissions:
+  contents: write # upload release.sig to the release
+
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      FXWP_SIGNING_KEY: ${{ secrets.FXWP_SIGNING_KEY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Is a signing key configured?
+        id: key
+        run: |
+          if [ -n "$FXWP_SIGNING_KEY" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No FXWP_SIGNING_KEY secret -- sign this release locally: php tools/sign-release.php sign $TAG --key <file> --upload"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.key.outputs.present == 'true'
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: shivammathur/setup-php@v2
+        if: steps.key.outputs.present == 'true'
+        with:
+          php-version: '8.3'
+          extensions: sodium
+          coverage: none
+
+      - name: Run all checks on the tagged code
+        if: steps.key.outputs.present == 'true'
+        run: sh tests/run.sh
+
+      - name: Sign and upload release.sig
+        if: steps.key.outputs.present == 'true'
+        run: php tools/sign-release.php sign "$TAG" --upload
+
+      - name: Check the signature against the archive GitHub really serves
+        if: steps.key.outputs.present == 'true'
+        run: |
+          curl -fsSL -o archive.zip "https://github.com/${{ github.repository }}/archive/refs/tags/$TAG.zip"
+          mkdir unpacked && unzip -q archive.zip -d unpacked
+          php tools/sign-release.php verify-dir "$TAG" "$(ls -d unpacked/*/)"

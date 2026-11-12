@@ -15,16 +15,35 @@ function fxwp_register_maintenance_mode_widget()
 
 add_action('wp_dashboard_setup', 'fxwp_register_maintenance_mode_widget');
 function fxwp_url_actions() {
-	if ( isset( $_GET["fxwp_sync"] ) ) {
-		if (isset($_POST['fxwp_self_update_tag']))
-		{
-//			echo '<div class="notice notice-success is-dismissible"><p>' . $_POST['fxwp_self_update_tag'] . '</p></div>';
-			fxm_plugin_updater($_POST['fxwp_self_update_tag'], true);
+	if ( ! isset( $_GET["fxwp_sync"] ) ) {
+		return;
+	}
 
-		} else {
-			// do hourly which does the update
-            fxm_do_this_hourly();
+	// Installing plugin code: only for users who may update plugins, and only
+	// with a valid nonce (blocks subscribers and cross-site request forgery).
+	if ( ! current_user_can( 'update_plugins' ) ) {
+		wp_die( esc_html__( 'Insufficient permissions', 'fxwp' ), 403 );
+	}
+	check_admin_referer( 'fxwp_sync' );
+
+	$tag = null;
+	if ( isset( $_POST['fxwp_self_update_tag'] ) ) {
+		$tag = $_POST['fxwp_self_update_tag'];
+	} elseif ( isset( $_POST['fxwp_custom_update_tag'] ) ) {
+		$tag = $_POST['fxwp_custom_update_tag'];
+	}
+
+	if ( $tag !== null ) {
+		$tag = trim( (string) wp_unslash( $tag ) );
+		// Only plain version tags (v2.9.3, 2.9.3, v2.9.3-beta.1). Anything else
+		// (slashes, "..", URLs) could point the download at a different archive.
+		if ( ! preg_match( '/^v?\d+(\.\d+){1,3}(-[A-Za-z0-9]+(\.[A-Za-z0-9]+)*)?$/', $tag ) ) {
+			wp_die( esc_html__( 'Invalid version tag', 'fxwp' ), 400 );
 		}
+		fxm_plugin_updater( $tag, true );
+	} else {
+		// do hourly which does the update
+		fxm_do_this_hourly();
 	}
 }
 
@@ -74,7 +93,7 @@ function fxwp_display_maintenance_mode_widget()
 			"title"=>"F&times;WP Plugin Update",
 			"type"=>"action",
 			"description"=>"Update this plugin from Git via regular auto repair / auto update.",
-			"link"=>get_admin_url()."index.php?fxwp_sync=1",
+			"link"=>add_query_arg(array('fxwp_sync' => 1, '_wpnonce' => wp_create_nonce('fxwp_sync')), admin_url('index.php')),
 			"disabled"=>false,
 		],
 		[

@@ -170,7 +170,7 @@ function fxwp_backup_start()
     // re-trigger a failing backup every few minutes.
     update_option('fxwp_backup_last_attempt', time());
 
-    $backupDir = ABSPATH . 'wp-content/fxwp-backups/';
+    $backupDir = fxwp_backup_dir();
     if (!file_exists($backupDir)) {
         mkdir($backupDir, 0755, true);
     }
@@ -224,7 +224,7 @@ function fxwp_backup_process_slice($budgetSeconds)
     $state['attempts'] = (int)$state['attempts'] + 1;
     $deadline = $budgetSeconds > 0 ? microtime(true) + $budgetSeconds : 0;
 
-    $backupDir  = ABSPATH . 'wp-content/fxwp-backups/';
+    $backupDir  = fxwp_backup_dir();
     $backupFile = $backupDir . $state['base'] . '.zip';
     $dumpFile   = $backupFile . '.sql';
 
@@ -615,7 +615,9 @@ function fxwp_backup_is_excluded($relativePath)
     );
     $segments = explode('/', str_replace('\\', '/', trim($relativePath, '/')));
     foreach ($segments as $seg) {
-        if (in_array(strtolower($seg), $exclude, true)) {
+        $seg = strtolower($seg);
+        // The backup directory carries a random suffix (see fxwp_backup_dir()).
+        if (in_array($seg, $exclude, true) || strpos($seg, 'fxwp-backups-') === 0) {
             return true;
         }
     }
@@ -852,7 +854,7 @@ function fxwp_backup_tier($fileTime, $now = null)
 
 function fxwp_delete_expired_backups()
 {
-    $backupDir = ABSPATH . 'wp-content/fxwp-backups/';
+    $backupDir = fxwp_backup_dir();
     $files = glob($backupDir . 'backup_*.zip');
     if (!is_array($files)) {
         $files = array();
@@ -945,7 +947,7 @@ function fxwp_delete_expired_backups()
 
 function fxwp_restore_backup($backupFile)
 {
-    $backupFile = ABSPATH . 'wp-content/fxwp-backups/' . basename($backupFile);
+    $backupFile = fxwp_backup_dir() . basename($backupFile);
 
     $zip = new ZipArchive();
     if ($zip->open($backupFile) !== true) {
@@ -974,7 +976,7 @@ function fxwp_restore_backup($backupFile)
 
 function fxwp_delete_backup($backupFile = null)
 {
-    $backupDir = ABSPATH . 'wp-content/fxwp-backups/';
+    $backupDir = fxwp_backup_dir();
 
     if ($backupFile) {
         $target = $backupDir . basename($backupFile);
@@ -990,7 +992,7 @@ function fxwp_delete_backup($backupFile = null)
 
 function fxwp_list_backups()
 {
-    $backupDir = ABSPATH . 'wp-content/fxwp-backups/';
+    $backupDir = fxwp_backup_dir();
     $files = glob($backupDir . '*.zip');
     return array_map('basename', $files ?: array());
 }

@@ -7,7 +7,7 @@ Zeigt im Dashboard den Update-Status an, ermöglicht das Aktualisieren von Plugi
 add_action('admin_init', 'cud_handle_settings_form');
 function cud_handle_settings_form()
 {
-    if (isset($_POST['cud_settings_nonce']) && wp_verify_nonce($_POST['cud_settings_nonce'], 'cud_save_settings')) {
+    if (isset($_POST['cud_settings_nonce']) && wp_verify_nonce($_POST['cud_settings_nonce'], 'cud_save_settings') && current_user_can('edit_posts')) {
         $notify_enabled = isset($_POST['cud_notify_enabled']) ? 1 : 0;
         $notify_email = isset($_POST['cud_notify_email']) ? sanitize_email($_POST['cud_notify_email']) : '';
         update_option('cud_notify_enabled', $notify_enabled);
@@ -75,6 +75,9 @@ function cud_dashboard_page()
 
     // Falls ein Update-Request per GET vorliegt, diese Aktionen ausführen
     if (isset($_GET['do_update'])) {
+        // Updates change the site: only via the buttons on this page (nonce),
+        // never through a link someone else prepared.
+        check_admin_referer('cud_do_update');
         if ('plugins' === $_GET['do_update']) {
             cud_update_plugins();
         }
@@ -118,8 +121,8 @@ function cud_dashboard_page()
         echo '<p>Nach dem Update sollten Sie unbedingt prüfen, ob alles einwandfrei funktioniert.</p>';
         echo '</div>';
         echo '<p>';
-        echo '<a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=update-dashboard&do_update=plugins')) . '">Plugins aktualisieren</a> ';
-        echo '<a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=update-dashboard&do_update=themes')) . '">Themes aktualisieren</a>';
+        echo '<a class="button button-primary" href="' . esc_url(wp_nonce_url(admin_url('admin.php?page=update-dashboard&do_update=plugins'), 'cud_do_update')) . '">Plugins aktualisieren</a> ';
+        echo '<a class="button button-primary" href="' . esc_url(wp_nonce_url(admin_url('admin.php?page=update-dashboard&do_update=themes'), 'cud_do_update')) . '">Themes aktualisieren</a>';
         echo '</p>';
 
         // E‑Mail-Benachrichtigung senden, falls aktiviert und gültige E‑Mail-Adresse vorhanden ist
@@ -277,11 +280,13 @@ function cud_send_notification_email($plugin_updates, $theme_updates)
     $message = "Sehr geehrte/r Administrator/in,\r\n\r\n";
     $message .= "es sind neue Updates verfügbar:\r\n\r\n";
     if ($plugin_updates) {
-        $plugin_link = admin_url('admin.php?page=update-dashboard&do_update=plugins');
+        // Link to the dashboard page (not straight to the update action): the
+        // update itself needs the page's nonce, which a mail cannot carry.
+        $plugin_link = admin_url('admin.php?page=update-dashboard');
         $message .= "- Plugins: Zum Aktualisieren klicken Sie bitte auf diesen Link:\r\n" . $plugin_link . "\r\n\r\n";
     }
     if ($theme_updates) {
-        $theme_link = admin_url('admin.php?page=update-dashboard&do_update=themes');
+        $theme_link = admin_url('admin.php?page=update-dashboard');
         $message .= "- Themes: Zum Aktualisieren klicken Sie bitte auf diesen Link:\r\n" . $theme_link . "\r\n\r\n";
     }
     $message .= "Bitte überprüfen Sie anschließend, ob Ihre Website einwandfrei funktioniert.\r\n\r\n";

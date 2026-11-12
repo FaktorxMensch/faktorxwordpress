@@ -177,6 +177,12 @@ function fxwp_plugin_list_installer_page()
         ),
     );
 
+    // Every form on this page installs code or changes the site, so each one
+    // carries this nonce and the handlers below verify it.
+    $nonce_field = wp_nonce_field('fxwp_installer', '_fxwp_installer_nonce', true, false);
+    // wp_nonce_field() prints a fixed id; the page has several forms.
+    $nonce_field = str_replace(' id="_fxwp_installer_nonce"', '', $nonce_field);
+
     echo '<div class="wrap">';
     ?>
     <label class="switch fixed-upper-right">
@@ -208,11 +214,11 @@ function fxwp_plugin_list_installer_page()
         }
         echo "</ul>";
         echo '<div style="display:flex;gap:8px;><form method="post" action="">';
-        echo '<form method="post">';
+        echo '<form method="post">' . $nonce_field;
         echo "<input type='hidden' name='plugin_collection' value='{$collection_name}'/>";
         echo '<input type="submit" value="Sammlung installieren" class="button button-primary button-large"/>';
         echo '</form>';
-        echo '<form method="post">';
+        echo '<form method="post">' . $nonce_field;
         echo "<input type='hidden' name='plugin_collection' value='{$collection_name}'/>";
         echo '<input type="submit" name="configure_plugins" value="Plugins konfigurieren" class="button button-secondary button-large"/>
         </form>
@@ -232,7 +238,7 @@ function fxwp_plugin_list_installer_page()
         </div>
     </li></ul>';
     // have a form with post that sets POST fxwp_install_theme to true
-    echo '<form method="post">';
+    echo '<form method="post">' . $nonce_field;
     echo '<input type="hidden" name="fxwp_install_theme" value="true"/>';
     echo '<input type="submit" value="Theme installieren" class="button button-primary button-large"/>';
     echo '</form>';
@@ -243,7 +249,7 @@ function fxwp_plugin_list_installer_page()
     echo '<h1>Installationshilfe</h1>';
     echo '<div class="collection-box postbox">';
     echo '<h2>Einrichtung</h2>';
-    echo '<form method="post">';
+    echo '<form method="post">' . $nonce_field;
     echo '<ul class="checkbox-list">';
     foreach ($site_setup_options as $option => $label) {
         echo "<li><input ";
@@ -274,6 +280,13 @@ function fxwp_plugin_list_installer_page()
         checkbox.click();
     </script>
     <?php
+
+    if (isset($_POST['fxwp_site_setup']) || isset($_POST['configure_plugins']) || isset($_POST['plugin_collection']) || isset($_POST['fxwp_install_theme'])) {
+        if (!current_user_can('install_plugins')) {
+            wp_die(esc_html__('Insufficient permissions', 'fxwp'), 403);
+        }
+        check_admin_referer('fxwp_installer', '_fxwp_installer_nonce');
+    }
 
     if (isset($_POST['fxwp_site_setup'])) {
         // go through all options and set them

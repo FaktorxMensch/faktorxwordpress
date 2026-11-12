@@ -35,7 +35,7 @@ function fxwp_display_settings_page()
                     echo '<td>' . esc_html(implode(', ', array_map(function ($attribute) {
                             return $attribute['name'] . '=' . $attribute['default'];
                         }, $shortcode_data['attributes']))) . '</td>';
-                    echo '<td>' . ($shortcode_data['description']) . '</td>';
+                    echo '<td>' . esc_html($shortcode_data['description']) . '</td>';
                     echo '<td><a href="' . admin_url('admin.php?page=my-custom-shortcodes-add-new&tag=' . urlencode($shortcode_tag)) . '">Bearbeiten</a></td>';
                     echo '</tr>';
                 }
@@ -97,6 +97,13 @@ function fxwp_display_shortcode_form($shortcode_tag = null)
     }
 
     if (isset($_POST['fxwp_shortcode_tag'])) {
+        // This form stores PHP that is later executed. Never accept it without
+        // the capability and the form's nonce (blocks cross-site request forgery).
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('Insufficient permissions', 'fxwp'), 403);
+        }
+        check_admin_referer('fxwp_shortcode_nonce', $is_edit ? 'fxwp_edit_shortcode_nonce' : 'fxwp_add_shortcode_nonce');
+
         $updated_shortcode = array(
             'tag' => sanitize_text_field($_POST['fxwp_shortcode_tag']),
             'attributes' => array(),

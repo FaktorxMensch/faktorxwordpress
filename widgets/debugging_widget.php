@@ -22,10 +22,8 @@ function fxwp_get_uptime_status()
 
 function fxwp_debugging_widget()
 {
-    echo "<p>Current server: " . FXWP_API_URL . "<br/></p>";
-    echo "<p>Api key:". get_option('fxwp_api_key') . "<br/></p>";
-    // call ?fxwp_website_description_edit
-    echo "<p>OpenAI Website description: <a href='?fxwp_website_description_edit'>Edit</a><br/></p>";
+    echo "<p>Current server: " . esc_html(FXWP_API_URL) . "<br/></p>";
+    echo "<p>Api key:" . esc_html(get_option('fxwp_api_key')) . "<br/></p>";
 
     $uptime = fxwp_get_uptime_status();
     if ($uptime) {
@@ -51,7 +49,7 @@ function fxwp_debugging_widget_without_fxm_admin_capability()
     $user_roles = $current_user->roles;
     $user_roles_list = implode(", ", $user_roles);
     echo "<em>You are an admin and you have a fxm email address but your are not an fxm_admin. This is probably a mistake.</em><br/>";
-    echo "<p>Current user roles: " . $user_roles_list . "<br/></p>";
+    echo "<p>Current user roles: " . esc_html($user_roles_list) . "<br/></p>";
     echo "<em>Contact an fxm_admin to fix this or change it yourself.</em><br/>";
     echo "<style>#fxwp_debugging_widget_without_fxm_admin_capability h2 {color: #F20530;}</style>";
 }

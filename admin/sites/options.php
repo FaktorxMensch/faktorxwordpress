@@ -6,13 +6,56 @@ if (!defined('ABSPATH')) {
 /**
  * AJAX-Handler zum Speichern einer Option.
  */
+/**
+ * Shared guard for the options-panel AJAX handlers: the panel is only available
+ * to fxm_admin, and every request must carry the panel's nonce.
+ */
+function fx_plugin_ajax_guard()
+{
+    if (!current_user_can('fxm_admin')) {
+        wp_send_json_error(array('message' => 'Nicht berechtigt'), 403);
+    }
+    if (!check_ajax_referer('fx_plugin_options', 'nonce', false)) {
+        wp_send_json_error(array('message' => 'Sicherheitsprüfung fehlgeschlagen. Bitte Seite neu laden.'), 403);
+    }
+}
+
+/**
+ * Options that may be written through the panel: only the editable entries
+ * defined in the options config -- never arbitrary WordPress options.
+ *
+ * @return array<string,string> option key => option type
+ */
+function fx_plugin_writable_options()
+{
+    $writable = array();
+    $editable_types = array('text', 'number', 'checkbox', 'radio', 'select', 'filesize');
+    $config = fxwp_get_options_config();
+    foreach ($config['nav_pages'] as $page) {
+        foreach ($page['sections'] as $section) {
+            foreach ($section['options'] as $key => $option) {
+                if (isset($option['type']) && in_array($option['type'], $editable_types, true)) {
+                    $writable[$key] = $option['type'];
+                }
+            }
+        }
+    }
+    return $writable;
+}
+
 function fx_plugin_save_option()
 {
-    if (!current_user_can('manage_options')) {
-        wp_send_json_error(array('message' => 'Nicht berechtigt'));
+    fx_plugin_ajax_guard();
+
+    $option_key = isset($_POST['option_key']) ? sanitize_text_field(wp_unslash($_POST['option_key'])) : '';
+    $writable = fx_plugin_writable_options();
+    if (!isset($writable[$option_key])) {
+        wp_send_json_error(array('message' => 'Unbekannte Option'), 400);
     }
-    $option_key = sanitize_text_field($_POST['option_key']);
-    $option_value = $_POST['option_value'];
+    if (!isset($_POST['option_value']) || !is_scalar($_POST['option_value'])) {
+        wp_send_json_error(array('message' => 'Ungültiger Wert'), 400);
+    }
+    $option_value = sanitize_text_field(wp_unslash($_POST['option_value']));
 
     // Bei Checkboxen: Werte "true" und "false" in Boolean umwandeln
     if ($option_value === "true") {
@@ -37,10 +80,9 @@ add_action('wp_ajax_fx_plugin_save_option', 'fx_plugin_save_option');
  */
 function fx_plugin_execute_action()
 {
-    if (!current_user_can('manage_options')) {
-        wp_send_json_error(array('message' => 'Nicht berechtigt'));
-    }
-    $action_key = sanitize_text_field($_POST['action_key']);
+    fx_plugin_ajax_guard();
+
+    $action_key = isset($_POST['action_key']) ? sanitize_text_field(wp_unslash($_POST['action_key'])) : '';
     $fx_plugin_config = fxwp_get_options_config();
     $callback = '';
     foreach ($fx_plugin_config['nav_pages'] as $page) {
@@ -93,9 +135,7 @@ unset($page, $section, $option);
  */
 function fx_plugin_get_options()
 {
-    if (!current_user_can('manage_options')) {
-        wp_send_json_error(array('message' => 'Nicht berechtigt'));
-    }
+    fx_plugin_ajax_guard();
 
     // Laden Sie die Basis-Konfiguration
     $fx_plugin_config = fxwp_get_options_config();
@@ -125,10 +165,16 @@ add_action('wp_ajax_fx_plugin_get_options', 'fx_plugin_get_options');
  */
 function fx_plugin_localize_config()
 {
+    // The config contains customer / project data. Only print it where it is
+    // used (the options panel) and only for fxm_admin -- not into every admin
+    // page of every logged-in user.
+    if (!current_user_can('fxm_admin') || !isset($_GET['page']) || $_GET['page'] !== 'fxwp-options') {
+        return;
+    }
     $fx_plugin_config = fxwp_get_options_config();
     ?>
     <script>
-        var fxPluginConfig = <?php echo json_encode($fx_plugin_config, JSON_UNESCAPED_SLASHES); ?>;
+        var fxPluginConfig = <?php echo wp_json_encode($fx_plugin_config, JSON_HEX_TAG | JSON_HEX_AMP); ?>;
     </script>
     <?php
 }
@@ -141,7 +187,12 @@ add_action('admin_head', 'fx_plugin_localize_config');
 function fxwp_options_page()
 {
     ?>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"
+            integrity="sha384-smVS78N63G0uFpVH9bKdb+2YIW7Q9eFrle79imo+AWW6YLluQxAEK7kxLOt1bNex"
+            crossorigin="anonymous"></script>
+    <script>
+        var fxPluginNonce = <?php echo wp_json_encode(wp_create_nonce('fx_plugin_options')); ?>;
+    </script>
     <div id="fx-plugin-panel">
         <main class="wrap fx-content" v-for="(currentNav, key) in filteredNavPages">
             <h1 class="fx-header">{{ currentNav.title }}</h1>
@@ -624,7 +675,9 @@ function fxwp_options_page()
     </style>
 
     <!-- Einbinden von Vue.js und jQuery via CDN -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK"
+            crossorigin="anonymous"></script>
 
     <script>
         // Hilfsfunktion: Aktualisiert oder fügt einen URL-Parameter hinzu.
@@ -784,6 +837,7 @@ function fxwp_options_page()
                     }
                     $.post(ajaxurl, {
                         action: 'fx_plugin_save_option',
+                        nonce: fxPluginNonce,
                         option_key: key,
                         option_value: value
                     }, function (response) {
@@ -817,7 +871,8 @@ function fxwp_options_page()
                 },
                 refreshOptions: function () {
                     $.post(ajaxurl, {
-                        action: 'fx_plugin_get_options'
+                        action: 'fx_plugin_get_options',
+                        nonce: fxPluginNonce
                     }, function (response) {
                         if (response.success) {
                             // Aktualisieren Sie das Konfigurationsobjekt in Vue
@@ -844,6 +899,7 @@ function fxwp_options_page()
                     this.$set(this.loadingActions, key, true);
                     $.post(ajaxurl, {
                         action: 'fx_plugin_execute_action',
+                        nonce: fxPluginNonce,
                         action_key: key
                     }, function (response) {
                         this.$set(this.loadingActions, key, false);

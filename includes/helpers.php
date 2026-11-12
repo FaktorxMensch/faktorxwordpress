@@ -96,3 +96,60 @@ function arrayToObject($array) {
     }
     return $object;
 }
+
+/**
+ * Directory that holds the local backups (with trailing slash).
+ *
+ * Backups contain the database dump and wp-config.php. The old fixed location
+ * wp-content/fxwp-backups/ was only protected by an .htaccess file, which nginx
+ * (and some other servers) ignore -- combined with the predictable file names
+ * the archives could be downloaded by anyone. The directory therefore gets a
+ * random suffix (wp-content/fxwp-backups-<20 hex chars>/) that cannot be guessed.
+ *
+ * The directory on disk is the source of truth (no option), so concurrent
+ * requests always agree. An existing legacy directory is renamed once, but not
+ * while a backup job is writing into it.
+ */
+function fxwp_backup_dir(): string
+{
+    static $dir = null;
+    if ($dir !== null) {
+        return $dir;
+    }
+
+    $base = ABSPATH . 'wp-content/';
+    $legacy = $base . 'fxwp-backups/';
+    $pattern = $base . 'fxwp-backups-' . str_repeat('[0-9a-f]', 20);
+
+    $find = function () use ($pattern) {
+        $found = glob($pattern, GLOB_ONLYDIR);
+        if (!is_array($found) || empty($found)) {
+            return null;
+        }
+        sort($found);
+        return trailingslashit($found[0]);
+    };
+
+    $existing = $find();
+    if ($existing !== null) {
+        return $dir = $existing;
+    }
+
+    if (is_dir($legacy)) {
+        // Don't move the directory from under a running backup job.
+        $state = get_option('fxwp_backup_state', array());
+        if (!empty($state['active'])) {
+            return $legacy; // not cached: migrate on a later call
+        }
+        $new = $base . 'fxwp-backups-' . bin2hex(random_bytes(10));
+        if (@rename(rtrim($legacy, '/'), $new)) {
+            return $dir = $new . '/';
+        }
+        // Another request may have migrated in the meantime.
+        $existing = $find();
+        return $dir = ($existing !== null ? $existing : $legacy);
+    }
+
+    // No backups yet: the directory is created by the first backup.
+    return $dir = $base . 'fxwp-backups-' . bin2hex(random_bytes(10)) . '/';
+}

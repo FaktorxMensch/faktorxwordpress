@@ -1,6 +1,33 @@
 <?php
 add_filter('wp_mail', 'fxwp_log_outgoing_mail');
 
+/**
+ * Remove secrets from a mail body before it is stored or shown in the log.
+ *
+ * The log exists to check *whether* a mail went out and what it looked like --
+ * not to keep working password-reset links or passwords readable for every
+ * administrator (and inside every database backup) for 30 days.
+ */
+function fxwp_redact_mail_secrets($text)
+{
+    if (!is_string($text) || $text === '') {
+        return $text;
+    }
+    // Reset / activation / magic-link keys in URLs: ...?key=XXXX, &token=XXXX
+    $text = preg_replace(
+        '/([?&](?:amp;)?(?:key|rp_key|reset_key|activation_key|token)=)[^&\s"\'<>]+/i',
+        '$1[entfernt]',
+        $text
+    );
+    // "Passwort: xyz" / "Password: xyz" lines
+    $text = preg_replace(
+        '/^([^\S\r\n]*(?:<[^>]+>\s*)*(?:Passwort|Password|Kennwort)\s*:\s*)\S.*$/mi',
+        '$1[entfernt]',
+        $text
+    );
+    return $text;
+}
+
 function fxwp_log_outgoing_mail($args)
 {
     // Mask the email for privacy
@@ -29,7 +56,7 @@ function fxwp_log_outgoing_mail($args)
     $email_content = array(
         'to_email' => $to,
         'subject' => $args['subject'],
-        'message' => $args['message'],
+        'message' => fxwp_redact_mail_secrets($args['message']),
         'headers' => $args['headers'],
         //if $args['attachments'] is an array, convert it to a string
         'attachments' => is_array($args['attachments']) ? implode(',', $args['attachments']) : $args['attachments'],

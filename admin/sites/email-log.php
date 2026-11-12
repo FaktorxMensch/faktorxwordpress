@@ -69,6 +69,8 @@ function fxwp_display_email_logs() {
         </tr></thead>';
 
         foreach ($email_logs as $log) {
+            // Also redact entries that were logged before redaction existed.
+            $log->message = fxwp_redact_mail_secrets($log->message);
             $log_id = esc_attr($log->id);
             echo '<tr>';
             echo '<td>' . esc_html($log->to_email) . '</td>';
