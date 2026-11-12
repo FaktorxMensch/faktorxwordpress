@@ -12,6 +12,10 @@
  *       variable FXWP_SIGNING_KEY. --upload attaches the file to the GitHub
  *       release with the gh command.
  *
+ *   php tools/sign-release.php preflight [--key <private-key-file>]
+ *       Tells the release tool (fxr) whether this machine can sign; see the
+ *       exit codes at the command below.
+ *
  *   php tools/sign-release.php verify <tag> [--sig release.sig]
  *       Checks a signature against the tag and the public keys in
  *       includes/config.php -- the same check the plugin does.
@@ -177,6 +181,29 @@ if ($cmd === 'verify') {
     exit(0);
 }
 
+if ($cmd === 'preflight') {
+    // preflight [--key <file>]: can a release be signed on this machine? Used by
+    // the release tool (fxr) BEFORE it changes anything. Exit codes:
+    //    0  ready: key file is valid (and matches includes/config.php, if keys are set there)
+    //   10  signing is not set up (no public key in config, no key file): nothing to do
+    //   11  sites require signatures, but the key file is missing on this machine
+    //   12  the key file is not a valid private key
+    //   13  the key file does not belong to any public key in includes/config.php
+    $keyFile = option($argv, '--key', '');
+    $required = count(configured_public_keys()) > 0;
+    if ($keyFile === '' || !is_file($keyFile)) {
+        exit($required ? 11 : 10);
+    }
+    $secret = base64_decode(trim((string)@file_get_contents($keyFile)), true);
+    if ($secret === false || strlen($secret) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
+        exit(12);
+    }
+    if ($required && !in_array(base64_encode(sodium_crypto_sign_publickey_from_secretkey($secret)), configured_public_keys(), true)) {
+        exit(13);
+    }
+    exit(0);
+}
+
 if ($cmd === 'verify-dir') {
     // verify-dir <tag> <unpacked folder> [--sig release.sig]: check an already
     // unpacked download, e.g. the archive GitHub actually serves.
@@ -195,4 +222,4 @@ if ($cmd === 'verify-dir') {
     exit(0);
 }
 
-fail("usage: php tools/sign-release.php keygen|sign|verify|verify-dir ...  (see the comment at the top of this file)");
+fail("usage: php tools/sign-release.php keygen|sign|verify|verify-dir|preflight ...  (see the comment at the top of this file)");

@@ -1,10 +1,10 @@
 ## create release
 use the release tool at https://github.com/FaktorxMensch/fxr
 
-## Signierte Updates (Release signieren)
-Nach `fxr` muss jedes Release signiert werden, sonst installieren die Kundenseiten es nicht (sobald ein
-Schlüssel in `FXWP_UPDATE_PUBLIC_KEYS` steht): `php tools/sign-release.php sign vX.Y.Z --key <Datei> --upload`.
-Einrichtung, Ablauf und Fehlerfälle: [docs/release-signing.md](docs/release-signing.md).
+## Signierte Updates
+Kundenseiten installieren nur signierte Releases. `fxr` signiert automatisch und bricht vorher ab, wenn der
+Schlüssel auf dem Rechner fehlt (dann aus 1Password „FXWP Signing Key“ nach `~/.config/fxwp/signing.key` kopieren).
+Einrichtung, neuer Rechner und Fehlerfälle: [docs/release-signing.md](docs/release-signing.md).
 
 ## Ausgesperrt? Admin-Zugang wiederherstellen (Recovery)
 Alle Wege (ProjectPilot-Button, FTP-Flag `fxwp-recover.flag` + `admin/fxm-recover.php`, Shell) stehen in

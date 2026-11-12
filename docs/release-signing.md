@@ -18,14 +18,15 @@ die Zip-Datei. Die Signatur liegt als Datei `release.sig` am GitHub-Release.
   aufgerufen in [`cron/auto_updater-cron.php`](../cron/auto_updater-cron.php)
 - Werkzeug: [`tools/sign-release.php`](../tools/sign-release.php)
 
-## Status: noch nicht scharf
+## Status: scharf seit v3.0.0
 
-Solange `FXWP_UPDATE_PUBLIC_KEYS` in [`includes/config.php`](../includes/config.php) leer ist,
-installiert das Plugin Updates **ungeprüft wie bisher**. Scharf wird es mit der Einrichtung unten.
+In `FXWP_UPDATE_PUBLIC_KEYS` ([`includes/config.php`](../includes/config.php)) steht ein öffentlicher
+Schlüssel. Seiten mit v3.0.0 oder neuer installieren nur noch signierte Releases. (Mit leerer Liste
+würde das Plugin Updates ungeprüft installieren.)
 
 ## Einmalige Einrichtung
 
-1. Schlüsselpaar erzeugen (Datei **außerhalb** des Repositories, Backup im Passwort-Manager):
+1. Schlüsselpaar erzeugen (Datei **außerhalb** des Repositories, Backup in 1Password als „FXWP Signing Key“):
 
    ```bash
    php tools/sign-release.php keygen ~/.config/fxwp/signing.key
@@ -43,22 +44,46 @@ einmal eines ohne `release.sig` (muss abgelehnt werden).
 
 ## Bei jedem Release
 
-1. `fxr` wie bisher (Version, Changelog, Commit, Tag, Push, GitHub-Release anlegen).
-2. Signieren und hochladen:
+Einfach `fxr` ausführen. Das Release-Tool erledigt die Signatur mit:
+
+1. **Vor jeder Änderung** prüft es, ob der Schlüssel auf diesem Rechner liegt
+   (`~/.config/fxwp/signing.key`) und zu `FXWP_UPDATE_PUBLIC_KEYS` passt. Wenn nicht, bricht es ab
+   und sagt, was zu tun ist – Version, Commit und Tag bleiben unberührt.
+2. Nach Commit, Tag und Push legt es das GitHub-Release an (ohne Rückfrage, weil die Signatur
+   daran hängt), signiert, lädt `release.sig` hoch und prüft die Signatur.
+
+Meldet `fxr` am Ende „NICHT gültig signiert“, steht der Befehl zum Nachholen direkt dabei.
+
+Von Hand geht es weiterhin:
+
+```bash
+php tools/sign-release.php sign v3.0.1 --key ~/.config/fxwp/signing.key --out /tmp/release.sig --upload
+php tools/sign-release.php verify v3.0.1 --sig /tmp/release.sig
+```
+
+`release.sig` gehört nicht ins Repository (steht in `.gitignore`).
+
+## Neuer Rechner / neue Person
+
+Der private Schlüssel liegt in **keinem** Repository – auch nicht im `fxr`-Repository. Wer an GitHub
+kommt, soll gerade nicht signieren können. Er wird von Hand kopiert:
+
+1. In 1Password den Eintrag **„FXWP Signing Key“** öffnen, Schlüssel kopieren (eine Zeile).
+2. Ablegen und schützen:
 
    ```bash
-   php tools/sign-release.php sign v2.9.4 --key ~/.config/fxwp/signing.key --upload
+   mkdir -p ~/.config/fxwp
+   pbpaste > ~/.config/fxwp/signing.key
+   chmod 600 ~/.config/fxwp/signing.key
    ```
 
-   `--upload` hängt `release.sig` per `gh` an das GitHub-Release. Das Release muss also existieren.
-3. Optional prüfen:
+3. Prüfen (im Plugin-Ordner; keine Ausgabe und Status 0 heißt: passt):
 
    ```bash
-   php tools/sign-release.php verify v2.9.4
+   php tools/sign-release.php preflight --key ~/.config/fxwp/signing.key; echo $?
    ```
 
-Zwischen Schritt 1 und 2 lehnen Seiten das Update ab und versuchen es in der nächsten Stunde
-erneut – das ist harmlos.
+Anderer Ablageort: Umgebungsvariable `FXWP_SIGNING_KEY_FILE` setzen.
 
 ### Alternative: GitHub signiert automatisch
 
