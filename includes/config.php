@@ -50,4 +50,6 @@ define('FXWP_ERROR_EMAIL', 'wp@faktorxmensch.com');
 // Create a key with:  php tools/sign-release.php keygen <file outside the repo>
 // Keep an old key in the list for one release when replacing it.
 define('FXWP_UPDATE_PUBLIC_KEYS', array(
+    'BPYc+llwceKrewHHtmJTeabL/zcXl/xlp2LbEclOoj0=',
+
 ));

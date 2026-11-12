@@ -87,14 +87,26 @@ if ($cmd === 'keygen') {
     if (file_exists($file)) {
         fail("$file already exists -- not overwriting a key");
     }
-    $inside = strpos(realpath(dirname($file)) . '/', realpath(dirname(__DIR__)) . '/') === 0;
+    // Create the folder if needed (e.g. ~/.config/fxwp), readable only by you.
+    $folder = dirname($file);
+    if (!is_dir($folder) && !@mkdir($folder, 0700, true)) {
+        fail("cannot create the folder $folder");
+    }
+    $inside = strpos(realpath($folder) . '/', realpath(dirname(__DIR__)) . '/') === 0;
     if ($inside) {
         fail('choose a location outside the repository for the private key');
     }
     $pair = sodium_crypto_sign_keypair();
     $old = umask(0177);
-    file_put_contents($file, base64_encode(sodium_crypto_sign_secretkey($pair)) . "\n");
+    $written = @file_put_contents($file, base64_encode(sodium_crypto_sign_secretkey($pair)) . "\n");
     umask($old);
+    // Never print a public key whose private half was not saved: nothing could
+    // ever be signed for it.
+    $saved = $written !== false ? base64_decode(trim((string)@file_get_contents($file)), true) : false;
+    if ($saved === false || $saved !== sodium_crypto_sign_secretkey($pair)) {
+        @unlink($file);
+        fail("could not write the private key to $file -- no key was created");
+    }
     echo "Private key written to $file (keep it secret, keep a backup).\n\n";
     echo "Public key -- add this line to FXWP_UPDATE_PUBLIC_KEYS in includes/config.php:\n\n";
     echo "    '" . base64_encode(sodium_crypto_sign_publickey($pair)) . "',\n";

@@ -138,6 +138,14 @@ t('keygen legt keinen Schlüssel im Repository ab und überschreibt keinen', fun
     ok(strlen(base64_decode(trim(file_get_contents("$tmp/k.key")), true)) === SODIUM_CRYPTO_SIGN_SECRETKEYBYTES);
     exec("$tool keygen " . escapeshellarg("$tmp/k.key") . ' 2>&1', $out3, $rv3);
     ok($rv3 !== 0, 'existing key was overwritten');
+    // a folder that does not exist yet is created (this once printed a public key without saving the private one)
+    exec("$tool keygen " . escapeshellarg("$tmp/new/sub/k2.key") . ' 2>&1', $out4, $rv4);
+    eq(0, $rv4, implode("\n", $out4));
+    ok(is_file("$tmp/new/sub/k2.key"));
+    // and if the key cannot be saved, the tool fails and prints no public key
+    exec("$tool keygen /dev/null/nope/k3.key 2>&1", $out5, $rv5);
+    ok($rv5 !== 0, 'keygen claimed success without saving the key');
+    ok(strpos(implode("\n", $out5), 'Public key') === false, 'public key printed although nothing was saved');
 });
 t('sign verweigert Tags, die keine Version sind, und fehlende Schlüssel', function () use ($tool, $tmp) {
     exec("$tool sign " . escapeshellarg('main; touch x') . ' --key ' . escapeshellarg("$tmp/k.key") . ' --out ' . escapeshellarg("$tmp/x.sig") . ' 2>&1', $o, $rv);
